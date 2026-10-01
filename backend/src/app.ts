@@ -8,6 +8,7 @@ import branchRoutes from "./routes/branch.routes.js";
 import departmentRoutes from "./routes/department.routes.js";
 import warehouseRoutes from "./routes/warehouse.routes.js";
 import employeeRoutes from "./routes/employee.routes.js";
+import customerRoutes from "./routes/customer.routes.js";
 
 const app = express();
 
@@ -42,6 +43,9 @@ app.use("/api/companies", companyRoutes);
 
 // API-Routen für Mitarbeiter
 app.use("/api/employees", employeeRoutes);
+
+// API-Routen für Kunden
+app.use("/api/customers", customerRoutes);
 
 // Health-Check für API und Datenbank
 app.get("/health", async (_req, res) => {

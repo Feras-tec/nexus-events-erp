@@ -134,7 +134,7 @@ model Employee {
 // Beschäftigungszeiträume eines Mitarbeiters
 // Ein Mitarbeiter kann die Firma verlassen und später wieder eingestellt werden.
 model EmploymentPeriod {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   startDate DateTime
   endDate   DateTime?
   position  String?
@@ -167,4 +167,28 @@ model EmployeeDocument {
 
   @@index([employeeId])
   @@index([expiryDate])
+}
+
+enum CustomerType {
+  COMPANY
+  PRIVATE
+}
+
+model Customer {
+  id          String       @id @default(uuid())
+  customerNo  String       @unique
+  type        CustomerType @default(COMPANY)
+  companyName String?
+  firstName   String?
+  lastName    String?
+  contactName String?
+  email       String?
+  phone       String?
+  address     String?
+  vatId       String?
+  discount    Decimal      @default(0)
+  isActive    Boolean      @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
