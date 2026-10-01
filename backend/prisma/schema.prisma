@@ -225,6 +225,8 @@ model Event {
   customerId String
   customer   Customer @relation(fields: [customerId], references: [id])
 
+  reservations Reservation[]
+
   @@index([customerId])
   @@index([status])
   @@index([startDate])
@@ -286,6 +288,8 @@ model InventoryItem {
   warehouseId String
   warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
 
+  reservations Reservation[]
+
   @@index([productId])
   @@index([warehouseId])
   @@index([status])
@@ -306,4 +310,35 @@ enum InventoryItemStatus {
   REPAIRED
   LOST
   RETIRED
+}
+
+// Status einer Geräte-Reservierung
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+// Reservierung eines konkreten Geräts für ein Event
+model Reservation {
+  id        String            @id @default(uuid())
+  startDate DateTime
+  endDate   DateTime
+  status    ReservationStatus @default(PENDING)
+  notes     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id])
+
+  inventoryItemId String
+  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id])
+
+  @@index([eventId])
+  @@index([inventoryItemId])
+  @@index([startDate, endDate])
+  @@index([status])
 }
