@@ -289,6 +289,7 @@ model InventoryItem {
   warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
 
   reservations Reservation[]
+  movements    EquipmentMovement[]
 
   @@index([productId])
   @@index([warehouseId])
@@ -341,4 +342,42 @@ model Reservation {
   @@index([inventoryItemId])
   @@index([startDate, endDate])
   @@index([status])
+}
+
+// Gründe für eine Bestandsbewegung
+enum EquipmentMovementType {
+  RECEIVED
+  RESERVED
+  PICKED
+  PACKED
+  LOADED
+  TRANSFERRED
+  DELIVERED_TO_EVENT
+  RETURNED_FROM_EVENT
+  INSPECTION
+  MAINTENANCE
+  REPAIRED
+  LOST
+  RETIRED
+  MANUAL_ADJUSTMENT
+}
+
+// Speichert die vollständige Bewegungshistorie eines Geräts
+model EquipmentMovement {
+  id           String                @id @default(uuid())
+  type         EquipmentMovementType
+  fromStatus   InventoryItemStatus?
+  toStatus     InventoryItemStatus
+  fromLocation String?
+  toLocation   String?
+  notes        String?
+
+  createdAt DateTime @default(now())
+
+  inventoryItemId String
+  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id])
+
+  @@index([inventoryItemId])
+  @@index([createdAt])
+  @@index([type])
 }
