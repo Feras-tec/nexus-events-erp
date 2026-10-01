@@ -8,8 +8,12 @@ import {
 } from "../controllers/employee.controller.js";
 import { createEmploymentPeriod } from "../controllers/employment-period.controller.js";
 import { createEmployeeDocument } from "../controllers/employee-document.controller.js";
+import { requireRole } from "../middleware/require-role.js";
 
 const router = Router();
+
+// Mitarbeiterverwaltung nur für berechtigte Rollen
+router.use(requireRole("OWNER", "ADMIN", "HR_MANAGER"));
 
 // Alle Mitarbeiter abrufen
 router.get("/", getEmployees);
