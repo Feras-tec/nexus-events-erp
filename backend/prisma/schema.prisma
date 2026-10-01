@@ -1,0 +1,170 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Zentrale Firma des ERP-Systems
+model Company {
+  id        String   @id @default(uuid())
+  name      String
+  legalName String?
+  taxNumber String?
+  vatId     String?
+  email     String?
+  phone     String?
+  website   String?
+  address   String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  branches Branch[]
+}
+
+// Niederlassung einer Firma, z. B. Hamburg oder Berlin
+model Branch {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  name      String
+  city      String
+  address   String?
+  phone     String?
+  email     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  departments Department[]
+  warehouses  Warehouse[]
+  employees   Employee[]
+
+  @@index([companyId])
+}
+
+// Abteilung innerhalb einer Niederlassung
+model Department {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  branchId String
+  branch   Branch @relation(fields: [branchId], references: [id])
+
+  employees Employee[]
+
+  @@unique([branchId, name])
+  @@index([branchId])
+}
+
+// Physisches Lager einer Niederlassung
+model Warehouse {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  name      String
+  address   String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  branchId String
+  branch   Branch @relation(fields: [branchId], references: [id])
+
+  @@index([branchId])
+}
+
+// Status eines Mitarbeiters
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+  ON_LEAVE
+  SUSPENDED
+}
+
+// Typ eines Mitarbeiterdokuments
+enum EmployeeDocumentType {
+  RESIDENCE_PERMIT
+  WORK_PERMIT
+  PASSPORT
+  CONTRACT
+  OTHER
+}
+
+// Mitarbeiter der Firma
+model Employee {
+  id          String         @id @default(uuid())
+  employeeNo  String         @unique
+  firstName   String
+  lastName    String
+  email       String?        @unique
+  phone       String?
+  birthDate   DateTime?
+  nationality String?
+  position    String?
+  status      EmployeeStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  branchId String
+  branch   Branch @relation(fields: [branchId], references: [id])
+
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+
+  employmentPeriods EmploymentPeriod[]
+  documents         EmployeeDocument[]
+
+  @@index([branchId])
+  @@index([departmentId])
+}
+
+// Beschäftigungszeiträume eines Mitarbeiters
+// Ein Mitarbeiter kann die Firma verlassen und später wieder eingestellt werden.
+model EmploymentPeriod {
+  id        String   @id @default(uuid())
+  startDate DateTime
+  endDate   DateTime?
+  position  String?
+  reason    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  @@index([employeeId])
+}
+
+// Dokumente eines Mitarbeiters, z. B. Aufenthaltstitel oder Arbeitsvertrag
+model EmployeeDocument {
+  id             String               @id @default(uuid())
+  type           EmployeeDocumentType
+  documentNumber String?
+  issueDate      DateTime?
+  expiryDate     DateTime?
+  fileUrl        String?
+  notes          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  @@index([employeeId])
+  @@index([expiryDate])
+}
