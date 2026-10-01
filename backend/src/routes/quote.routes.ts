@@ -5,19 +5,50 @@ import {
   getQuoteById,
   updateQuote,
 } from "../controllers/quote.controller.js";
+import { requireRole } from "../middleware/require-role.js";
 
 const router = Router();
 
 // Alle Angebote abrufen
-router.get("/", getQuotes);
+router.get(
+  "/",
+  requireRole(
+    "OWNER",
+    "ADMIN",
+    "SALES_MANAGER",
+    "SALES_EMPLOYEE",
+    "PROJECT_MANAGER",
+    "ACCOUNTANT",
+  ),
+  getQuotes,
+);
 
 // Einzelnes Angebot abrufen
-router.get("/:id", getQuoteById);
+router.get(
+  "/:id",
+  requireRole(
+    "OWNER",
+    "ADMIN",
+    "SALES_MANAGER",
+    "SALES_EMPLOYEE",
+    "PROJECT_MANAGER",
+    "ACCOUNTANT",
+  ),
+  getQuoteById,
+);
 
 // Neues Angebot erstellen
-router.post("/", createQuote);
+router.post(
+  "/",
+  requireRole("OWNER", "ADMIN", "SALES_MANAGER", "SALES_EMPLOYEE"),
+  createQuote,
+);
 
 // Angebot aktualisieren
-router.patch("/:id", updateQuote);
+router.patch(
+  "/:id",
+  requireRole("OWNER", "ADMIN", "SALES_MANAGER", "SALES_EMPLOYEE"),
+  updateQuote,
+);
 
 export default router;
