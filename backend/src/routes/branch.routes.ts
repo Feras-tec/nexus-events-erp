@@ -6,22 +6,53 @@ import {
   updateBranch,
   deactivateBranch,
 } from "../controllers/branch.controller.js";
+import { requireRole } from "../middleware/require-role.js";
 
 const router = Router();
 
 // Alle Niederlassungen abrufen
-router.get("/", getBranches);
+router.get(
+  "/",
+  requireRole(
+    "OWNER",
+    "ADMIN",
+    "HR_MANAGER",
+    "ACCOUNTANT",
+    "SALES_MANAGER",
+    "PROJECT_MANAGER",
+    "DEPARTMENT_MANAGER",
+    "WAREHOUSE_MANAGER",
+  ),
+  getBranches,
+);
 
 // Eine Niederlassung anhand ihrer ID abrufen
-router.get("/:id", getBranchById);
+router.get(
+  "/:id",
+  requireRole(
+    "OWNER",
+    "ADMIN",
+    "HR_MANAGER",
+    "ACCOUNTANT",
+    "SALES_MANAGER",
+    "PROJECT_MANAGER",
+    "DEPARTMENT_MANAGER",
+    "WAREHOUSE_MANAGER",
+  ),
+  getBranchById,
+);
 
 // Niederlassung deaktivieren statt endgültig löschen
-router.patch("/:id/deactivate", deactivateBranch);
+router.patch(
+  "/:id/deactivate",
+  requireRole("OWNER", "ADMIN"),
+  deactivateBranch,
+);
 
 // Daten einer Niederlassung teilweise aktualisieren
-router.patch("/:id", updateBranch);
+router.patch("/:id", requireRole("OWNER", "ADMIN"), updateBranch);
 
 // Neue Niederlassung erstellen
-router.post("/", createBranch);
+router.post("/", requireRole("OWNER", "ADMIN"), createBranch);
 
 export default router;
