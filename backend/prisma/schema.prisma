@@ -191,4 +191,39 @@ model Customer {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  events Event[]
+}
+
+enum EventStatus {
+  INQUIRY
+  QUOTED
+  CONFIRMED
+  PREPARING
+  IN_PROGRESS
+  COMPLETED
+  INVOICED
+  CLOSED
+}
+
+model Event {
+  id          String      @id @default(uuid())
+  eventNo     String      @unique
+  name        String
+  type        String?
+  location    String?
+  startDate   DateTime
+  endDate     DateTime
+  status      EventStatus @default(INQUIRY)
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  @@index([customerId])
+  @@index([status])
+  @@index([startDate])
 }
