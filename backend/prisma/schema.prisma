@@ -82,6 +82,8 @@ model Warehouse {
   branchId String
   branch   Branch @relation(fields: [branchId], references: [id])
 
+  inventoryItems InventoryItem[]
+
   @@index([branchId])
 }
 
@@ -226,4 +228,82 @@ model Event {
   @@index([customerId])
   @@index([status])
   @@index([startDate])
+}
+
+// Produktmodell im Gerätekatalog, z. B. Sony FX6
+model Product {
+  id          String  @id @default(uuid())
+  productNo   String  @unique
+  name        String
+  brand       String?
+  model       String?
+  category    String?
+  description String?
+
+  // SERIALIZED = einzelne Geräte, QUANTITY = Mengenartikel
+  trackingType ProductTrackingType @default(SERIALIZED)
+
+  // RENTAL = Vermietung, SALE = Verkauf, BOTH = beides
+  usageType ProductUsageType @default(RENTAL)
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  inventoryItems InventoryItem[]
+}
+
+enum ProductTrackingType {
+  SERIALIZED
+  QUANTITY
+}
+
+enum ProductUsageType {
+  RENTAL
+  SALE
+  BOTH
+}
+
+// Physisches Gerät oder einzelner Lagerartikel
+model InventoryItem {
+  id                 String              @id @default(uuid())
+  assetNo            String              @unique
+  manufacturerSerial String?             @unique
+  barcode            String?             @unique
+  status             InventoryItemStatus @default(AVAILABLE)
+  location           String?
+  purchaseDate       DateTime?
+  purchasePrice      Decimal?
+  notes              String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  warehouseId String
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
+
+  @@index([productId])
+  @@index([warehouseId])
+  @@index([status])
+}
+
+enum InventoryItemStatus {
+  RECEIVED
+  AVAILABLE
+  RESERVED
+  PICKING
+  PACKED
+  IN_TRANSIT
+  AT_EVENT
+  RETURNING
+  INSPECTION
+  DAMAGED
+  MAINTENANCE
+  REPAIRED
+  LOST
+  RETIRED
 }

@@ -10,6 +10,8 @@ import warehouseRoutes from "./routes/warehouse.routes.js";
 import employeeRoutes from "./routes/employee.routes.js";
 import customerRoutes from "./routes/customer.routes.js";
 import eventRoutes from "./routes/event.routes.js";
+import productRoutes from "./routes/product.routes.js";
+import inventoryItemRoutes from "./routes/inventory-item.routes.js";
 
 const app = express();
 
@@ -50,6 +52,12 @@ app.use("/api/customers", customerRoutes);
 
 // API-Routen für Events
 app.use("/api/events", eventRoutes);
+
+// API-Routen für Produkte
+app.use("/api/products", productRoutes);
+
+// API-Routen für Lagerartikel
+app.use("/api/inventory-items", inventoryItemRoutes);
 
 // Health-Check für API und Datenbank
 app.get("/health", async (_req, res) => {
