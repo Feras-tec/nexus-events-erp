@@ -196,7 +196,8 @@ model Customer {
 
   events Event[]
 
-  quotes Quote[]
+  quotes   Quote[]
+  invoices Invoice[]
 }
 
 enum EventStatus {
@@ -229,7 +230,8 @@ model Event {
 
   reservations Reservation[]
 
-  quotes Quote[]
+  quotes   Quote[]
+  invoices Invoice[]
 
   @@index([customerId])
   @@index([status])
@@ -259,6 +261,7 @@ model Product {
 
   inventoryItems InventoryItem[]
   quoteItems     QuoteItem[]
+  invoiceItems   InvoiceItem[]
 }
 
 enum ProductTrackingType {
@@ -426,7 +429,8 @@ model Quote {
   eventId String?
   event   Event?  @relation(fields: [eventId], references: [id])
 
-  items QuoteItem[]
+  items    QuoteItem[]
+  invoices Invoice[]
 
   @@index([customerId])
   @@index([eventId])
@@ -453,5 +457,81 @@ model QuoteItem {
   product   Product? @relation(fields: [productId], references: [id])
 
   @@index([quoteId])
+  @@index([productId])
+}
+
+// Status einer Rechnung
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+// Typ einer Rechnungsposition
+enum InvoiceItemType {
+  EQUIPMENT
+  SERVICE
+  TRANSPORT
+  PERSONNEL
+  OTHER
+}
+
+// Rechnung für einen Kunden
+model Invoice {
+  id        String        @id @default(uuid())
+  invoiceNo String        @unique
+  status    InvoiceStatus @default(DRAFT)
+
+  issueDate DateTime?
+  dueDate   DateTime?
+  notes     String?
+
+  subtotal Decimal @default(0)
+  discount Decimal @default(0)
+  tax      Decimal @default(0)
+  total    Decimal @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  eventId String?
+  event   Event?  @relation(fields: [eventId], references: [id])
+
+  quoteId String?
+  quote   Quote?  @relation(fields: [quoteId], references: [id])
+
+  items InvoiceItem[]
+
+  @@index([customerId])
+  @@index([eventId])
+  @@index([quoteId])
+  @@index([status])
+}
+
+// Einzelne Position innerhalb einer Rechnung
+model InvoiceItem {
+  id          String          @id @default(uuid())
+  type        InvoiceItemType
+  description String
+  quantity    Decimal         @default(1)
+  unitPrice   Decimal
+  discount    Decimal         @default(0)
+  total       Decimal
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+
+  @@index([invoiceId])
   @@index([productId])
 }

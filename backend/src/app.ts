@@ -15,6 +15,7 @@ import inventoryItemRoutes from "./routes/inventory-item.routes.js";
 import reservationRoutes from "./routes/reservation.routes.js";
 import equipmentMovementRoutes from "./routes/equipment-movement.routes.js";
 import quoteRoutes from "./routes/quote.routes.js";
+import invoiceRoutes from "./routes/invoice.routes.js";
 
 const app = express();
 
@@ -67,6 +68,8 @@ app.use("/api/reservations", reservationRoutes);
 app.use("/api/equipment-movements", equipmentMovementRoutes);
 
 app.use("/api/quotes", quoteRoutes);
+
+app.use("/api/invoices", invoiceRoutes);
 
 // Health-Check für API und Datenbank
 app.get("/health", async (_req, res) => {
