@@ -195,6 +195,8 @@ model Customer {
   updatedAt DateTime @updatedAt
 
   events Event[]
+
+  quotes Quote[]
 }
 
 enum EventStatus {
@@ -227,6 +229,8 @@ model Event {
 
   reservations Reservation[]
 
+  quotes Quote[]
+
   @@index([customerId])
   @@index([status])
   @@index([startDate])
@@ -254,6 +258,7 @@ model Product {
   updatedAt DateTime @updatedAt
 
   inventoryItems InventoryItem[]
+  quoteItems     QuoteItem[]
 }
 
 enum ProductTrackingType {
@@ -380,4 +385,73 @@ model EquipmentMovement {
   @@index([inventoryItemId])
   @@index([createdAt])
   @@index([type])
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  CANCELLED
+}
+
+enum QuoteItemType {
+  EQUIPMENT
+  SERVICE
+  TRANSPORT
+  PERSONNEL
+  OTHER
+}
+
+// Angebot für einen Kunden
+model Quote {
+  id         String      @id @default(uuid())
+  quoteNo    String      @unique
+  status     QuoteStatus @default(DRAFT)
+  validUntil DateTime?
+  notes      String?
+
+  subtotal Decimal @default(0)
+  discount Decimal @default(0)
+  tax      Decimal @default(0)
+  total    Decimal @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  eventId String?
+  event   Event?  @relation(fields: [eventId], references: [id])
+
+  items QuoteItem[]
+
+  @@index([customerId])
+  @@index([eventId])
+  @@index([status])
+}
+
+// Einzelne Position innerhalb eines Angebots
+model QuoteItem {
+  id          String        @id @default(uuid())
+  type        QuoteItemType
+  description String
+  quantity    Decimal       @default(1)
+  unitPrice   Decimal
+  discount    Decimal       @default(0)
+  total       Decimal
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  quoteId String
+  quote   Quote  @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+
+  @@index([quoteId])
+  @@index([productId])
 }
