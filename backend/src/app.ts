@@ -27,8 +27,22 @@ app.use(helmet());
 // JSON-Anfragen verarbeiten
 app.use(express.json({ limit: "1mb" }));
 
-// CORS aktivieren
-app.use(cors());
+// Erlaubte Frontend-Adressen aus der Umgebung laden
+const allowedOrigins = process.env.CORS_ORIGINS?.split(",") ?? [];
+
+// CORS nur für erlaubte Frontend-Adressen aktivieren
+app.use(
+  cors({
+    origin(origin, callback) {
+      // Anfragen ohne Origin erlauben, z. B. curl oder Server-zu-Server
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("CORS origin not allowed"));
+    },
+  }),
+);
 
 // Clerk-Authentifizierung aktivieren
 app.use(clerkMiddleware());
@@ -97,5 +111,27 @@ app.get("/health", async (_req, res) => {
     });
   }
 });
+
+// Zentrale Fehlerbehandlung
+app.use(
+  (
+    err: Error,
+    _req: express.Request,
+    res: express.Response,
+    _next: express.NextFunction,
+  ) => {
+    if (err.message === "CORS origin not allowed") {
+      return res.status(403).json({
+        error: "CORS origin not allowed",
+      });
+    }
+
+    console.error(err);
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
+  },
+);
 
 export default app;
