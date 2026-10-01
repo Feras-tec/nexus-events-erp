@@ -16,6 +16,8 @@ import reservationRoutes from "./routes/reservation.routes.js";
 import equipmentMovementRoutes from "./routes/equipment-movement.routes.js";
 import quoteRoutes from "./routes/quote.routes.js";
 import invoiceRoutes from "./routes/invoice.routes.js";
+import { clerkMiddleware } from "@clerk/express";
+import authRoutes from "./routes/auth.routes.js";
 
 const app = express();
 
@@ -28,6 +30,9 @@ app.use(express.json({ limit: "1mb" }));
 // CORS aktivieren
 app.use(cors());
 
+// Clerk-Authentifizierung aktivieren
+app.use(clerkMiddleware());
+
 // API vor zu vielen Anfragen schützen
 app.use(
   rateLimit({
@@ -35,6 +40,9 @@ app.use(
     limit: 100,
   }),
 );
+
+// API-Routen für Authentifizierung
+app.use("/api/auth", authRoutes);
 
 // API-Routen für Niederlassungen
 app.use("/api/branches", branchRoutes);
