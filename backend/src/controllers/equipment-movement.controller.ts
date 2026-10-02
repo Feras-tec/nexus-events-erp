@@ -2,6 +2,8 @@ import type { Request, Response } from "express";
 import prisma from "../lib/prisma.js";
 import { createEquipmentMovementSchema } from "../schemas/equipment-movement.schema.js";
 import { isEquipmentStatusTransitionAllowed } from "../utils/equipment-status-transition.js";
+import { getAuth } from "@clerk/express";
+import { createAuditLog } from "../services/audit-log.service.js";
 
 // Neue Bewegung erstellen und aktuellen Gerätestatus aktualisieren
 export async function createEquipmentMovement(req: Request, res: Response) {
@@ -71,6 +73,24 @@ export async function createEquipmentMovement(req: Request, res: Response) {
       });
 
       return createdMovement;
+    });
+    // Wichtige Gerätebewegung im Audit-Log speichern
+    const { userId } = getAuth(req);
+
+    await createAuditLog({
+      ...(userId ? { userId } : {}),
+      action: "EQUIPMENT_MOVEMENT_CREATED",
+      entityType: "InventoryItem",
+      entityId: inventoryItemId,
+      details: {
+        movementId: movement.id,
+        type,
+        fromStatus: inventoryItem.status,
+        toStatus,
+        fromLocation: inventoryItem.location,
+        toLocation,
+      },
+      ...(req.ip ? { ipAddress: req.ip } : {}),
     });
 
     return res.status(201).json(movement);
