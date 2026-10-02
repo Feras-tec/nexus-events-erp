@@ -16,7 +16,7 @@ const mockInventoryItemFindUnique = jest.fn<
 const mockReservationFindFirst =
   jest.fn<() => Promise<{ id: string } | null>>();
 
-const mockReservationCreate = jest.fn();
+const mockReservationCreate = jest.fn<() => Promise<{ id: string }>>();
 
 jest.unstable_mockModule("../src/lib/prisma.js", () => ({
   default: {
@@ -88,5 +88,59 @@ describe("Reservation Conflict", () => {
 
     // Bei einem Konflikt darf keine neue Reservierung gespeichert werden
     expect(mockReservationCreate).not.toHaveBeenCalled();
+  });
+
+  it("sollte eine Reservierung erlauben, wenn kein aktiver Konflikt existiert", async () => {
+    mockEventFindUnique.mockResolvedValue({
+      id: "11111111-1111-4111-8111-111111111111",
+    });
+
+    mockInventoryItemFindUnique.mockResolvedValue({
+      id: "22222222-2222-4222-8222-222222222222",
+      status: "AVAILABLE",
+      product: {
+        id: "33333333-3333-4333-8333-333333333333",
+      },
+    });
+
+    // Keine aktive Reservierung blockiert diesen Zeitraum
+    mockReservationFindFirst.mockResolvedValue(null);
+
+    const createdReservation = {
+      id: "55555555-5555-4555-8555-555555555555",
+    };
+
+    mockReservationCreate.mockResolvedValue(createdReservation);
+
+    const req = {
+      body: {
+        startDate: "2026-11-12T10:00:00.000Z",
+        endDate: "2026-11-12T18:00:00.000Z",
+        status: "CONFIRMED",
+        eventId: "11111111-1111-4111-8111-111111111111",
+        inventoryItemId: "22222222-2222-4222-8222-222222222222",
+      },
+    } as Request;
+
+    const json = jest.fn();
+    const status = jest.fn(() => ({ json }));
+
+    const res = {
+      status,
+    } as unknown as Response;
+
+    await createReservation(req, res);
+
+    expect(mockReservationFindFirst).toHaveBeenCalledWith({
+      where: expect.objectContaining({
+        status: {
+          not: "CANCELLED",
+        },
+      }),
+    });
+
+    expect(mockReservationCreate).toHaveBeenCalledTimes(1);
+    expect(status).toHaveBeenCalledWith(201);
+    expect(json).toHaveBeenCalledWith(createdReservation);
   });
 });
