@@ -103,7 +103,9 @@ app.get("/health", async (_req, res) => {
       service: "nexus-events-api",
       database: "connected",
     });
-  } catch {
+  } catch (error) {
+    console.error("PostgreSQL health check failed:", error);
+
     res.status(503).json({
       status: "error",
       service: "nexus-events-api",
