@@ -6,7 +6,7 @@ const navigationItems = [
   { label: "Customers", icon: "♙" },
   { label: "Employees", icon: "♟" },
   { label: "Products", icon: "□" },
-  { label: "Inventory", icon: "▤" },
+  { label: "Inventory", icon: "▤", to: "/equipment" },
   { label: "Reservations", icon: "◷" },
   { label: "Quotes", icon: "▧" },
   { label: "Invoices", icon: "€" },

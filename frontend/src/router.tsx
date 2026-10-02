@@ -10,6 +10,7 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { EventsPage } from "./pages/EventsPage";
 import { EmployeesPage } from "./pages/EmployeesPage";
+import { EquipmentPage } from "./pages/EquipmentPage";
 
 const rootRoute = createRootRoute({
   component: () => <Outlet />,
@@ -44,8 +45,19 @@ const employeesRoute = createRoute({
   component: EmployeesPage,
 });
 
+const equipmentRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/equipment",
+  component: EquipmentPage,
+});
+
 const routeTree = rootRoute.addChildren([
-  appRoute.addChildren([dashboardRoute, eventsRoute, employeesRoute]),
+  appRoute.addChildren([
+    dashboardRoute,
+    eventsRoute,
+    employeesRoute,
+    equipmentRoute,
+  ]),
 ]);
 
 export const router = createRouter({
