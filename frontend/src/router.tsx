@@ -11,6 +11,7 @@ import { NotFoundPage } from "./pages/NotFoundPage";
 import { EventsPage } from "./pages/EventsPage";
 import { EmployeesPage } from "./pages/EmployeesPage";
 import { EquipmentPage } from "./pages/EquipmentPage";
+import { CustomersPage } from "./pages/CustomersPage";
 
 const rootRoute = createRootRoute({
   component: () => <Outlet />,
@@ -45,6 +46,12 @@ const employeesRoute = createRoute({
   component: EmployeesPage,
 });
 
+const customersRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/customers",
+  component: CustomersPage,
+});
+
 const equipmentRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/equipment",
@@ -56,6 +63,7 @@ const routeTree = rootRoute.addChildren([
     dashboardRoute,
     eventsRoute,
     employeesRoute,
+    customersRoute,
     equipmentRoute,
   ]),
 ]);
