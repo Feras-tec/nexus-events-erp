@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import { jest } from "@jest/globals";
 
 const mockGetAuth = jest.fn();
+
 const mockFindUnique = jest.fn<
   () => Promise<{
     clerkUserId: string;
@@ -95,5 +96,33 @@ describe("requireRole Middleware", () => {
       error: "Forbidden",
     });
     expect(next).not.toHaveBeenCalled();
+  });
+
+  it("sollte Benutzer mit erlaubter Rolle zulassen", async () => {
+    mockGetAuth.mockReturnValue({
+      isAuthenticated: true,
+      userId: "test-user",
+    });
+
+    mockFindUnique.mockResolvedValue({
+      clerkUserId: "test-user",
+      role: "OWNER",
+      isActive: true,
+    });
+
+    const req = {} as Request;
+
+    const res = {
+      status: jest.fn(),
+    } as unknown as Response;
+
+    const next = jest.fn() as NextFunction;
+
+    const middleware = requireRole("OWNER", "ADMIN");
+
+    await middleware(req, res, next);
+
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.status).not.toHaveBeenCalled();
   });
 });
