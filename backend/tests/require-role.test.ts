@@ -2,7 +2,13 @@ import type { Request, Response, NextFunction } from "express";
 import { jest } from "@jest/globals";
 
 const mockGetAuth = jest.fn();
-const mockFindUnique = jest.fn();
+const mockFindUnique = jest.fn<
+  () => Promise<{
+    clerkUserId: string;
+    role: "OWNER" | "EMPLOYEE";
+    isActive: boolean;
+  } | null>
+>();
 
 jest.unstable_mockModule("@clerk/express", () => ({
   getAuth: mockGetAuth,
@@ -53,6 +59,40 @@ describe("requireRole Middleware", () => {
     expect(status).toHaveBeenCalledWith(403);
     expect(json).toHaveBeenCalledWith({
       error: "Insufficient permissions",
+    });
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  it("sollte deaktivierte Benutzer ablehnen", async () => {
+    mockGetAuth.mockReturnValue({
+      isAuthenticated: true,
+      userId: "test-user",
+    });
+
+    mockFindUnique.mockResolvedValue({
+      clerkUserId: "test-user",
+      role: "OWNER",
+      isActive: false,
+    });
+
+    const req = {} as Request;
+
+    const json = jest.fn();
+    const status = jest.fn(() => ({ json }));
+
+    const res = {
+      status,
+    } as unknown as Response;
+
+    const next = jest.fn() as NextFunction;
+
+    const middleware = requireRole("OWNER", "ADMIN");
+
+    await middleware(req, res, next);
+
+    expect(status).toHaveBeenCalledWith(403);
+    expect(json).toHaveBeenCalledWith({
+      error: "Forbidden",
     });
     expect(next).not.toHaveBeenCalled();
   });
