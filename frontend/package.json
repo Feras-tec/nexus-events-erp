@@ -11,8 +11,16 @@
   },
   "dependencies": {
     "@clerk/react": "^6.17.4",
+    "@tailwindcss/vite": "^4.3.3",
+    "@tanstack/react-query": "^5.104.1",
+    "@tanstack/react-router": "^1.170.41",
+    "daisyui": "^5.7.47",
+    "i18next": "^26.4.2",
+    "motion": "^14.0.0",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "react-i18next": "^17.0.15",
+    "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",
