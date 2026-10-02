@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import prisma from "../lib/prisma.js";
 import { createEquipmentMovementSchema } from "../schemas/equipment-movement.schema.js";
+import { isEquipmentStatusTransitionAllowed } from "../utils/equipment-status-transition.js";
 
 // Neue Bewegung erstellen und aktuellen Gerätestatus aktualisieren
 export async function createEquipmentMovement(req: Request, res: Response) {
@@ -35,6 +36,18 @@ export async function createEquipmentMovement(req: Request, res: Response) {
 
     const { type, toStatus, toLocation, notes } = result.data;
 
+    // Prüfen, ob der Statusübergang erlaubt ist
+    if (
+      type !== "MANUAL_ADJUSTMENT" &&
+      !isEquipmentStatusTransitionAllowed(inventoryItem.status, toStatus)
+    ) {
+      return res.status(409).json({
+        error: "Invalid equipment status transition",
+        fromStatus: inventoryItem.status,
+        toStatus,
+      });
+    }
+
     // Bewegung und Statusänderung gemeinsam speichern
     const movement = await prisma.$transaction(async (tx) => {
       const createdMovement = await tx.equipmentMovement.create({
@@ -53,9 +66,7 @@ export async function createEquipmentMovement(req: Request, res: Response) {
         where: { id: inventoryItemId },
         data: {
           status: toStatus,
-          ...(toLocation !== undefined
-            ? { location: toLocation }
-            : {}),
+          ...(toLocation !== undefined ? { location: toLocation } : {}),
         },
       });
 
