@@ -9,6 +9,7 @@ import { DashboardLayout } from "./components/templates/DashboardLayout";
 import { DashboardPage } from "./pages/DashboardPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { EventsPage } from "./pages/EventsPage";
+import { EmployeesPage } from "./pages/EmployeesPage";
 
 const rootRoute = createRootRoute({
   component: () => <Outlet />,
@@ -37,8 +38,14 @@ const eventsRoute = createRoute({
   component: EventsPage,
 });
 
+const employeesRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/employees",
+  component: EmployeesPage,
+});
+
 const routeTree = rootRoute.addChildren([
-  appRoute.addChildren([dashboardRoute, eventsRoute]),
+  appRoute.addChildren([dashboardRoute, eventsRoute, employeesRoute]),
 ]);
 
 export const router = createRouter({
