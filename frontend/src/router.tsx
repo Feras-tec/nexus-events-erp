@@ -2,10 +2,11 @@ import {
   createRootRoute,
   createRoute,
   createRouter,
+  Navigate,
   Outlet,
 } from "@tanstack/react-router";
 
-import { DashboardLayout } from "./components/templates/DashboardLayout";
+import { ProtectedDashboardLayout } from "./components/templates/ProtectedDashboardLayout";
 import { DashboardPage } from "./pages/DashboardPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { EventsPage } from "./pages/EventsPage";
@@ -14,19 +15,32 @@ import { EmployeesPage } from "./pages/EmployeesPage";
 import { EquipmentPage } from "./pages/EquipmentPage";
 import { CustomersPage } from "./pages/CustomersPage";
 import { CustomerDetailPage } from "./pages/CustomerDetailPage";
+import { SignInPage } from "./pages/SignInPage";
 
 const rootRoute = createRootRoute({
   component: () => <Outlet />,
   notFoundComponent: NotFoundPage,
 });
 
+const indexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/",
+  component: () => <Navigate to="/dashboard" replace />,
+});
+
+const signInRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/sign-in",
+  component: SignInPage,
+});
+
 const appRoute = createRoute({
   getParentRoute: () => rootRoute,
   id: "app",
   component: () => (
-    <DashboardLayout>
+    <ProtectedDashboardLayout>
       <Outlet />
-    </DashboardLayout>
+    </ProtectedDashboardLayout>
   ),
 });
 
@@ -73,6 +87,8 @@ const equipmentRoute = createRoute({
 });
 
 const routeTree = rootRoute.addChildren([
+  indexRoute,
+  signInRoute,
   appRoute.addChildren([
     dashboardRoute,
     eventsRoute,
