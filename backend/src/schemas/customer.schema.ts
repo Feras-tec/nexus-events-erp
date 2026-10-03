@@ -55,14 +55,22 @@ export const createCustomerSchema = customerBaseSchema.superRefine(
 );
 
 // Validierung für das Aktualisieren eines Kunden
-export const updateCustomerSchema = customerBaseSchema
-  .omit({
-    customerNo: true,
-  })
-  .partial()
-  .extend({
-    isActive: z.boolean().optional(),
-  });
+export const updateCustomerSchema = z.object({
+  type: customerTypeSchema.optional(),
+
+  companyName: z.string().trim().max(150).optional(),
+  firstName: z.string().trim().max(100).optional(),
+  lastName: z.string().trim().max(100).optional(),
+  contactName: z.string().trim().max(150).optional(),
+
+  email: z.email().optional(),
+  phone: z.string().trim().max(50).optional(),
+  address: z.string().trim().max(255).optional(),
+  vatId: z.string().trim().max(50).optional(),
+
+  discount: z.number().min(0).max(100).optional(),
+  isActive: z.boolean().optional(),
+});
 
 export type CreateCustomerInput = z.infer<typeof createCustomerSchema>;
 

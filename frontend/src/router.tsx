@@ -13,6 +13,7 @@ import { EventDetailPage } from "./pages/EventDetailPage";
 import { EmployeesPage } from "./pages/EmployeesPage";
 import { EquipmentPage } from "./pages/EquipmentPage";
 import { CustomersPage } from "./pages/CustomersPage";
+import { CustomerDetailPage } from "./pages/CustomerDetailPage";
 
 const rootRoute = createRootRoute({
   component: () => <Outlet />,
@@ -59,6 +60,12 @@ const customersRoute = createRoute({
   component: CustomersPage,
 });
 
+const customerDetailRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/customers/$customerId",
+  component: CustomerDetailPage,
+});
+
 const equipmentRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/equipment",
@@ -72,6 +79,7 @@ const routeTree = rootRoute.addChildren([
     eventDetailRoute,
     employeesRoute,
     customersRoute,
+    customerDetailRoute,
     equipmentRoute,
   ]),
 ]);
