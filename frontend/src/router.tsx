@@ -9,6 +9,7 @@ import { DashboardLayout } from "./components/templates/DashboardLayout";
 import { DashboardPage } from "./pages/DashboardPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { EventsPage } from "./pages/EventsPage";
+import { EventDetailPage } from "./pages/EventDetailPage";
 import { EmployeesPage } from "./pages/EmployeesPage";
 import { EquipmentPage } from "./pages/EquipmentPage";
 import { CustomersPage } from "./pages/CustomersPage";
@@ -40,6 +41,12 @@ const eventsRoute = createRoute({
   component: EventsPage,
 });
 
+const eventDetailRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/events/$eventId",
+  component: EventDetailPage,
+});
+
 const employeesRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/employees",
@@ -62,6 +69,7 @@ const routeTree = rootRoute.addChildren([
   appRoute.addChildren([
     dashboardRoute,
     eventsRoute,
+    eventDetailRoute,
     employeesRoute,
     customersRoute,
     equipmentRoute,

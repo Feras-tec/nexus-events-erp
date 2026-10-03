@@ -29,6 +29,7 @@ type EventFormProps = {
   customers: CustomerOption[];
   initialValues?: Partial<EventFormData>;
   loading?: boolean;
+  mode?: "create" | "edit";
   onSubmit: (data: EventFormData) => void;
 };
 
@@ -59,6 +60,7 @@ export function EventForm({
   customers,
   initialValues,
   loading = false,
+  mode = "create",
   onSubmit,
 }: EventFormProps) {
   const [formData, setFormData] = useState<EventFormData>({
@@ -66,10 +68,7 @@ export function EventForm({
     ...initialValues,
   });
 
-  function updateField(
-    field: keyof EventFormData,
-    value: string,
-  ) {
+  function updateField(field: keyof EventFormData, value: string) {
     setFormData((current) => ({
       ...current,
       [field]: value,
@@ -96,9 +95,7 @@ export function EventForm({
     const name =
       customer.type === "COMPANY"
         ? customer.companyName
-        : [customer.firstName, customer.lastName]
-            .filter(Boolean)
-            .join(" ");
+        : [customer.firstName, customer.lastName].filter(Boolean).join(" ");
 
     return {
       value: customer.id,
@@ -123,9 +120,8 @@ export function EventForm({
           minLength={2}
           maxLength={30}
           required
-          onChange={(event) =>
-            updateField("eventNo", event.target.value)
-          }
+          disabled={mode === "edit"}
+          onChange={(event) => updateField("eventNo", event.target.value)}
         />
 
         <Input
@@ -134,9 +130,7 @@ export function EventForm({
           minLength={2}
           maxLength={150}
           required
-          onChange={(event) =>
-            updateField("name", event.target.value)
-          }
+          onChange={(event) => updateField("name", event.target.value)}
         />
 
         <Select
@@ -145,36 +139,29 @@ export function EventForm({
           options={customerOptions}
           placeholder="Kunde auswählen"
           required
-          onChange={(event) =>
-            updateField("customerId", event.target.value)
-          }
+          disabled={mode === "edit"}
+          onChange={(event) => updateField("customerId", event.target.value)}
         />
 
         <Select
           label="Status"
           value={formData.status}
           options={statusOptions}
-          onChange={(event) =>
-            updateField("status", event.target.value)
-          }
+          onChange={(event) => updateField("status", event.target.value)}
         />
 
         <Input
           label="Typ"
           value={formData.type}
           maxLength={100}
-          onChange={(event) =>
-            updateField("type", event.target.value)
-          }
+          onChange={(event) => updateField("type", event.target.value)}
         />
 
         <Input
           label="Ort"
           value={formData.location}
           maxLength={255}
-          onChange={(event) =>
-            updateField("location", event.target.value)
-          }
+          onChange={(event) => updateField("location", event.target.value)}
         />
 
         <Input
@@ -182,9 +169,7 @@ export function EventForm({
           label="Start"
           value={formData.startDate}
           required
-          onChange={(event) =>
-            updateField("startDate", event.target.value)
-          }
+          onChange={(event) => updateField("startDate", event.target.value)}
         />
 
         <Input
@@ -193,9 +178,7 @@ export function EventForm({
           value={formData.endDate}
           min={formData.startDate}
           required
-          onChange={(event) =>
-            updateField("endDate", event.target.value)
-          }
+          onChange={(event) => updateField("endDate", event.target.value)}
         />
       </div>
 
@@ -213,9 +196,7 @@ export function EventForm({
           rows={4}
           maxLength={1000}
           value={formData.description}
-          onChange={(event) =>
-            updateField("description", event.target.value)
-          }
+          onChange={(event) => updateField("description", event.target.value)}
         />
       </div>
 
