@@ -17,6 +17,10 @@ import {
   type DepartmentOption,
   type EmployeeFormValues,
 } from "../components/organisms/EmployeeForm";
+import {
+  EmploymentPeriodForm,
+  type EmploymentPeriodFormData,
+} from "../components/organisms/EmploymentPeriodForm";
 import { DetailLayout } from "../components/templates/DetailLayout";
 import { apiFetch } from "../services/api";
 
@@ -51,7 +55,16 @@ type EmployeeDetail = {
     isActive: boolean;
   } | null;
 
-  employmentPeriods: unknown[];
+  employmentPeriods: {
+    id: string;
+    startDate: string;
+    endDate?: string | null;
+    position?: string | null;
+    reason?: string | null;
+    createdAt: string;
+    updatedAt: string;
+    employeeId: string;
+  }[];
   documents: unknown[];
 };
 
@@ -74,6 +87,8 @@ export function EmployeeDetailPage() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [showDeactivateDialog, setShowDeactivateDialog] =
+    useState(false);
+  const [showEmploymentPeriodForm, setShowEmploymentPeriodForm] =
     useState(false);
 
   const { employeeId } = useParams({
@@ -163,6 +178,38 @@ export function EmployeeDetailPage() {
       ]);
 
       setIsEditing(false);
+    },
+  });
+
+  const createEmploymentPeriodMutation = useMutation({
+    mutationFn: async (data: EmploymentPeriodFormData) => {
+      const token = await getToken();
+
+      const payload = {
+        startDate: data.startDate,
+        endDate: data.endDate || undefined,
+        position: data.position.trim() || undefined,
+        reason: data.reason.trim() || undefined,
+      };
+
+      const response = await apiFetch(
+        `/api/employees/${employeeId}/employment-periods`,
+        token,
+        {
+          method: "POST",
+          body: JSON.stringify(payload),
+        },
+      );
+
+      return response.json();
+    },
+
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["employees", employeeId],
+      });
+
+      setShowEmploymentPeriodForm(false);
     },
   });
 
@@ -459,13 +506,118 @@ export function EmployeeDetailPage() {
 
               <div className="grid gap-6 lg:grid-cols-2">
                 <section className="rounded-box border border-base-300 bg-base-100 p-6">
-                  <h2 className="text-lg font-semibold">
-                    Beschäftigungszeiträume
-                  </h2>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <h2 className="text-lg font-semibold">
+                        Beschäftigungszeiträume
+                      </h2>
 
-                  <p className="mt-2 text-sm text-base-content/60">
-                    {employee.employmentPeriods.length} Einträge
-                  </p>
+                      <p className="mt-1 text-sm text-base-content/60">
+                        {employee.employmentPeriods.length} Einträge
+                      </p>
+                    </div>
+
+                    <Button
+                      type="button"
+                      className="btn-sm"
+                      onClick={() =>
+                        setShowEmploymentPeriodForm(
+                          (current) => !current,
+                        )
+                      }
+                    >
+                      {showEmploymentPeriodForm
+                        ? "Abbrechen"
+                        : "Zeitraum hinzufügen"}
+                    </Button>
+                  </div>
+
+                  <AnimatePresence>
+                    {showEmploymentPeriodForm && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="mt-5"
+                      >
+                        <EmploymentPeriodForm
+                          loading={
+                            createEmploymentPeriodMutation.isPending
+                          }
+                          onSubmit={(data) =>
+                            createEmploymentPeriodMutation.mutate(
+                              data,
+                            )
+                          }
+                        />
+
+                        {createEmploymentPeriodMutation.isError && (
+                          <div
+                            role="alert"
+                            className="alert alert-error mt-4"
+                          >
+                            Beschäftigungszeitraum konnte nicht
+                            erstellt werden.
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {employee.employmentPeriods.length === 0 ? (
+                    <p className="mt-5 text-sm text-base-content/60">
+                      Noch keine Beschäftigungszeiträume vorhanden.
+                    </p>
+                  ) : (
+                    <div className="mt-5 space-y-3">
+                      {employee.employmentPeriods.map((period) => (
+                        <div
+                          key={period.id}
+                          className="rounded-box border border-base-300 p-4"
+                        >
+                          <div className="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                              <p className="font-medium">
+                                {period.position ||
+                                  employee.position ||
+                                  "Beschäftigung"}
+                              </p>
+
+                              {period.reason && (
+                                <p className="mt-1 text-sm text-base-content/60">
+                                  {period.reason}
+                                </p>
+                              )}
+                            </div>
+
+                            {!period.endDate && (
+                              <span className="badge badge-success">
+                                Aktuell
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="mt-3 text-sm">
+                            <span className="text-base-content/60">
+                              Zeitraum:
+                            </span>{" "}
+                            <span className="font-medium">
+                              {new Date(
+                                period.startDate,
+                              ).toLocaleDateString("de-DE")}
+                              {" – "}
+                              {period.endDate
+                                ? new Date(
+                                    period.endDate,
+                                  ).toLocaleDateString("de-DE")
+                                : "heute"}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </section>
 
                 <section className="rounded-box border border-base-300 bg-base-100 p-6">
