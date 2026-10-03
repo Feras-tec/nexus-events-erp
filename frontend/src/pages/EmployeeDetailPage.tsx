@@ -21,6 +21,10 @@ import {
   EmploymentPeriodForm,
   type EmploymentPeriodFormData,
 } from "../components/organisms/EmploymentPeriodForm";
+import {
+  EmployeeDocumentForm,
+  type EmployeeDocumentFormData,
+} from "../components/organisms/EmployeeDocumentForm";
 import { DetailLayout } from "../components/templates/DetailLayout";
 import { apiFetch } from "../services/api";
 
@@ -65,7 +69,23 @@ type EmployeeDetail = {
     updatedAt: string;
     employeeId: string;
   }[];
-  documents: unknown[];
+  documents: {
+    id: string;
+    type:
+      | "RESIDENCE_PERMIT"
+      | "WORK_PERMIT"
+      | "PASSPORT"
+      | "CONTRACT"
+      | "OTHER";
+    documentNumber?: string | null;
+    issueDate?: string | null;
+    expiryDate?: string | null;
+    fileUrl?: string | null;
+    notes?: string | null;
+    createdAt: string;
+    updatedAt: string;
+    employeeId: string;
+  }[];
 };
 
 type EmployeeResponse = {
@@ -89,6 +109,8 @@ export function EmployeeDetailPage() {
   const [showDeactivateDialog, setShowDeactivateDialog] =
     useState(false);
   const [showEmploymentPeriodForm, setShowEmploymentPeriodForm] =
+    useState(false);
+  const [showDocumentForm, setShowDocumentForm] =
     useState(false);
 
   const { employeeId } = useParams({
@@ -178,6 +200,41 @@ export function EmployeeDetailPage() {
       ]);
 
       setIsEditing(false);
+    },
+  });
+
+  const createEmployeeDocumentMutation = useMutation({
+    mutationFn: async (data: EmployeeDocumentFormData) => {
+      const token = await getToken();
+
+      const payload = {
+        type: data.type,
+        documentNumber:
+          data.documentNumber.trim() || undefined,
+        issueDate: data.issueDate || undefined,
+        expiryDate: data.expiryDate || undefined,
+        fileUrl: data.fileUrl.trim() || undefined,
+        notes: data.notes.trim() || undefined,
+      };
+
+      const response = await apiFetch(
+        `/api/employees/${employeeId}/documents`,
+        token,
+        {
+          method: "POST",
+          body: JSON.stringify(payload),
+        },
+      );
+
+      return response.json();
+    },
+
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["employees", employeeId],
+      });
+
+      setShowDocumentForm(false);
     },
   });
 
@@ -621,13 +678,146 @@ export function EmployeeDetailPage() {
                 </section>
 
                 <section className="rounded-box border border-base-300 bg-base-100 p-6">
-                  <h2 className="text-lg font-semibold">
-                    Dokumente
-                  </h2>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <h2 className="text-lg font-semibold">
+                        Dokumente
+                      </h2>
 
-                  <p className="mt-2 text-sm text-base-content/60">
-                    {employee.documents.length} Dokumente
-                  </p>
+                      <p className="mt-1 text-sm text-base-content/60">
+                        {employee.documents.length} Dokumente
+                      </p>
+                    </div>
+
+                    <Button
+                      type="button"
+                      className="btn-sm"
+                      onClick={() =>
+                        setShowDocumentForm(
+                          (current) => !current,
+                        )
+                      }
+                    >
+                      {showDocumentForm
+                        ? "Abbrechen"
+                        : "Dokument hinzufügen"}
+                    </Button>
+                  </div>
+
+                  <AnimatePresence>
+                    {showDocumentForm && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="mt-5"
+                      >
+                        <EmployeeDocumentForm
+                          loading={
+                            createEmployeeDocumentMutation.isPending
+                          }
+                          onSubmit={(data) =>
+                            createEmployeeDocumentMutation.mutate(
+                              data,
+                            )
+                          }
+                        />
+
+                        {createEmployeeDocumentMutation.isError && (
+                          <div
+                            role="alert"
+                            className="alert alert-error mt-4"
+                          >
+                            Dokument konnte nicht erstellt werden.
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {employee.documents.length === 0 ? (
+                    <p className="mt-5 text-sm text-base-content/60">
+                      Noch keine Dokumente vorhanden.
+                    </p>
+                  ) : (
+                    <div className="mt-5 space-y-3">
+                      {employee.documents.map((document) => {
+                        const typeLabels = {
+                          RESIDENCE_PERMIT: "Aufenthaltstitel",
+                          WORK_PERMIT: "Arbeitserlaubnis",
+                          PASSPORT: "Reisepass",
+                          CONTRACT: "Vertrag",
+                          OTHER: "Sonstiges",
+                        };
+
+                        return (
+                          <div
+                            key={document.id}
+                            className="rounded-box border border-base-300 p-4"
+                          >
+                            <div className="flex flex-wrap items-start justify-between gap-3">
+                              <div>
+                                <p className="font-medium">
+                                  {typeLabels[document.type]}
+                                </p>
+
+                                {document.documentNumber && (
+                                  <p className="mt-1 text-sm text-base-content/60">
+                                    Nr. {document.documentNumber}
+                                  </p>
+                                )}
+                              </div>
+
+                              {document.fileUrl && (
+                                <a
+                                  href={document.fileUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="btn btn-ghost btn-sm"
+                                >
+                                  Datei öffnen
+                                </a>
+                              )}
+                            </div>
+
+                            {(document.issueDate ||
+                              document.expiryDate) && (
+                              <div className="mt-3 text-sm">
+                                {document.issueDate && (
+                                  <p>
+                                    <span className="text-base-content/60">
+                                      Ausgestellt:
+                                    </span>{" "}
+                                    {new Date(
+                                      document.issueDate,
+                                    ).toLocaleDateString("de-DE")}
+                                  </p>
+                                )}
+
+                                {document.expiryDate && (
+                                  <p>
+                                    <span className="text-base-content/60">
+                                      Gültig bis:
+                                    </span>{" "}
+                                    {new Date(
+                                      document.expiryDate,
+                                    ).toLocaleDateString("de-DE")}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+
+                            {document.notes && (
+                              <p className="mt-3 text-sm text-base-content/70">
+                                {document.notes}
+                              </p>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </section>
               </div>
             </motion.div>
