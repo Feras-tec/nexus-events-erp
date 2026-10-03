@@ -112,6 +112,10 @@ export function EmployeeDetailPage() {
     useState(false);
   const [showDocumentForm, setShowDocumentForm] =
     useState(false);
+  const [editingEmploymentPeriodId, setEditingEmploymentPeriodId] =
+    useState<string | null>(null);
+  const [deletingEmploymentPeriodId, setDeletingEmploymentPeriodId] =
+    useState<string | null>(null);
 
   const { employeeId } = useParams({
     from: "/app/employees/$employeeId",
@@ -235,6 +239,69 @@ export function EmployeeDetailPage() {
       });
 
       setShowDocumentForm(false);
+    },
+  });
+
+  const updateEmploymentPeriodMutation = useMutation({
+    mutationFn: async ({
+      periodId,
+      data,
+    }: {
+      periodId: string;
+      data: EmploymentPeriodFormData;
+    }) => {
+      const token = await getToken();
+
+      const payload = {
+        startDate: data.startDate,
+        endDate: data.endDate || null,
+        position: data.position.trim() || null,
+        reason: data.reason.trim() || null,
+      };
+
+      const response = await apiFetch(
+        `/api/employees/${employeeId}/employment-periods/${periodId}`,
+        token,
+        {
+          method: "PATCH",
+          body: JSON.stringify(payload),
+        },
+      );
+
+      return response.json();
+    },
+
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["employees", employeeId],
+      });
+
+      setEditingEmploymentPeriodId(null);
+    },
+  });
+
+  const deleteEmploymentPeriodMutation = useMutation({
+    mutationFn: async (periodId: string) => {
+      const token = await getToken();
+
+      const response = await apiFetch(
+        `/api/employees/${employeeId}/employment-periods/${periodId}`,
+        token,
+        {
+          method: "DELETE",
+        },
+      );
+
+      return response.json();
+    },
+
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["employees", employeeId],
+      });
+
+      setDeletingEmploymentPeriodId(null);
+      setEditingEmploymentPeriodId(null);
     },
   });
 
@@ -629,8 +696,9 @@ export function EmployeeDetailPage() {
                   ) : (
                     <div className="mt-5 space-y-3">
                       {employee.employmentPeriods.map((period) => (
-                        <div
+                        <motion.div
                           key={period.id}
+                          layout
                           className="rounded-box border border-base-300 p-4"
                         >
                           <div className="flex flex-wrap items-start justify-between gap-3">
@@ -648,11 +716,40 @@ export function EmployeeDetailPage() {
                               )}
                             </div>
 
-                            {!period.endDate && (
-                              <span className="badge badge-success">
-                                Aktuell
-                              </span>
-                            )}
+                            <div className="flex flex-wrap items-center gap-2">
+                              {!period.endDate && (
+                                <span className="badge badge-success">
+                                  Aktuell
+                                </span>
+                              )}
+
+                              <button
+                                type="button"
+                                className="btn btn-ghost btn-xs"
+                                onClick={() => {
+                                  setEditingEmploymentPeriodId(
+                                    editingEmploymentPeriodId === period.id
+                                      ? null
+                                      : period.id,
+                                  );
+                                  setShowEmploymentPeriodForm(false);
+                                }}
+                              >
+                                {editingEmploymentPeriodId === period.id
+                                  ? "Abbrechen"
+                                  : "Bearbeiten"}
+                              </button>
+
+                              <button
+                                type="button"
+                                className="btn btn-error btn-outline btn-xs"
+                                onClick={() =>
+                                  setDeletingEmploymentPeriodId(period.id)
+                                }
+                              >
+                                Löschen
+                              </button>
+                            </div>
                           </div>
 
                           <div className="mt-3 text-sm">
@@ -671,7 +768,106 @@ export function EmployeeDetailPage() {
                                 : "heute"}
                             </span>
                           </div>
-                        </div>
+
+                          <AnimatePresence>
+                            {editingEmploymentPeriodId === period.id && (
+                              <motion.div
+                                initial={{ opacity: 0, y: -8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -8 }}
+                                transition={{ duration: 0.2 }}
+                                className="mt-4"
+                              >
+                                <EmploymentPeriodForm
+                                  key={period.id}
+                                  mode="edit"
+                                  initialValues={{
+                                    startDate: period.startDate.slice(0, 10),
+                                    endDate: period.endDate
+                                      ? period.endDate.slice(0, 10)
+                                      : "",
+                                    position: period.position || "",
+                                    reason: period.reason || "",
+                                  }}
+                                  loading={
+                                    updateEmploymentPeriodMutation.isPending
+                                  }
+                                  onSubmit={(data) =>
+                                    updateEmploymentPeriodMutation.mutate({
+                                      periodId: period.id,
+                                      data,
+                                    })
+                                  }
+                                />
+
+                                {updateEmploymentPeriodMutation.isError && (
+                                  <div
+                                    role="alert"
+                                    className="alert alert-error mt-4"
+                                  >
+                                    Beschäftigungszeitraum konnte nicht
+                                    aktualisiert werden.
+                                  </div>
+                                )}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+
+                          {deletingEmploymentPeriodId === period.id && (
+                            <div className="mt-4 rounded-box border border-error/30 bg-error/5 p-4">
+                              <p className="text-sm font-medium">
+                                Beschäftigungszeitraum wirklich löschen?
+                              </p>
+
+                              <p className="mt-1 text-sm text-base-content/60">
+                                Dieser Vorgang kann nicht rückgängig gemacht
+                                werden.
+                              </p>
+
+                              <div className="mt-3 flex justify-end gap-2">
+                                <button
+                                  type="button"
+                                  className="btn btn-ghost btn-sm"
+                                  disabled={
+                                    deleteEmploymentPeriodMutation.isPending
+                                  }
+                                  onClick={() =>
+                                    setDeletingEmploymentPeriodId(null)
+                                  }
+                                >
+                                  Abbrechen
+                                </button>
+
+                                <button
+                                  type="button"
+                                  className="btn btn-error btn-sm"
+                                  disabled={
+                                    deleteEmploymentPeriodMutation.isPending
+                                  }
+                                  onClick={() =>
+                                    deleteEmploymentPeriodMutation.mutate(
+                                      period.id,
+                                    )
+                                  }
+                                >
+                                  {deleteEmploymentPeriodMutation.isPending
+                                    ? "Wird gelöscht..."
+                                    : "Endgültig löschen"}
+                                </button>
+                              </div>
+
+                              {deleteEmploymentPeriodMutation.isError && (
+                                <div
+                                  role="alert"
+                                  className="alert alert-error mt-3"
+                                >
+                                  Beschäftigungszeitraum konnte nicht
+                                  gelöscht werden.
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </motion.div>
                       ))}
                     </div>
                   )}

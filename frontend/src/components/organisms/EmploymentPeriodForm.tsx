@@ -9,6 +9,8 @@ export type EmploymentPeriodFormData = {
 
 type EmploymentPeriodFormProps = {
   loading?: boolean;
+  initialValues?: EmploymentPeriodFormData;
+  mode?: "create" | "edit";
   onSubmit: (data: EmploymentPeriodFormData) => void;
 };
 
@@ -21,10 +23,14 @@ const initialValues: EmploymentPeriodFormData = {
 
 export function EmploymentPeriodForm({
   loading = false,
+  initialValues: providedInitialValues,
+  mode = "create",
   onSubmit,
 }: EmploymentPeriodFormProps) {
   const [values, setValues] =
-    useState<EmploymentPeriodFormData>(initialValues);
+    useState<EmploymentPeriodFormData>(
+      providedInitialValues ?? initialValues,
+    );
 
   function updateField(
     field: keyof EmploymentPeriodFormData,
@@ -60,7 +66,9 @@ export function EmploymentPeriodForm({
       className="rounded-box border border-base-300 bg-base-100 p-6"
     >
       <h3 className="mb-5 text-lg font-semibold">
-        Beschäftigungszeitraum hinzufügen
+        {mode === "edit"
+          ? "Beschäftigungszeitraum bearbeiten"
+          : "Beschäftigungszeitraum hinzufügen"}
       </h3>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -145,7 +153,9 @@ export function EmploymentPeriodForm({
         >
           {loading
             ? "Wird gespeichert..."
-            : "Zeitraum hinzufügen"}
+            : mode === "edit"
+              ? "Änderungen speichern"
+              : "Zeitraum hinzufügen"}
         </button>
       </div>
     </form>

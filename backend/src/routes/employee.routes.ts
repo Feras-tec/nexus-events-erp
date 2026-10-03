@@ -6,7 +6,11 @@ import {
   updateEmployee,
   deactivateEmployee,
 } from "../controllers/employee.controller.js";
-import { createEmploymentPeriod } from "../controllers/employment-period.controller.js";
+import {
+  createEmploymentPeriod,
+  updateEmploymentPeriod,
+  deleteEmploymentPeriod,
+} from "../controllers/employment-period.controller.js";
 import { createEmployeeDocument } from "../controllers/employee-document.controller.js";
 import { requireRole } from "../middleware/require-role.js";
 
@@ -20,6 +24,18 @@ router.get("/", getEmployees);
 
 // Neuen Beschäftigungszeitraum für einen Mitarbeiter erstellen
 router.post("/:employeeId/employment-periods", createEmploymentPeriod);
+
+// Beschäftigungszeitraum aktualisieren
+router.patch(
+  "/:employeeId/employment-periods/:periodId",
+  updateEmploymentPeriod,
+);
+
+// Beschäftigungszeitraum löschen
+router.delete(
+  "/:employeeId/employment-periods/:periodId",
+  deleteEmploymentPeriod,
+);
 
 // Neues Dokument für einen Mitarbeiter erstellen
 router.post("/:employeeId/documents", createEmployeeDocument);
