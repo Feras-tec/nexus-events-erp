@@ -16,6 +16,8 @@ export type EmployeeDocumentFormData = {
 
 type EmployeeDocumentFormProps = {
   loading?: boolean;
+  initialValues?: EmployeeDocumentFormData;
+  mode?: "create" | "edit";
   onSubmit: (data: EmployeeDocumentFormData) => void;
 };
 
@@ -30,10 +32,14 @@ const initialValues: EmployeeDocumentFormData = {
 
 export function EmployeeDocumentForm({
   loading = false,
+  initialValues: providedInitialValues,
+  mode = "create",
   onSubmit,
 }: EmployeeDocumentFormProps) {
   const [values, setValues] =
-    useState<EmployeeDocumentFormData>(initialValues);
+    useState<EmployeeDocumentFormData>(
+      providedInitialValues ?? initialValues,
+    );
 
   function updateField(
     field: keyof EmployeeDocumentFormData,
@@ -70,7 +76,9 @@ export function EmployeeDocumentForm({
       className="rounded-box border border-base-300 bg-base-100 p-6"
     >
       <h3 className="mb-5 text-lg font-semibold">
-        Dokument hinzufügen
+        {mode === "edit"
+          ? "Dokument bearbeiten"
+          : "Dokument hinzufügen"}
       </h3>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -191,7 +199,11 @@ export function EmployeeDocumentForm({
           className="btn btn-primary"
           disabled={loading || invalidDateRange}
         >
-          {loading ? "Wird gespeichert..." : "Dokument hinzufügen"}
+          {loading
+            ? "Wird gespeichert..."
+            : mode === "edit"
+              ? "Änderungen speichern"
+              : "Dokument hinzufügen"}
         </button>
       </div>
     </form>

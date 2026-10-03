@@ -33,3 +33,17 @@ export const createEmployeeDocumentSchema = z
 export type CreateEmployeeDocumentInput = z.infer<
   typeof createEmployeeDocumentSchema
 >;
+
+// Validierung für die teilweise Aktualisierung eines Mitarbeiterdokuments
+export const updateEmployeeDocumentSchema = z.object({
+  type: employeeDocumentTypeSchema.optional(),
+  documentNumber: z.string().trim().max(100).nullable().optional(),
+  issueDate: z.coerce.date().nullable().optional(),
+  expiryDate: z.coerce.date().nullable().optional(),
+  fileUrl: z.url().nullable().optional(),
+  notes: z.string().trim().max(500).nullable().optional(),
+});
+
+export type UpdateEmployeeDocumentInput = z.infer<
+  typeof updateEmployeeDocumentSchema
+>;

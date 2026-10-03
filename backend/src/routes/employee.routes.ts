@@ -11,7 +11,11 @@ import {
   updateEmploymentPeriod,
   deleteEmploymentPeriod,
 } from "../controllers/employment-period.controller.js";
-import { createEmployeeDocument } from "../controllers/employee-document.controller.js";
+import {
+  createEmployeeDocument,
+  updateEmployeeDocument,
+  deleteEmployeeDocument,
+} from "../controllers/employee-document.controller.js";
 import { requireRole } from "../middleware/require-role.js";
 
 const router = Router();
@@ -39,6 +43,16 @@ router.delete(
 
 // Neues Dokument für einen Mitarbeiter erstellen
 router.post("/:employeeId/documents", createEmployeeDocument);
+
+router.patch(
+  "/:employeeId/documents/:documentId",
+  updateEmployeeDocument,
+);
+
+router.delete(
+  "/:employeeId/documents/:documentId",
+  deleteEmployeeDocument,
+);
 
 // Einen Mitarbeiter anhand seiner ID abrufen
 router.get("/:id", getEmployeeById);

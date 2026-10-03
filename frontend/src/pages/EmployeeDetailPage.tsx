@@ -112,6 +112,10 @@ export function EmployeeDetailPage() {
     useState(false);
   const [showDocumentForm, setShowDocumentForm] =
     useState(false);
+  const [editingDocumentId, setEditingDocumentId] =
+    useState<string | null>(null);
+  const [deletingDocumentId, setDeletingDocumentId] =
+    useState<string | null>(null);
   const [editingEmploymentPeriodId, setEditingEmploymentPeriodId] =
     useState<string | null>(null);
   const [deletingEmploymentPeriodId, setDeletingEmploymentPeriodId] =
@@ -204,6 +208,71 @@ export function EmployeeDetailPage() {
       ]);
 
       setIsEditing(false);
+    },
+  });
+
+  const updateEmployeeDocumentMutation = useMutation({
+    mutationFn: async ({
+      documentId,
+      data,
+    }: {
+      documentId: string;
+      data: EmployeeDocumentFormData;
+    }) => {
+      const token = await getToken();
+
+      const payload = {
+        type: data.type,
+        documentNumber: data.documentNumber.trim() || null,
+        issueDate: data.issueDate || null,
+        expiryDate: data.expiryDate || null,
+        fileUrl: data.fileUrl.trim() || null,
+        notes: data.notes.trim() || null,
+      };
+
+      const response = await apiFetch(
+        `/api/employees/${employeeId}/documents/${documentId}`,
+        token,
+        {
+          method: "PATCH",
+          body: JSON.stringify(payload),
+        },
+      );
+
+      return response.json();
+    },
+
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["employees", employeeId],
+      });
+
+      setEditingDocumentId(null);
+    },
+  });
+
+  const deleteEmployeeDocumentMutation = useMutation({
+    mutationFn: async (documentId: string) => {
+      const token = await getToken();
+
+      const response = await apiFetch(
+        `/api/employees/${employeeId}/documents/${documentId}`,
+        token,
+        {
+          method: "DELETE",
+        },
+      );
+
+      return response.json();
+    },
+
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["employees", employeeId],
+      });
+
+      setDeletingDocumentId(null);
+      setEditingDocumentId(null);
     },
   });
 
@@ -948,8 +1017,9 @@ export function EmployeeDetailPage() {
                         };
 
                         return (
-                          <div
+                          <motion.div
                             key={document.id}
+                            layout
                             className="rounded-box border border-base-300 p-4"
                           >
                             <div className="flex flex-wrap items-start justify-between gap-3">
@@ -965,16 +1035,45 @@ export function EmployeeDetailPage() {
                                 )}
                               </div>
 
-                              {document.fileUrl && (
-                                <a
-                                  href={document.fileUrl}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="btn btn-ghost btn-sm"
+                              <div className="flex flex-wrap items-center gap-2">
+                                {document.fileUrl && (
+                                  <a
+                                    href={document.fileUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="btn btn-ghost btn-xs"
+                                  >
+                                    Datei öffnen
+                                  </a>
+                                )}
+
+                                <button
+                                  type="button"
+                                  className="btn btn-ghost btn-xs"
+                                  onClick={() => {
+                                    setEditingDocumentId(
+                                      editingDocumentId === document.id
+                                        ? null
+                                        : document.id,
+                                    );
+                                    setShowDocumentForm(false);
+                                  }}
                                 >
-                                  Datei öffnen
-                                </a>
-                              )}
+                                  {editingDocumentId === document.id
+                                    ? "Abbrechen"
+                                    : "Bearbeiten"}
+                                </button>
+
+                                <button
+                                  type="button"
+                                  className="btn btn-error btn-outline btn-xs"
+                                  onClick={() =>
+                                    setDeletingDocumentId(document.id)
+                                  }
+                                >
+                                  Löschen
+                                </button>
+                              </div>
                             </div>
 
                             {(document.issueDate ||
@@ -1009,7 +1108,110 @@ export function EmployeeDetailPage() {
                                 {document.notes}
                               </p>
                             )}
-                          </div>
+
+                            <AnimatePresence>
+                              {editingDocumentId === document.id && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: -8 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0, y: -8 }}
+                                  transition={{ duration: 0.2 }}
+                                  className="mt-4"
+                                >
+                                  <EmployeeDocumentForm
+                                    key={document.id}
+                                    mode="edit"
+                                    initialValues={{
+                                      type: document.type,
+                                      documentNumber:
+                                        document.documentNumber || "",
+                                      issueDate: document.issueDate
+                                        ? document.issueDate.slice(0, 10)
+                                        : "",
+                                      expiryDate: document.expiryDate
+                                        ? document.expiryDate.slice(0, 10)
+                                        : "",
+                                      fileUrl: document.fileUrl || "",
+                                      notes: document.notes || "",
+                                    }}
+                                    loading={
+                                      updateEmployeeDocumentMutation.isPending
+                                    }
+                                    onSubmit={(data) =>
+                                      updateEmployeeDocumentMutation.mutate({
+                                        documentId: document.id,
+                                        data,
+                                      })
+                                    }
+                                  />
+
+                                  {updateEmployeeDocumentMutation.isError && (
+                                    <div
+                                      role="alert"
+                                      className="alert alert-error mt-4"
+                                    >
+                                      Dokument konnte nicht aktualisiert
+                                      werden.
+                                    </div>
+                                  )}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+
+                            {deletingDocumentId === document.id && (
+                              <div className="mt-4 rounded-box border border-error/30 bg-error/5 p-4">
+                                <p className="text-sm font-medium">
+                                  Dokument wirklich löschen?
+                                </p>
+
+                                <p className="mt-1 text-sm text-base-content/60">
+                                  Dieser Vorgang kann nicht rückgängig gemacht
+                                  werden.
+                                </p>
+
+                                <div className="mt-3 flex justify-end gap-2">
+                                  <button
+                                    type="button"
+                                    className="btn btn-ghost btn-sm"
+                                    disabled={
+                                      deleteEmployeeDocumentMutation.isPending
+                                    }
+                                    onClick={() =>
+                                      setDeletingDocumentId(null)
+                                    }
+                                  >
+                                    Abbrechen
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    className="btn btn-error btn-sm"
+                                    disabled={
+                                      deleteEmployeeDocumentMutation.isPending
+                                    }
+                                    onClick={() =>
+                                      deleteEmployeeDocumentMutation.mutate(
+                                        document.id,
+                                      )
+                                    }
+                                  >
+                                    {deleteEmployeeDocumentMutation.isPending
+                                      ? "Wird gelöscht..."
+                                      : "Endgültig löschen"}
+                                  </button>
+                                </div>
+
+                                {deleteEmployeeDocumentMutation.isError && (
+                                  <div
+                                    role="alert"
+                                    className="alert alert-error mt-3"
+                                  >
+                                    Dokument konnte nicht gelöscht werden.
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </motion.div>
                         );
                       })}
                     </div>
