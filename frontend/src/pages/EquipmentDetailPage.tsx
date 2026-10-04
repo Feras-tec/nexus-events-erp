@@ -1402,6 +1402,17 @@ export function EquipmentDetailPage() {
                         </div>
                       )}
 
+                      {(movement.fromWarehouse ||
+                        movement.toWarehouse) && (
+                        <div className="mt-2 text-sm">
+                          Lager:{" "}
+                          <span className="font-medium">
+                            {movement.fromWarehouse?.name ?? "—"} →{" "}
+                            {movement.toWarehouse?.name ?? "—"}
+                          </span>
+                        </div>
+                      )}
+
                       {movement.reservation?.event && (
                         <div className="mt-3 rounded-box bg-base-200 p-3 text-sm">
                           Event:{" "}
