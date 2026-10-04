@@ -84,6 +84,9 @@ model Warehouse {
 
   inventoryItems InventoryItem[]
 
+  movementsFrom EquipmentMovement[] @relation("EquipmentMovementFromWarehouse")
+  movementsTo   EquipmentMovement[] @relation("EquipmentMovementToWarehouse")
+
   @@index([branchId])
 }
 
@@ -395,6 +398,14 @@ model EquipmentMovement {
   responsibleEmployeeId String?
   responsibleEmployee   Employee? @relation(fields: [responsibleEmployeeId], references: [id])
 
+  fromWarehouseId String?
+  fromWarehouse   Warehouse? @relation("EquipmentMovementFromWarehouse", fields: [fromWarehouseId], references: [id])
+
+  toWarehouseId String?
+  toWarehouse   Warehouse? @relation("EquipmentMovementToWarehouse", fields: [toWarehouseId], references: [id])
+
+  @@index([fromWarehouseId])
+  @@index([toWarehouseId])
   @@index([reservationId])
   @@index([responsibleEmployeeId])
   @@index([inventoryItemId])

@@ -195,6 +195,14 @@ export async function createEquipmentMovement(req: Request, res: Response) {
           inventoryItemId,
           reservationId,
           responsibleEmployeeId,
+          fromWarehouseId:
+            type === "TRANSFERRED"
+              ? inventoryItem.warehouseId
+              : undefined,
+          toWarehouseId:
+            type === "TRANSFERRED"
+              ? toWarehouseId
+              : undefined,
         },
       });
 
@@ -278,6 +286,8 @@ export async function getEquipmentMovements(req: Request, res: Response) {
           },
         },
         responsibleEmployee: true,
+        fromWarehouse: true,
+        toWarehouse: true,
       },
       orderBy: {
         createdAt: "desc",

@@ -108,6 +108,9 @@ type EquipmentMovement = {
     lastName: string;
     position?: string | null;
   } | null;
+
+  fromWarehouse?: WarehouseOption | null;
+  toWarehouse?: WarehouseOption | null;
 };
 
 type EquipmentMovementsResponse = {
@@ -147,6 +150,7 @@ export function EquipmentDetailPage() {
   const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
+  const [transferWarehouseId, setTransferWarehouseId] = useState("");
 
   const { equipmentId } = useParams({
     from: "/app/equipment/$equipmentId",
@@ -251,6 +255,54 @@ export function EquipmentDetailPage() {
 
   const activeMovementReservation =
     movements.find((movement) => movement.reservation)?.reservation ?? null;
+
+  const transferWarehouseMutation = useMutation({
+    mutationFn: async (toWarehouseId: string) => {
+      if (!equipment) {
+        throw new Error("Gerät wurde nicht gefunden.");
+      }
+
+      const token = await getToken();
+
+      const response = await apiFetch(
+        `/api/equipment-movements/${equipmentId}`,
+        token,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            type: "TRANSFERRED",
+            toStatus: equipment.status,
+            toWarehouseId,
+            notes: "Gerät wurde in ein anderes Lager übertragen",
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error ?? "Lagertransfer fehlgeschlagen.");
+      }
+
+      return response.json();
+    },
+
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["equipment", equipmentId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["equipment"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["equipment-movements", equipmentId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["warehouses"],
+        }),
+      ]);
+    },
+  });
 
   const startPickingMutation = useMutation({
     mutationFn: async () => {
@@ -731,6 +783,71 @@ export function EquipmentDetailPage() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        <section className="mb-6 rounded-box border border-base-300 bg-base-100 p-6">
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold">Lagertransfer</h2>
+            <p className="text-sm text-base-content/60">
+              Gerät von {equipment.warehouse.name} in ein anderes Lager umlagern
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <label className="form-control w-full sm:max-w-md">
+              <span className="label-text mb-2">Ziellager</span>
+
+              <select
+                className="select select-bordered w-full"
+                value={transferWarehouseId}
+                onChange={(event) =>
+                  setTransferWarehouseId(event.target.value)
+                }
+                disabled={transferWarehouseMutation.isPending}
+              >
+                <option value="">Lager auswählen</option>
+
+                {warehouses
+                  .filter((warehouse) => warehouse.id !== equipment.warehouseId)
+                  .map((warehouse) => (
+                    <option key={warehouse.id} value={warehouse.id}>
+                      {warehouse.name}
+                    </option>
+                  ))}
+              </select>
+            </label>
+
+            <Button
+              type="button"
+              disabled={
+                !transferWarehouseId ||
+                transferWarehouseMutation.isPending
+              }
+              onClick={() =>
+                transferWarehouseMutation.mutate(transferWarehouseId, {
+                  onSuccess: () => setTransferWarehouseId(""),
+                })
+              }
+            >
+              {transferWarehouseMutation.isPending
+                ? "Wird umgelagert..."
+                : "Umlagern"}
+            </Button>
+          </div>
+
+          {transferWarehouseMutation.isError && (
+            <div role="alert" className="alert alert-error mt-4">
+              {transferWarehouseMutation.error instanceof Error
+                ? transferWarehouseMutation.error.message
+                : "Lagertransfer fehlgeschlagen."}
+            </div>
+          )}
+
+          {transferWarehouseMutation.isSuccess && (
+            <div role="alert" className="alert alert-success mt-4">
+              Gerät wurde erfolgreich umgelagert.
+            </div>
+          )}
+        </section>
 
         <div className="grid gap-6 lg:grid-cols-2">
           <section className="rounded-box border border-base-300 bg-base-100 p-6">
