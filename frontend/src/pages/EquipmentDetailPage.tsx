@@ -185,17 +185,6 @@ export function EquipmentDetailPage() {
     },
   });
 
-  const equipmentReservations = reservations.filter(
-    (reservation) =>
-      reservation.inventoryItem.id === equipmentId &&
-      reservation.status !== "CANCELLED" &&
-      !movements.some(
-        (movement) =>
-          movement.type === "RESERVED" &&
-          movement.reservation?.id === reservation.id,
-      ),
-  );
-
   const {
     data: movements = [],
     isLoading: movementsLoading,
@@ -216,6 +205,17 @@ export function EquipmentDetailPage() {
       return result.movements;
     },
   });
+
+  const equipmentReservations = reservations.filter(
+    (reservation) =>
+      reservation.inventoryItem.id === equipmentId &&
+      reservation.status !== "CANCELLED" &&
+      !movements.some(
+        (movement) =>
+          movement.type === "RESERVED" &&
+          movement.reservation?.id === reservation.id,
+      ),
+  );
 
   const {
     data: products = [],
