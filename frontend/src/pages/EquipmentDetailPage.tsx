@@ -487,6 +487,54 @@ export function EquipmentDetailPage() {
     },
   });
 
+  const completeInspectionMutation = useMutation({
+    mutationFn: async (
+      result: "AVAILABLE" | "DAMAGED" | "MAINTENANCE",
+    ) => {
+      if (!activeMovementReservation) {
+        throw new Error("Keine Reservierung für diese Bewegung gefunden.");
+      }
+
+      const token = await getToken();
+
+      const notes = {
+        AVAILABLE: "Prüfung abgeschlossen – Gerät ist einsatzbereit",
+        DAMAGED: "Prüfung abgeschlossen – Gerät ist beschädigt",
+        MAINTENANCE: "Prüfung abgeschlossen – Wartung erforderlich",
+      }[result];
+
+      const response = await apiFetch(
+        `/api/equipment-movements/${equipmentId}`,
+        token,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            type: result === "MAINTENANCE" ? "MAINTENANCE" : "INSPECTION",
+            toStatus: result,
+            reservationId: activeMovementReservation.id,
+            notes,
+          }),
+        },
+      );
+
+      return response.json();
+    },
+
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["equipment", equipmentId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["equipment"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["equipment-movements", equipmentId],
+        }),
+      ]);
+    },
+  });
+
   const createMovementMutation = useMutation({
     mutationFn: async (reservationId: string) => {
       const token = await getToken();
@@ -770,6 +818,60 @@ export function EquipmentDetailPage() {
               </div>
             </dl>
           </section>
+
+          {equipment.status === "INSPECTION" && (
+            <motion.section
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-box border border-base-300 bg-base-100 p-6 lg:col-span-2"
+            >
+              <h2 className="text-lg font-semibold">
+                Prüfung abschließen
+              </h2>
+
+              <p className="mt-1 text-sm text-base-content/60">
+                Ergebnis der Geräteprüfung auswählen.
+              </p>
+
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Button
+                  type="button"
+                  disabled={completeInspectionMutation.isPending}
+                  onClick={() =>
+                    completeInspectionMutation.mutate("AVAILABLE")
+                  }
+                >
+                  Einsatzbereit
+                </Button>
+
+                <Button
+                  type="button"
+                  disabled={completeInspectionMutation.isPending}
+                  onClick={() =>
+                    completeInspectionMutation.mutate("DAMAGED")
+                  }
+                >
+                  Beschädigt
+                </Button>
+
+                <Button
+                  type="button"
+                  disabled={completeInspectionMutation.isPending}
+                  onClick={() =>
+                    completeInspectionMutation.mutate("MAINTENANCE")
+                  }
+                >
+                  Wartung erforderlich
+                </Button>
+              </div>
+
+              {completeInspectionMutation.isError && (
+                <div className="alert alert-error mt-4">
+                  Prüfergebnis konnte nicht gespeichert werden.
+                </div>
+              )}
+            </motion.section>
+          )}
 
           {equipment.status === "RETURNING" && (
             <motion.section
