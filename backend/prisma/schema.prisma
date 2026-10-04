@@ -126,8 +126,9 @@ model Employee {
   departmentId String?
   department   Department? @relation(fields: [departmentId], references: [id])
 
-  employmentPeriods EmploymentPeriod[]
-  documents         EmployeeDocument[]
+  employmentPeriods  EmploymentPeriod[]
+  documents          EmployeeDocument[]
+  equipmentMovements EquipmentMovement[]
 
   @@index([branchId])
   @@index([departmentId])
@@ -344,8 +345,9 @@ model Reservation {
   eventId String
   event   Event  @relation(fields: [eventId], references: [id])
 
-  inventoryItemId String
-  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  inventoryItemId    String
+  inventoryItem      InventoryItem       @relation(fields: [inventoryItemId], references: [id])
+  equipmentMovements EquipmentMovement[]
 
   @@index([eventId])
   @@index([inventoryItemId])
@@ -357,6 +359,7 @@ model Reservation {
 enum EquipmentMovementType {
   RECEIVED
   RESERVED
+  RELEASED
   PICKED
   PACKED
   LOADED
@@ -386,6 +389,14 @@ model EquipmentMovement {
   inventoryItemId String
   inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id])
 
+  reservationId String?
+  reservation   Reservation? @relation(fields: [reservationId], references: [id])
+
+  responsibleEmployeeId String?
+  responsibleEmployee   Employee? @relation(fields: [responsibleEmployeeId], references: [id])
+
+  @@index([reservationId])
+  @@index([responsibleEmployeeId])
   @@index([inventoryItemId])
   @@index([createdAt])
   @@index([type])

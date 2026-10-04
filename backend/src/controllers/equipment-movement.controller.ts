@@ -1,7 +1,10 @@
 import type { Request, Response } from "express";
 import prisma from "../lib/prisma.js";
 import { createEquipmentMovementSchema } from "../schemas/equipment-movement.schema.js";
-import { isEquipmentStatusTransitionAllowed } from "../utils/equipment-status-transition.js";
+import {
+  isEquipmentStatusTransitionAllowed,
+  isEquipmentMovementTypeValid,
+} from "../utils/equipment-status-transition.js";
 import { getAuth } from "@clerk/express";
 import { createAuditLog } from "../services/audit-log.service.js";
 
@@ -36,15 +39,123 @@ export async function createEquipmentMovement(req: Request, res: Response) {
       });
     }
 
-    const { type, toStatus, toLocation, notes } = result.data;
+    const {
+      type,
+      toStatus,
+      toLocation,
+      toWarehouseId,
+      notes,
+      reservationId,
+      responsibleEmployeeId,
+    } = result.data;
+
+    // Zugehörige Reservierung prüfen
+    if (reservationId) {
+      const reservation = await prisma.reservation.findUnique({
+        where: { id: reservationId },
+      });
+
+      if (!reservation) {
+        return res.status(404).json({
+          error: "Reservation not found",
+        });
+      }
+
+      if (reservation.inventoryItemId !== inventoryItemId) {
+        return res.status(409).json({
+          error: "Reservation does not belong to this inventory item",
+        });
+      }
+
+      if (reservation.status === "CANCELLED") {
+        return res.status(409).json({
+          error: "Cancelled reservation cannot be used for equipment movement",
+        });
+      }
+    }
+
+    // Verantwortlichen Mitarbeiter prüfen
+    if (responsibleEmployeeId) {
+      const employee = await prisma.employee.findUnique({
+        where: { id: responsibleEmployeeId },
+      });
+
+      if (!employee) {
+        return res.status(404).json({
+          error: "Responsible employee not found",
+        });
+      }
+
+      if (employee.status !== "ACTIVE") {
+        return res.status(409).json({
+          error: "Responsible employee is not active",
+        });
+      }
+    }
+
+    // Internen Lagertransfer prüfen
+    if (type === "TRANSFERRED") {
+      if (toStatus !== inventoryItem.status) {
+        return res.status(409).json({
+          error: "Warehouse transfer cannot change equipment status",
+          currentStatus: inventoryItem.status,
+          requestedStatus: toStatus,
+        });
+      }
+
+      if (!toWarehouseId) {
+        return res.status(400).json({
+          error: "Target warehouse is required for transfer",
+        });
+      }
+
+      const targetWarehouse = await prisma.warehouse.findUnique({
+        where: { id: toWarehouseId },
+      });
+
+      if (!targetWarehouse) {
+        return res.status(404).json({
+          error: "Target warehouse not found",
+        });
+      }
+
+      if (!targetWarehouse.isActive) {
+        return res.status(409).json({
+          error: "Target warehouse is inactive",
+        });
+      }
+
+      if (inventoryItem.warehouseId === toWarehouseId) {
+        return res.status(409).json({
+          error: "Equipment is already in the target warehouse",
+        });
+      }
+    }
 
     // Prüfen, ob der Statusübergang erlaubt ist
     if (
       type !== "MANUAL_ADJUSTMENT" &&
+      type !== "TRANSFERRED" &&
       !isEquipmentStatusTransitionAllowed(inventoryItem.status, toStatus)
     ) {
       return res.status(409).json({
         error: "Invalid equipment status transition",
+        fromStatus: inventoryItem.status,
+        toStatus,
+      });
+    }
+
+    // Prüfen, ob der Bewegungstyp zum Statusübergang passt
+    if (
+      !isEquipmentMovementTypeValid(
+        inventoryItem.status,
+        type,
+        toStatus,
+      )
+    ) {
+      return res.status(409).json({
+        error: "Movement type does not match equipment status transition",
+        movementType: type,
         fromStatus: inventoryItem.status,
         toStatus,
       });
@@ -61,6 +172,8 @@ export async function createEquipmentMovement(req: Request, res: Response) {
           toLocation,
           notes,
           inventoryItemId,
+          reservationId,
+          responsibleEmployeeId,
         },
       });
 
@@ -69,6 +182,9 @@ export async function createEquipmentMovement(req: Request, res: Response) {
         data: {
           status: toStatus,
           ...(toLocation !== undefined ? { location: toLocation } : {}),
+          ...(type === "TRANSFERRED" && toWarehouseId
+            ? { warehouseId: toWarehouseId }
+            : {}),
         },
       });
 
@@ -130,6 +246,18 @@ export async function getEquipmentMovements(req: Request, res: Response) {
 
     const movements = await prisma.equipmentMovement.findMany({
       where: { inventoryItemId },
+      include: {
+        reservation: {
+          include: {
+            event: {
+              include: {
+                customer: true,
+              },
+            },
+          },
+        },
+        responsibleEmployee: true,
+      },
       orderBy: {
         createdAt: "desc",
       },

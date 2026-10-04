@@ -38,3 +38,112 @@ export function isEquipmentStatusTransitionAllowed(
 ): boolean {
   return allowedTransitions[fromStatus].includes(toStatus);
 }
+
+type EquipmentMovementType =
+  | "RECEIVED"
+  | "RESERVED"
+  | "RELEASED"
+  | "PICKED"
+  | "PACKED"
+  | "LOADED"
+  | "TRANSFERRED"
+  | "DELIVERED_TO_EVENT"
+  | "RETURNED_FROM_EVENT"
+  | "INSPECTION"
+  | "MAINTENANCE"
+  | "REPAIRED"
+  | "LOST"
+  | "RETIRED"
+  | "MANUAL_ADJUSTMENT";
+
+// Prüft, ob der Bewegungstyp zum konkreten Statusübergang passt
+export function isEquipmentMovementTypeValid(
+  fromStatus: EquipmentStatus,
+  movementType: EquipmentMovementType,
+  toStatus: EquipmentStatus,
+): boolean {
+  // Sonderfälle werden im Controller zusätzlich geprüft
+  if (movementType === "MANUAL_ADJUSTMENT") {
+    return true;
+  }
+
+  if (movementType === "TRANSFERRED") {
+    return fromStatus === toStatus;
+  }
+
+  const validMovements: Partial<
+    Record<
+      EquipmentStatus,
+      Partial<Record<EquipmentStatus, EquipmentMovementType[]>>
+    >
+  > = {
+    RECEIVED: {
+      AVAILABLE: ["RECEIVED"],
+    },
+
+    AVAILABLE: {
+      RESERVED: ["RESERVED"],
+      MAINTENANCE: ["MAINTENANCE"],
+      LOST: ["LOST"],
+      RETIRED: ["RETIRED"],
+    },
+
+    RESERVED: {
+      AVAILABLE: ["RELEASED"],
+      PICKING: ["PICKED"],
+    },
+
+    PICKING: {
+      PACKED: ["PACKED"],
+      AVAILABLE: ["RELEASED"],
+    },
+
+    PACKED: {
+      IN_TRANSIT: ["LOADED"],
+      AVAILABLE: ["RELEASED"],
+    },
+
+    IN_TRANSIT: {
+      AT_EVENT: ["DELIVERED_TO_EVENT"],
+      RETURNING: ["RETURNED_FROM_EVENT"],
+      LOST: ["LOST"],
+    },
+
+    AT_EVENT: {
+      RETURNING: ["RETURNED_FROM_EVENT"],
+      LOST: ["LOST"],
+    },
+
+    RETURNING: {
+      INSPECTION: ["INSPECTION"],
+      LOST: ["LOST"],
+    },
+
+    INSPECTION: {
+      AVAILABLE: ["INSPECTION"],
+      DAMAGED: ["INSPECTION"],
+      MAINTENANCE: ["MAINTENANCE"],
+    },
+
+    DAMAGED: {
+      MAINTENANCE: ["MAINTENANCE"],
+      RETIRED: ["RETIRED"],
+    },
+
+    MAINTENANCE: {
+      REPAIRED: ["REPAIRED"],
+      RETIRED: ["RETIRED"],
+    },
+
+    REPAIRED: {
+      AVAILABLE: ["REPAIRED"],
+    },
+
+    LOST: {
+      AVAILABLE: ["RELEASED"],
+      RETIRED: ["RETIRED"],
+    },
+  };
+
+  return validMovements[fromStatus]?.[toStatus]?.includes(movementType) ?? false;
+}

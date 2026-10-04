@@ -1,10 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@clerk/react";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -16,6 +12,7 @@ import {
   type ProductOption,
   type WarehouseOption,
 } from "../components/organisms/EquipmentForm";
+import type { ReservationItem } from "../components/organisms/ReservationTable";
 import { DetailLayout } from "../components/templates/DetailLayout";
 import { apiFetch } from "../services/api";
 
@@ -59,12 +56,72 @@ type WarehousesResponse = {
   data: WarehouseOption[];
 };
 
+type EquipmentMovement = {
+  id: string;
+  type:
+    | "RECEIVED"
+    | "RESERVED"
+    | "RELEASED"
+    | "PICKED"
+    | "PACKED"
+    | "LOADED"
+    | "TRANSFERRED"
+    | "DELIVERED_TO_EVENT"
+    | "RETURNED_FROM_EVENT"
+    | "INSPECTION"
+    | "MAINTENANCE"
+    | "REPAIRED"
+    | "LOST"
+    | "RETIRED"
+    | "MANUAL_ADJUSTMENT";
+  fromStatus?: EquipmentFormValues["status"] | null;
+  toStatus: EquipmentFormValues["status"];
+  fromLocation?: string | null;
+  toLocation?: string | null;
+  notes?: string | null;
+  createdAt: string;
+
+  reservation?: {
+    id: string;
+    startDate: string;
+    endDate: string;
+    status: string;
+    event: {
+      id: string;
+      eventNo: string;
+      name: string;
+      location?: string | null;
+      customer: {
+        id: string;
+        customerNo: string;
+        companyName?: string | null;
+        firstName?: string | null;
+        lastName?: string | null;
+      };
+    };
+  } | null;
+
+  responsibleEmployee?: {
+    id: string;
+    employeeNo: string;
+    firstName: string;
+    lastName: string;
+    position?: string | null;
+  } | null;
+};
+
+type EquipmentMovementsResponse = {
+  inventoryItem: {
+    id: string;
+    assetNo: string;
+  };
+  movements: EquipmentMovement[];
+};
+
 function formatDate(value?: string | null) {
   if (!value) return "—";
 
-  return new Intl.DateTimeFormat("de-DE").format(
-    new Date(value),
-  );
+  return new Intl.DateTimeFormat("de-DE").format(new Date(value));
 }
 
 function formatPrice(value?: string | number | null) {
@@ -116,6 +173,46 @@ export function EquipmentDetailPage() {
   });
 
   const {
+    data: reservations = [],
+    isLoading: reservationsLoading,
+  } = useQuery({
+    queryKey: ["reservations"],
+    queryFn: async () => {
+      const token = await getToken();
+      const response = await apiFetch("/api/reservations", token);
+
+      return (await response.json()) as ReservationItem[];
+    },
+  });
+
+  const equipmentReservations = reservations.filter(
+    (reservation) =>
+      reservation.inventoryItem.id === equipmentId &&
+      reservation.status !== "CANCELLED",
+  );
+
+  const {
+    data: movements = [],
+    isLoading: movementsLoading,
+    isError: movementsError,
+  } = useQuery({
+    queryKey: ["equipment-movements", equipmentId],
+    queryFn: async () => {
+      const token = await getToken();
+
+      const response = await apiFetch(
+        `/api/equipment-movements/${equipmentId}`,
+        token,
+      );
+
+      const result =
+        (await response.json()) as EquipmentMovementsResponse;
+
+      return result.movements;
+    },
+  });
+
+  const {
     data: products = [],
     isLoading: productsLoading,
     isError: productsError,
@@ -147,13 +244,48 @@ export function EquipmentDetailPage() {
     },
   });
 
+  const createMovementMutation = useMutation({
+    mutationFn: async (reservationId: string) => {
+      const token = await getToken();
+
+      const response = await apiFetch(
+        `/api/equipment-movements/${equipmentId}`,
+        token,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            type: "RESERVED",
+            toStatus: "RESERVED",
+            reservationId,
+            notes: "Für Event reserviert",
+          }),
+        },
+      );
+
+      return response.json();
+    },
+
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["equipment", equipmentId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["equipment"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["equipment-movements", equipmentId],
+        }),
+      ]);
+    },
+  });
+
   const updateEquipmentMutation = useMutation({
     mutationFn: async (data: EquipmentFormValues) => {
       const token = await getToken();
 
       const payload = {
-        manufacturerSerial:
-          data.manufacturerSerial.trim() || undefined,
+        manufacturerSerial: data.manufacturerSerial.trim() || undefined,
         barcode: data.barcode.trim() || undefined,
         status: data.status,
         location: data.location.trim() || undefined,
@@ -220,8 +352,7 @@ export function EquipmentDetailPage() {
       ? equipment.purchaseDate.slice(0, 10)
       : "",
     purchasePrice:
-      equipment.purchasePrice !== null &&
-      equipment.purchasePrice !== undefined
+      equipment.purchasePrice !== null && equipment.purchasePrice !== undefined
         ? String(equipment.purchasePrice)
         : "",
     notes: equipment.notes ?? "",
@@ -257,9 +388,7 @@ export function EquipmentDetailPage() {
 
             <Button
               type="button"
-              onClick={() =>
-                setIsEditing((current) => !current)
-              }
+              onClick={() => setIsEditing((current) => !current)}
             >
               {isEditing ? "Abbrechen" : "Bearbeiten"}
             </Button>
@@ -294,9 +423,7 @@ export function EquipmentDetailPage() {
                   warehouses={warehouses}
                   initialValues={initialValues}
                   loading={updateEquipmentMutation.isPending}
-                  onSubmit={(data) =>
-                    updateEquipmentMutation.mutate(data)
-                  }
+                  onSubmit={(data) => updateEquipmentMutation.mutate(data)}
                 />
               )}
 
@@ -313,9 +440,7 @@ export function EquipmentDetailPage() {
           <section className="rounded-box border border-base-300 bg-base-100 p-6">
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-lg font-semibold">
-                  Gerätedaten
-                </h2>
+                <h2 className="text-lg font-semibold">Gerätedaten</h2>
                 <p className="text-sm text-base-content/60">
                   Technische und interne Informationen
                 </p>
@@ -326,114 +451,262 @@ export function EquipmentDetailPage() {
 
             <dl className="grid gap-4 sm:grid-cols-2">
               <div>
-                <dt className="text-sm text-base-content/60">
-                  Asset-Nr.
-                </dt>
+                <dt className="text-sm text-base-content/60">Asset-Nr.</dt>
                 <dd className="font-medium">{equipment.assetNo}</dd>
               </div>
 
               <div>
-                <dt className="text-sm text-base-content/60">
-                  Seriennummer
-                </dt>
+                <dt className="text-sm text-base-content/60">Seriennummer</dt>
                 <dd>{equipment.manufacturerSerial ?? "—"}</dd>
               </div>
 
               <div>
-                <dt className="text-sm text-base-content/60">
-                  Barcode
-                </dt>
+                <dt className="text-sm text-base-content/60">Barcode</dt>
                 <dd>{equipment.barcode ?? "—"}</dd>
               </div>
 
               <div>
-                <dt className="text-sm text-base-content/60">
-                  Standort
-                </dt>
+                <dt className="text-sm text-base-content/60">Standort</dt>
                 <dd>{equipment.location ?? "—"}</dd>
               </div>
 
               <div>
-                <dt className="text-sm text-base-content/60">
-                  Kaufdatum
-                </dt>
+                <dt className="text-sm text-base-content/60">Kaufdatum</dt>
                 <dd>{formatDate(equipment.purchaseDate)}</dd>
               </div>
 
               <div>
-                <dt className="text-sm text-base-content/60">
-                  Kaufpreis
-                </dt>
+                <dt className="text-sm text-base-content/60">Kaufpreis</dt>
                 <dd>{formatPrice(equipment.purchasePrice)}</dd>
               </div>
             </dl>
           </section>
 
           <section className="rounded-box border border-base-300 bg-base-100 p-6">
-            <h2 className="mb-5 text-lg font-semibold">
-              Produkt & Lager
-            </h2>
+            <h2 className="mb-5 text-lg font-semibold">Produkt & Lager</h2>
 
             <dl className="grid gap-4 sm:grid-cols-2">
               <div>
-                <dt className="text-sm text-base-content/60">
-                  Produktnummer
-                </dt>
-                <dd className="font-medium">
-                  {equipment.product.productNo}
-                </dd>
+                <dt className="text-sm text-base-content/60">Produktnummer</dt>
+                <dd className="font-medium">{equipment.product.productNo}</dd>
               </div>
 
               <div>
-                <dt className="text-sm text-base-content/60">
-                  Produkt
-                </dt>
+                <dt className="text-sm text-base-content/60">Produkt</dt>
                 <dd>{equipment.product.name}</dd>
               </div>
 
               <div>
-                <dt className="text-sm text-base-content/60">
-                  Marke
-                </dt>
+                <dt className="text-sm text-base-content/60">Marke</dt>
                 <dd>{equipment.product.brand ?? "—"}</dd>
               </div>
 
               <div>
-                <dt className="text-sm text-base-content/60">
-                  Modell
-                </dt>
+                <dt className="text-sm text-base-content/60">Modell</dt>
                 <dd>{equipment.product.model ?? "—"}</dd>
               </div>
 
               <div>
-                <dt className="text-sm text-base-content/60">
-                  Kategorie
-                </dt>
+                <dt className="text-sm text-base-content/60">Kategorie</dt>
                 <dd>{equipment.product.category ?? "—"}</dd>
               </div>
 
               <div>
-                <dt className="text-sm text-base-content/60">
-                  Lager
-                </dt>
+                <dt className="text-sm text-base-content/60">Lager</dt>
                 <dd>{equipment.warehouse.name}</dd>
               </div>
 
               <div>
-                <dt className="text-sm text-base-content/60">
-                  Niederlassung
-                </dt>
+                <dt className="text-sm text-base-content/60">Niederlassung</dt>
                 <dd>{equipment.warehouse.branch.name}</dd>
               </div>
 
               <div>
-                <dt className="text-sm text-base-content/60">
-                  Lageradresse
-                </dt>
+                <dt className="text-sm text-base-content/60">Lageradresse</dt>
                 <dd>{equipment.warehouse.address ?? "—"}</dd>
               </div>
             </dl>
           </section>
+
+          {equipment.status === "AVAILABLE" && (
+            <motion.section
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-box border border-base-300 bg-base-100 p-6 lg:col-span-2"
+            >
+              <h2 className="text-lg font-semibold">
+                Neue Bewegung
+              </h2>
+              <p className="mt-1 text-sm text-base-content/60">
+                Gerät für eine bestehende Event-Reservierung vormerken.
+              </p>
+
+              {reservationsLoading ? (
+                <div className="mt-5">
+                  <span className="loading loading-spinner loading-md" />
+                </div>
+              ) : equipmentReservations.length === 0 ? (
+                <div className="alert mt-5">
+                  Keine aktive Reservierung für dieses Gerät vorhanden.
+                </div>
+              ) : (
+                <div className="mt-5 space-y-3">
+                  {equipmentReservations.map((reservation) => (
+                    <div
+                      key={reservation.id}
+                      className="flex flex-col gap-4 rounded-box border border-base-300 p-4 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div>
+                        <div className="font-semibold">
+                          {reservation.event.eventNo} ·{" "}
+                          {reservation.event.name}
+                        </div>
+
+                        <div className="mt-1 text-sm text-base-content/60">
+                          {new Intl.DateTimeFormat("de-DE", {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          }).format(new Date(reservation.startDate))}
+                          {" – "}
+                          {new Intl.DateTimeFormat("de-DE", {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          }).format(new Date(reservation.endDate))}
+                        </div>
+
+                        <div className="mt-1 text-sm">
+                          Status: {reservation.status}
+                        </div>
+                      </div>
+
+                      <Button
+                        type="button"
+                        loading={createMovementMutation.isPending}
+                        disabled={
+                          createMovementMutation.isPending ||
+                          reservation.status !== "CONFIRMED"
+                        }
+                        onClick={() =>
+                          createMovementMutation.mutate(reservation.id)
+                        }
+                      >
+                        Reservieren
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {createMovementMutation.isError && (
+                <div role="alert" className="alert alert-error mt-4">
+                  Gerätebewegung konnte nicht gespeichert werden.
+                </div>
+              )}
+            </motion.section>
+          )}
+
+          <motion.section
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-box border border-base-300 bg-base-100 p-6 lg:col-span-2"
+          >
+            <div className="mb-5">
+              <h2 className="text-lg font-semibold">
+                Bewegungshistorie
+              </h2>
+              <p className="text-sm text-base-content/60">
+                Status- und Gerätebewegungen
+              </p>
+            </div>
+
+            {movementsLoading && (
+              <div className="flex justify-center py-8">
+                <span className="loading loading-spinner loading-md" />
+              </div>
+            )}
+
+            {movementsError && (
+              <div role="alert" className="alert alert-error">
+                Bewegungshistorie konnte nicht geladen werden.
+              </div>
+            )}
+
+            {!movementsLoading &&
+              !movementsError &&
+              movements.length === 0 && (
+                <div className="rounded-box bg-base-200 p-5 text-sm text-base-content/60">
+                  Noch keine Gerätebewegungen vorhanden.
+                </div>
+              )}
+
+            {!movementsLoading &&
+              !movementsError &&
+              movements.length > 0 && (
+                <div className="space-y-3">
+                  {movements.map((movement) => (
+                    <div
+                      key={movement.id}
+                      className="rounded-box border border-base-300 p-4"
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <div className="font-semibold">
+                            {movement.type}
+                          </div>
+
+                          <div className="mt-1 text-sm text-base-content/60">
+                            {movement.fromStatus ?? "—"} →{" "}
+                            {movement.toStatus}
+                          </div>
+                        </div>
+
+                        <div className="text-sm text-base-content/60">
+                          {new Intl.DateTimeFormat("de-DE", {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          }).format(new Date(movement.createdAt))}
+                        </div>
+                      </div>
+
+                      {(movement.fromLocation ||
+                        movement.toLocation) && (
+                        <div className="mt-3 text-sm">
+                          Standort:{" "}
+                          {movement.fromLocation ?? "—"} →{" "}
+                          {movement.toLocation ?? "—"}
+                        </div>
+                      )}
+
+                      {movement.reservation?.event && (
+                        <div className="mt-3 rounded-box bg-base-200 p-3 text-sm">
+                          Event:{" "}
+                          <span className="font-medium">
+                            {movement.reservation.event.eventNo} ·{" "}
+                            {movement.reservation.event.name}
+                          </span>
+                        </div>
+                      )}
+
+                      {movement.responsibleEmployee && (
+                        <div className="mt-2 text-sm">
+                          Verantwortlich:{" "}
+                          <span className="font-medium">
+                            {movement.responsibleEmployee.firstName}{" "}
+                            {movement.responsibleEmployee.lastName}
+                          </span>
+                        </div>
+                      )}
+
+                      {movement.notes && (
+                        <p className="mt-2 text-sm text-base-content/70">
+                          {movement.notes}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+          </motion.section>
 
           <section className="rounded-box border border-base-300 bg-base-100 p-6 lg:col-span-2">
             <h2 className="mb-3 text-lg font-semibold">Notizen</h2>

@@ -20,6 +20,7 @@ const inventoryItemStatusSchema = z.enum([
 const equipmentMovementTypeSchema = z.enum([
   "RECEIVED",
   "RESERVED",
+  "RELEASED",
   "PICKED",
   "PACKED",
   "LOADED",
@@ -38,7 +39,10 @@ export const createEquipmentMovementSchema = z.object({
   type: equipmentMovementTypeSchema,
   toStatus: inventoryItemStatusSchema,
   toLocation: z.string().trim().max(200).optional(),
+  toWarehouseId: z.string().uuid().optional(),
   notes: z.string().trim().max(500).optional(),
+  reservationId: z.string().uuid().optional(),
+  responsibleEmployeeId: z.string().uuid().optional(),
 });
 
 export type CreateEquipmentMovementInput = z.infer<
