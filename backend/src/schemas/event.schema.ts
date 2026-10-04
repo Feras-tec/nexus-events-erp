@@ -10,6 +10,7 @@ const eventStatusSchema = z.enum([
   "COMPLETED",
   "INVOICED",
   "CLOSED",
+  "CANCELLED",
 ]);
 
 // Gemeinsame Felder für Event-Daten

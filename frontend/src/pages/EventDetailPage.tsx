@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 
 import { Button } from "../components/atoms/Button";
 import { StatusChip } from "../components/atoms/StatusChip";
+import { ConfirmDeleteDialog } from "../components/molecules/ConfirmDeleteDialog";
 import {
   EventForm,
   type EventFormData,
@@ -90,6 +91,7 @@ export function EventDetailPage() {
   const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   const { eventId } = useParams({
     from: "/app/events/$eventId",
@@ -163,6 +165,35 @@ export function EventDetailPage() {
     },
   });
 
+  const cancelEventMutation = useMutation({
+    mutationFn: async () => {
+      const token = await getToken();
+
+      const response = await apiFetch(`/api/events/${eventId}`, token, {
+        method: "PATCH",
+        body: JSON.stringify({
+          status: "CANCELLED",
+        }),
+      });
+
+      return response.json();
+    },
+
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["events", eventId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["events"],
+        }),
+      ]);
+
+      setShowCancelDialog(false);
+      setIsEditing(false);
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
@@ -214,6 +245,18 @@ export function EventDetailPage() {
             >
               ← Zurück
             </Button>
+
+            {event.status !== "CANCELLED" && (
+              <Button
+                type="button"
+                variant="error"
+                onClick={() => {
+                  setShowCancelDialog(true);
+                }}
+              >
+                Stornieren
+              </Button>
+            )}
 
             <Button
               type="button"
@@ -342,6 +385,27 @@ export function EventDetailPage() {
           )}
         </AnimatePresence>
       </DetailLayout>
+
+      {cancelEventMutation.isError && (
+        <div role="alert" className="alert alert-error mt-4">
+          Event konnte nicht storniert werden.
+        </div>
+      )}
+
+      <ConfirmDeleteDialog
+        open={showCancelDialog}
+        title="Event stornieren"
+        message={`Möchten Sie das Event "${event.name}" wirklich stornieren? Das Event wird nicht gelöscht.`}
+        confirmLabel="Event stornieren"
+        cancelLabel="Abbrechen"
+        loading={cancelEventMutation.isPending}
+        onConfirm={() => {
+          cancelEventMutation.mutate();
+        }}
+        onCancel={() => {
+          setShowCancelDialog(false);
+        }}
+      />
     </motion.div>
   );
 }
