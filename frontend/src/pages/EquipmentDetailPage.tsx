@@ -188,7 +188,12 @@ export function EquipmentDetailPage() {
   const equipmentReservations = reservations.filter(
     (reservation) =>
       reservation.inventoryItem.id === equipmentId &&
-      reservation.status !== "CANCELLED",
+      reservation.status !== "CANCELLED" &&
+      !movements.some(
+        (movement) =>
+          movement.type === "RESERVED" &&
+          movement.reservation?.id === reservation.id,
+      ),
   );
 
   const {

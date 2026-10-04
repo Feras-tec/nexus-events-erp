@@ -72,6 +72,27 @@ export async function createEquipmentMovement(req: Request, res: Response) {
           error: "Cancelled reservation cannot be used for equipment movement",
         });
       }
+
+      // Dieselbe Reservierung darf den Geräte-Workflow nur einmal starten
+      if (type === "RESERVED") {
+        const existingReservedMovement =
+          await prisma.equipmentMovement.findFirst({
+            where: {
+              inventoryItemId,
+              reservationId,
+              type: "RESERVED",
+            },
+            select: {
+              id: true,
+            },
+          });
+
+        if (existingReservedMovement) {
+          return res.status(409).json({
+            error: "Equipment workflow already started for this reservation",
+          });
+        }
+      }
     }
 
     // Verantwortlichen Mitarbeiter prüfen
