@@ -400,6 +400,7 @@ export function EquipmentDetailPage() {
           body: JSON.stringify({
             type: "LOADED",
             toStatus: "IN_TRANSIT",
+            toLocation: "Unterwegs zum Event",
             reservationId: activeMovementReservation.id,
             notes: "Gerät wurde verladen",
           }),
@@ -440,6 +441,9 @@ export function EquipmentDetailPage() {
           body: JSON.stringify({
             type: "DELIVERED_TO_EVENT",
             toStatus: "AT_EVENT",
+            toLocation:
+              activeMovementReservation.event.location ||
+              activeMovementReservation.event.name,
             reservationId: activeMovementReservation.id,
             notes: "Gerät ist am Event angekommen",
           }),
@@ -480,6 +484,7 @@ export function EquipmentDetailPage() {
           body: JSON.stringify({
             type: "RETURNED_FROM_EVENT",
             toStatus: "RETURNING",
+            toLocation: "Rücktransport zum Lager",
             reservationId: activeMovementReservation.id,
             notes: "Rücktransport vom Event gestartet",
           }),
@@ -520,6 +525,7 @@ export function EquipmentDetailPage() {
           body: JSON.stringify({
             type: "INSPECTION",
             toStatus: "INSPECTION",
+            toLocation: `Prüfbereich – ${equipment?.warehouse.name ?? "Lager"}`,
             reservationId: activeMovementReservation.id,
             notes: "Geräteprüfung nach Rückkehr gestartet",
           }),
@@ -568,6 +574,11 @@ export function EquipmentDetailPage() {
           body: JSON.stringify({
             type: result === "MAINTENANCE" ? "MAINTENANCE" : "INSPECTION",
             toStatus: result,
+            ...(result === "AVAILABLE"
+              ? {
+                  toLocation: `Lagerbereich – ${equipment?.warehouse.name ?? "Lager"}`,
+                }
+              : {}),
             reservationId: activeMovementReservation.id,
             notes,
           }),
