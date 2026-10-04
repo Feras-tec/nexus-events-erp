@@ -367,6 +367,46 @@ export function EquipmentDetailPage() {
     },
   });
 
+  const markDeliveredMutation = useMutation({
+    mutationFn: async () => {
+      if (!activeMovementReservation) {
+        throw new Error("Keine Reservierung für diese Bewegung gefunden.");
+      }
+
+      const token = await getToken();
+
+      const response = await apiFetch(
+        `/api/equipment-movements/${equipmentId}`,
+        token,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            type: "DELIVERED_TO_EVENT",
+            toStatus: "AT_EVENT",
+            reservationId: activeMovementReservation.id,
+            notes: "Gerät ist am Event angekommen",
+          }),
+        },
+      );
+
+      return response.json();
+    },
+
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["equipment", equipmentId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["equipment"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["equipment-movements", equipmentId],
+        }),
+      ]);
+    },
+  });
+
   const createMovementMutation = useMutation({
     mutationFn: async (reservationId: string) => {
       const token = await getToken();
@@ -650,6 +690,49 @@ export function EquipmentDetailPage() {
               </div>
             </dl>
           </section>
+
+          {equipment.status === "IN_TRANSIT" && (
+            <motion.section
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-box border border-base-300 bg-base-100 p-6 lg:col-span-2"
+            >
+              <h2 className="text-lg font-semibold">Neue Bewegung</h2>
+
+              <p className="mt-1 text-sm text-base-content/60">
+                Ankunft des Geräts am Event bestätigen.
+              </p>
+
+              {activeMovementReservation ? (
+                <div className="mt-5 rounded-box border border-base-300 p-4">
+                  <div className="font-semibold">
+                    {activeMovementReservation.event.eventNo} ·{" "}
+                    {activeMovementReservation.event.name}
+                  </div>
+
+                  <Button
+                    type="button"
+                    className="mt-4"
+                    loading={markDeliveredMutation.isPending}
+                    disabled={markDeliveredMutation.isPending}
+                    onClick={() => markDeliveredMutation.mutate()}
+                  >
+                    Am Event angekommen
+                  </Button>
+                </div>
+              ) : (
+                <div className="alert alert-warning mt-5">
+                  Keine verknüpfte Reservierung gefunden.
+                </div>
+              )}
+
+              {markDeliveredMutation.isError && (
+                <div className="alert alert-error mt-4">
+                  Ankunft am Event konnte nicht gespeichert werden.
+                </div>
+              )}
+            </motion.section>
+          )}
 
           {equipment.status === "PACKED" && (
             <motion.section
