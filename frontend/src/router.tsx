@@ -20,6 +20,8 @@ import { ProductDetailPage } from "./pages/ProductDetailPage";
 import { CustomersPage } from "./pages/CustomersPage";
 import { CustomerDetailPage } from "./pages/CustomerDetailPage";
 import { SignInPage } from "./pages/SignInPage";
+import { ReservationsPage } from "./pages/ReservationsPage";
+import { ReservationDetailPage } from "./pages/ReservationDetailPage";
 
 const rootRoute = createRootRoute({
   component: () => <Outlet />,
@@ -114,6 +116,18 @@ const equipmentDetailRoute = createRoute({
   component: EquipmentDetailPage,
 });
 
+const reservationsRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/reservations",
+  component: ReservationsPage,
+});
+
+const reservationDetailRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/reservations/$reservationId",
+  component: ReservationDetailPage,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   signInRoute,
@@ -129,6 +143,8 @@ const routeTree = rootRoute.addChildren([
     productDetailRoute,
     equipmentRoute,
     equipmentDetailRoute,
+    reservationsRoute,
+    reservationDetailRoute,
   ]),
 ]);
 

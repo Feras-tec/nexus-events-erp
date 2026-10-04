@@ -7,7 +7,7 @@ const navigationItems = [
   { label: "Employees", icon: "♟", to: "/employees" },
   { label: "Products", icon: "□", to: "/products" },
   { label: "Inventory", icon: "▤", to: "/equipment" },
-  { label: "Reservations", icon: "◷" },
+  { label: "Reservations", icon: "◷", to: "/reservations" },
   { label: "Quotes", icon: "▧" },
   { label: "Invoices", icon: "€" },
 ];
@@ -16,16 +16,12 @@ type NavigationContentProps = {
   onNavigate?: () => void;
 };
 
-function NavigationContent({
-  onNavigate,
-}: NavigationContentProps) {
+function NavigationContent({ onNavigate }: NavigationContentProps) {
   return (
     <>
       <div className="border-b border-base-300 p-6">
         <h1 className="text-xl font-bold">Nexus Events</h1>
-        <p className="text-sm text-base-content/60">
-          ERP Management
-        </p>
+        <p className="text-sm text-base-content/60">ERP Management</p>
       </div>
 
       <nav className="p-4">
@@ -40,16 +36,12 @@ function NavigationContent({
                   }}
                   onClick={onNavigate}
                 >
-                  <span className="w-5 text-center">
-                    {item.icon}
-                  </span>
+                  <span className="w-5 text-center">{item.icon}</span>
                   {item.label}
                 </Link>
               ) : (
                 <button type="button">
-                  <span className="w-5 text-center">
-                    {item.icon}
-                  </span>
+                  <span className="w-5 text-center">{item.icon}</span>
                   {item.label}
                 </button>
               )}
@@ -74,10 +66,7 @@ type MobileNavigationProps = {
   onClose: () => void;
 };
 
-export function MobileNavigation({
-  open,
-  onClose,
-}: MobileNavigationProps) {
+export function MobileNavigation({ open, onClose }: MobileNavigationProps) {
   if (!open) {
     return null;
   }
