@@ -14,6 +14,9 @@ import { EventDetailPage } from "./pages/EventDetailPage";
 import { EmployeesPage } from "./pages/EmployeesPage";
 import { EmployeeDetailPage } from "./pages/EmployeeDetailPage";
 import { EquipmentPage } from "./pages/EquipmentPage";
+import { EquipmentDetailPage } from "./pages/EquipmentDetailPage";
+import { ProductsPage } from "./pages/ProductsPage";
+import { ProductDetailPage } from "./pages/ProductDetailPage";
 import { CustomersPage } from "./pages/CustomersPage";
 import { CustomerDetailPage } from "./pages/CustomerDetailPage";
 import { SignInPage } from "./pages/SignInPage";
@@ -87,10 +90,28 @@ const customerDetailRoute = createRoute({
   component: CustomerDetailPage,
 });
 
+const productsRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/products",
+  component: ProductsPage,
+});
+
+const productDetailRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/products/$productId",
+  component: ProductDetailPage,
+});
+
 const equipmentRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/equipment",
   component: EquipmentPage,
+});
+
+const equipmentDetailRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/equipment/$equipmentId",
+  component: EquipmentDetailPage,
 });
 
 const routeTree = rootRoute.addChildren([
@@ -104,7 +125,10 @@ const routeTree = rootRoute.addChildren([
     employeeDetailRoute,
     customersRoute,
     customerDetailRoute,
+    productsRoute,
+    productDetailRoute,
     equipmentRoute,
+    equipmentDetailRoute,
   ]),
 ]);
 

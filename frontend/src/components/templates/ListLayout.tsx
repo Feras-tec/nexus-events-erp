@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Link } from "@tanstack/react-router";
 
 import { SearchBox } from "../molecules/SearchBox";
 
@@ -32,6 +33,13 @@ export function ListLayout({
               {description}
             </p>
           )}
+
+          <Link
+            to="/dashboard"
+            className="btn btn-ghost btn-sm mt-3 -ml-3"
+          >
+            ← Zum Dashboard
+          </Link>
         </div>
 
         {actions && (
