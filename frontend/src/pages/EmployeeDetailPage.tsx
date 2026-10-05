@@ -18,15 +18,13 @@ import {
   EmploymentPeriodForm,
   type EmploymentPeriodFormData,
 } from "../components/organisms/EmploymentPeriodForm";
-import {
-  EmployeeDocumentForm,
-  type EmployeeDocumentFormData,
-} from "../components/organisms/EmployeeDocumentForm";
+import { EmployeeDocumentForm } from "../components/organisms/EmployeeDocumentForm";
 import { DetailLayout } from "../components/templates/DetailLayout";
 import { apiFetch } from "../services/api";
 import { useEmployeeDetail } from "../features/employees/hooks/useEmployeeDetail";
 import { useEmployeeOptions } from "../features/employees/hooks/useEmployeeOptions";
 import { useUpdateEmployee } from "../features/employees/hooks/useUpdateEmployee";
+import { useEmployeeDocuments } from "../features/employees/hooks/useEmployeeDocuments";
 
 
 export function EmployeeDetailPage() {
@@ -70,103 +68,17 @@ export function EmployeeDetailPage() {
     onSuccess: () => setIsEditing(false),
   });
 
-  const updateEmployeeDocumentMutation = useMutation({
-    mutationFn: async ({
-      documentId,
-      data,
-    }: {
-      documentId: string;
-      data: EmployeeDocumentFormData;
-    }) => {
-      const token = await getToken();
-
-      const payload = {
-        type: data.type,
-        documentNumber: data.documentNumber.trim() || null,
-        issueDate: data.issueDate || null,
-        expiryDate: data.expiryDate || null,
-        fileUrl: data.fileUrl.trim() || null,
-        notes: data.notes.trim() || null,
-      };
-
-      const response = await apiFetch(
-        `/api/employees/${employeeId}/documents/${documentId}`,
-        token,
-        {
-          method: "PATCH",
-          body: JSON.stringify(payload),
-        },
-      );
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["employees", employeeId],
-      });
-
-      setEditingDocumentId(null);
-    },
-  });
-
-  const deleteEmployeeDocumentMutation = useMutation({
-    mutationFn: async (documentId: string) => {
-      const token = await getToken();
-
-      const response = await apiFetch(
-        `/api/employees/${employeeId}/documents/${documentId}`,
-        token,
-        {
-          method: "DELETE",
-        },
-      );
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["employees", employeeId],
-      });
-
+  const {
+    createEmployeeDocumentMutation,
+    updateEmployeeDocumentMutation,
+    deleteEmployeeDocumentMutation,
+  } = useEmployeeDocuments({
+    employeeId,
+    onCreateSuccess: () => setShowDocumentForm(false),
+    onUpdateSuccess: () => setEditingDocumentId(null),
+    onDeleteSuccess: () => {
       setDeletingDocumentId(null);
       setEditingDocumentId(null);
-    },
-  });
-
-  const createEmployeeDocumentMutation = useMutation({
-    mutationFn: async (data: EmployeeDocumentFormData) => {
-      const token = await getToken();
-
-      const payload = {
-        type: data.type,
-        documentNumber:
-          data.documentNumber.trim() || undefined,
-        issueDate: data.issueDate || undefined,
-        expiryDate: data.expiryDate || undefined,
-        fileUrl: data.fileUrl.trim() || undefined,
-        notes: data.notes.trim() || undefined,
-      };
-
-      const response = await apiFetch(
-        `/api/employees/${employeeId}/documents`,
-        token,
-        {
-          method: "POST",
-          body: JSON.stringify(payload),
-        },
-      );
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["employees", employeeId],
-      });
-
-      setShowDocumentForm(false);
     },
   });
 
