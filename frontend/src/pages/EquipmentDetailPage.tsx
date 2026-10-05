@@ -25,6 +25,7 @@ import { useEquipmentWarehouses } from "../features/equipment/hooks/useEquipment
 import { useEquipmentEmployees } from "../features/equipment/hooks/useEquipmentEmployees";
 import { useEquipmentEventWorkflow } from "../features/equipment/hooks/useEquipmentEventWorkflow";
 import { useEquipmentLifecycle } from "../features/equipment/hooks/useEquipmentLifecycle";
+import { useEquipmentMaintenance } from "../features/equipment/hooks/useEquipmentMaintenance";
 import { apiFetch } from "../services/api";
 
 export function EquipmentDetailPage() {
@@ -137,6 +138,15 @@ export function EquipmentDetailPage() {
     activeReservation: activeMovementReservation,
   });
 
+  const {
+    startMaintenanceMutation,
+    completeRepairMutation,
+    returnRepairedToAvailableMutation,
+  } = useEquipmentMaintenance({
+    equipmentId,
+    equipment,
+  });
+
   const transferWarehouseMutation = useMutation({
     mutationFn: async (toWarehouseId: string) => {
       if (!equipment) {
@@ -238,135 +248,6 @@ export function EquipmentDetailPage() {
         }),
         queryClient.invalidateQueries({
           queryKey: ["reservations"],
-        }),
-      ]);
-    },
-  });
-
-  const startMaintenanceMutation = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      const response = await apiFetch(
-        `/api/equipment-movements/${equipmentId}`,
-        token,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            type: "MAINTENANCE",
-            toStatus: "MAINTENANCE",
-            toLocation: `Wartungsbereich – ${equipment?.warehouse.name ?? "Lager"}`,
-            notes: "Beschädigtes Gerät zur Wartung übergeben",
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        const result = await response.json();
-        throw new Error(
-          result.error ?? "Gerät konnte nicht zur Wartung übergeben werden.",
-        );
-      }
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["equipment", equipmentId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment"],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment-movements", equipmentId],
-        }),
-      ]);
-    },
-  });
-
-  const completeRepairMutation = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      const response = await apiFetch(
-        `/api/equipment-movements/${equipmentId}`,
-        token,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            type: "REPAIRED",
-            toStatus: "REPAIRED",
-            toLocation: `Reparatur abgeschlossen – ${equipment?.warehouse.name ?? "Lager"}`,
-            notes: "Wartung abgeschlossen – Gerät wurde repariert",
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        const result = await response.json();
-        throw new Error(
-          result.error ?? "Reparatur konnte nicht abgeschlossen werden.",
-        );
-      }
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["equipment", equipmentId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment"],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment-movements", equipmentId],
-        }),
-      ]);
-    },
-  });
-
-  const returnRepairedToAvailableMutation = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      const response = await apiFetch(
-        `/api/equipment-movements/${equipmentId}`,
-        token,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            type: "REPAIRED",
-            toStatus: "AVAILABLE",
-            toLocation: `Lagerbereich – ${equipment?.warehouse.name ?? "Lager"}`,
-            notes: "Repariertes Gerät wieder einsatzbereit",
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        const result = await response.json();
-        throw new Error(
-          result.error ?? "Gerät konnte nicht freigegeben werden.",
-        );
-      }
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["equipment", equipmentId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment"],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment-movements", equipmentId],
         }),
       ]);
     },
