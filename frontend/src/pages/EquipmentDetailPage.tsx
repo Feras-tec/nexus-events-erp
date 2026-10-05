@@ -956,17 +956,37 @@ export function EquipmentDetailPage() {
                 ["IN_TRANSIT", "AT_EVENT", "RETURNING", "INSPECTION"].includes(
                   equipment.status,
                 ) && (
-                  <div>
-                    <dt className="text-sm text-base-content/60">
-                      Ausgecheckt am
-                    </dt>
-                    <dd className="font-medium">
-                      {new Intl.DateTimeFormat("de-DE", {
-                        dateStyle: "medium",
-                        timeStyle: "short",
-                      }).format(new Date(checkedOutMovement.createdAt))}
-                    </dd>
-                  </div>
+                  <>
+                    <div>
+                      <dt className="text-sm text-base-content/60">
+                        Ausgecheckt am
+                      </dt>
+                      <dd className="font-medium">
+                        {new Intl.DateTimeFormat("de-DE", {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        }).format(new Date(checkedOutMovement.createdAt))}
+                      </dd>
+                    </div>
+
+                    {checkedOutMovement.responsibleEmployee && (
+                      <div>
+                        <dt className="text-sm text-base-content/60">
+                          Verantwortlich
+                        </dt>
+                        <dd className="font-medium">
+                          {checkedOutMovement.responsibleEmployee.firstName}{" "}
+                          {checkedOutMovement.responsibleEmployee.lastName}
+                        </dd>
+                        <dd className="text-sm text-base-content/60">
+                          {checkedOutMovement.responsibleEmployee.employeeNo}
+                          {checkedOutMovement.responsibleEmployee.position
+                            ? ` · ${checkedOutMovement.responsibleEmployee.position}`
+                            : ""}
+                        </dd>
+                      </div>
+                    )}
+                  </>
                 )}
 
               <div>
