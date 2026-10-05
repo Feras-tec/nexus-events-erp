@@ -6,8 +6,6 @@ import {
   EquipmentForm,
   type EquipmentFormValues,
 } from "../components/organisms/EquipmentForm";
-import type {
-} from "../features/equipment/types/equipment.types";
 import { Button } from "../components/atoms/Button";
 import { DetailLayout } from "../components/templates/DetailLayout";
 import { useEquipmentDetail } from "../features/equipment/hooks/useEquipmentDetail";
@@ -83,8 +81,6 @@ export function EquipmentDetailPage() {
           movement.reservation?.id === activeMovementReservation.id,
       )
     : undefined;
-
-
 
   const { updateEquipmentMutation } = useUpdateEquipment({
     equipmentId,
