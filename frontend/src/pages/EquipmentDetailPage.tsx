@@ -3,17 +3,12 @@ import { useNavigate, useParams } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 
 import { Button } from "../components/atoms/Button";
-import { StatusChip } from "../components/atoms/StatusChip";
 import {
   EquipmentForm,
   type EquipmentFormValues,
 } from "../components/organisms/EquipmentForm";
 import type {
 } from "../features/equipment/types/equipment.types";
-import {
-  formatDate,
-  formatPrice,
-} from "../features/equipment/utils/equipment-formatters";
 import { DetailLayout } from "../components/templates/DetailLayout";
 import { useEquipmentDetail } from "../features/equipment/hooks/useEquipmentDetail";
 import { useEquipmentMovements } from "../features/equipment/hooks/useEquipmentMovements";
@@ -29,6 +24,7 @@ import { EquipmentLifecycle } from "../features/equipment/components/EquipmentLi
 import { EquipmentInspection } from "../features/equipment/components/EquipmentInspection";
 import { EquipmentEventWorkflow } from "../features/equipment/components/EquipmentEventWorkflow";
 import { EquipmentTransfer } from "../features/equipment/components/EquipmentTransfer";
+import { EquipmentOverview } from "../features/equipment/components/EquipmentOverview";
 
 export function EquipmentDetailPage() {
   const navigate = useNavigate();
@@ -242,104 +238,11 @@ export function EquipmentDetailPage() {
         />
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <section className="rounded-box border border-base-300 bg-base-100 p-6">
-            <div className="mb-5 flex items-start justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-semibold">Gerätedaten</h2>
-                <p className="text-sm text-base-content/60">
-                  Technische und interne Informationen
-                </p>
-              </div>
-
-              <StatusChip status={equipment.status} />
-            </div>
-
-            <dl className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <dt className="text-sm text-base-content/60">Asset-Nr.</dt>
-                <dd className="font-medium">{equipment.assetNo}</dd>
-              </div>
-
-              <div>
-                <dt className="text-sm text-base-content/60">Seriennummer</dt>
-                <dd>{equipment.manufacturerSerial ?? "—"}</dd>
-              </div>
-
-              <div>
-                <dt className="text-sm text-base-content/60">Barcode</dt>
-                <dd>{equipment.barcode ?? "—"}</dd>
-              </div>
-
-              <div>
-                <dt className="text-sm text-base-content/60">Standort</dt>
-                <dd>{equipment.location ?? "—"}</dd>
-              </div>
-
-              {activeMovementReservation &&
-                ["RESERVED", "PICKING", "PACKED", "IN_TRANSIT", "AT_EVENT", "RETURNING", "INSPECTION"].includes(
-                  equipment.status,
-                ) && (
-                  <div>
-                    <dt className="text-sm text-base-content/60">
-                      Erwartete Rückgabe
-                    </dt>
-                    <dd className="font-medium">
-                      {new Intl.DateTimeFormat("de-DE", {
-                        dateStyle: "medium",
-                        timeStyle: "short",
-                      }).format(new Date(activeMovementReservation.endDate))}
-                    </dd>
-                  </div>
-                )}
-
-              {checkedOutMovement &&
-                ["IN_TRANSIT", "AT_EVENT", "RETURNING", "INSPECTION"].includes(
-                  equipment.status,
-                ) && (
-                  <>
-                    <div>
-                      <dt className="text-sm text-base-content/60">
-                        Ausgecheckt am
-                      </dt>
-                      <dd className="font-medium">
-                        {new Intl.DateTimeFormat("de-DE", {
-                          dateStyle: "medium",
-                          timeStyle: "short",
-                        }).format(new Date(checkedOutMovement.createdAt))}
-                      </dd>
-                    </div>
-
-                    {checkedOutMovement.responsibleEmployee && (
-                      <div>
-                        <dt className="text-sm text-base-content/60">
-                          Verantwortlich
-                        </dt>
-                        <dd className="font-medium">
-                          {checkedOutMovement.responsibleEmployee.firstName}{" "}
-                          {checkedOutMovement.responsibleEmployee.lastName}
-                        </dd>
-                        <dd className="text-sm text-base-content/60">
-                          {checkedOutMovement.responsibleEmployee.employeeNo}
-                          {checkedOutMovement.responsibleEmployee.position
-                            ? ` · ${checkedOutMovement.responsibleEmployee.position}`
-                            : ""}
-                        </dd>
-                      </div>
-                    )}
-                  </>
-                )}
-
-              <div>
-                <dt className="text-sm text-base-content/60">Kaufdatum</dt>
-                <dd>{formatDate(equipment.purchaseDate)}</dd>
-              </div>
-
-              <div>
-                <dt className="text-sm text-base-content/60">Kaufpreis</dt>
-                <dd>{formatPrice(equipment.purchasePrice)}</dd>
-              </div>
-            </dl>
-          </section>
+          <EquipmentOverview
+            equipment={equipment}
+            activeReservation={activeMovementReservation}
+            checkedOutMovement={checkedOutMovement}
+          />
 
           <section className="rounded-box border border-base-300 bg-base-100 p-6">
             <h2 className="mb-5 text-lg font-semibold">Produkt & Lager</h2>
