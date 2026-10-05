@@ -1,58 +1,22 @@
 import { useState } from "react";
-import { useAuth } from "@clerk/react";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 
 import { Button } from "../components/atoms/Button";
-import { StatusChip } from "../components/atoms/StatusChip";
 import { ConfirmDeleteDialog } from "../components/molecules/ConfirmDeleteDialog";
 import {
   CustomerForm,
   type CustomerFormData,
 } from "../components/organisms/CustomerForm";
 import { DetailLayout } from "../components/templates/DetailLayout";
-import { apiFetch } from "../services/api";
-
-type CustomerDetail = {
-  id: string;
-  customerNo: string;
-  type: "COMPANY" | "PRIVATE";
-  companyName?: string | null;
-  firstName?: string | null;
-  lastName?: string | null;
-  contactName?: string | null;
-  email?: string | null;
-  phone?: string | null;
-  address?: string | null;
-  vatId?: string | null;
-  discount: number | string;
-  isActive: boolean;
-};
-
-type CustomerResponse = {
-  data: CustomerDetail;
-};
-
-function getCustomerName(customer: CustomerDetail) {
-  if (customer.companyName) {
-    return customer.companyName;
-  }
-
-  const fullName = [customer.firstName, customer.lastName]
-    .filter(Boolean)
-    .join(" ");
-
-  return fullName || "—";
-}
+import { CustomerOverview } from "../features/customers/components/CustomerOverview";
+import { useCustomerDetail } from "../features/customers/hooks/useCustomerDetail";
+import { useUpdateCustomer } from "../features/customers/hooks/useUpdateCustomer";
+import { useDeactivateCustomer } from "../features/customers/hooks/useDeactivateCustomer";
+import { useActivateCustomer } from "../features/customers/hooks/useActivateCustomer";
+import { getCustomerName } from "../features/customers/utils/customer-formatters";
 
 export function CustomerDetailPage() {
-  const { getToken } = useAuth();
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -67,136 +31,24 @@ export function CustomerDetailPage() {
     data: customer,
     isLoading,
     isError,
-  } = useQuery({
-    queryKey: ["customers", customerId],
-    queryFn: async () => {
-      const token = await getToken();
+  } = useCustomerDetail(customerId);
 
-      const response = await apiFetch(
-        `/api/customers/${customerId}`,
-        token,
-      );
-
-      const result =
-        (await response.json()) as CustomerResponse;
-
-      return result.data;
-    },
-  });
-
-  const updateCustomerMutation = useMutation({
-    mutationFn: async (data: CustomerFormData) => {
-      const token = await getToken();
-
-      const payload = {
-        type: data.type,
-
-        companyName:
-          data.type === "COMPANY"
-            ? data.companyName.trim() || undefined
-            : undefined,
-
-        firstName:
-          data.type === "PRIVATE"
-            ? data.firstName.trim() || undefined
-            : undefined,
-
-        lastName:
-          data.type === "PRIVATE"
-            ? data.lastName.trim() || undefined
-            : undefined,
-
-        contactName: data.contactName.trim() || undefined,
-        email: data.email.trim() || undefined,
-        phone: data.phone.trim() || undefined,
-        address: data.address.trim() || undefined,
-        vatId: data.vatId.trim() || undefined,
-        discount: Number(data.discount),
-      };
-
-      const response = await apiFetch(
-        `/api/customers/${customerId}`,
-        token,
-        {
-          method: "PATCH",
-          body: JSON.stringify(payload),
-        },
-      );
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["customers", customerId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["customers"],
-        }),
-      ]);
-
+  const { updateCustomerMutation } = useUpdateCustomer({
+    customerId,
+    onSuccess: () => {
       setIsEditing(false);
     },
   });
 
-  const deactivateCustomerMutation = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      const response = await apiFetch(
-        `/api/customers/${customerId}/deactivate`,
-        token,
-        {
-          method: "PATCH",
-        },
-      );
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["customers", customerId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["customers"],
-        }),
-      ]);
-
+  const { deactivateCustomerMutation } = useDeactivateCustomer({
+    customerId,
+    onSuccess: () => {
       setShowDeactivateDialog(false);
     },
   });
 
-  const activateCustomerMutation = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      const response = await apiFetch(
-        `/api/customers/${customerId}`,
-        token,
-        {
-          method: "PATCH",
-          body: JSON.stringify({
-            isActive: true,
-          }),
-        },
-      );
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["customers", customerId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["customers"],
-        }),
-      ]);
-    },
+  const { activateCustomerMutation } = useActivateCustomer({
+    customerId,
   });
 
   if (isLoading) {
@@ -324,130 +176,8 @@ export function CustomerDetailPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.2 }}
-              className="rounded-box border border-base-300 bg-base-100 p-6"
             >
-              <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-lg font-semibold">
-                  Kundendaten
-                </h2>
-
-                <StatusChip
-                  status={
-                    customer.isActive
-                      ? "ACTIVE"
-                      : "INACTIVE"
-                  }
-                />
-              </div>
-
-              <dl className="grid gap-6 md:grid-cols-2">
-                <div>
-                  <dt className="text-sm text-base-content/60">
-                    Kundennr.
-                  </dt>
-                  <dd className="mt-1 font-medium">
-                    {customer.customerNo}
-                  </dd>
-                </div>
-
-                <div>
-                  <dt className="text-sm text-base-content/60">
-                    Kundentyp
-                  </dt>
-                  <dd className="mt-1 font-medium">
-                    {customer.type === "COMPANY"
-                      ? "Unternehmen"
-                      : "Privatkunde"}
-                  </dd>
-                </div>
-
-                {customer.companyName && (
-                  <div>
-                    <dt className="text-sm text-base-content/60">
-                      Firmenname
-                    </dt>
-                    <dd className="mt-1 font-medium">
-                      {customer.companyName}
-                    </dd>
-                  </div>
-                )}
-
-                {customer.firstName && (
-                  <div>
-                    <dt className="text-sm text-base-content/60">
-                      Vorname
-                    </dt>
-                    <dd className="mt-1 font-medium">
-                      {customer.firstName}
-                    </dd>
-                  </div>
-                )}
-
-                {customer.lastName && (
-                  <div>
-                    <dt className="text-sm text-base-content/60">
-                      Nachname
-                    </dt>
-                    <dd className="mt-1 font-medium">
-                      {customer.lastName}
-                    </dd>
-                  </div>
-                )}
-
-                <div>
-                  <dt className="text-sm text-base-content/60">
-                    Ansprechpartner
-                  </dt>
-                  <dd className="mt-1 font-medium">
-                    {customer.contactName || "—"}
-                  </dd>
-                </div>
-
-                <div>
-                  <dt className="text-sm text-base-content/60">
-                    E-Mail
-                  </dt>
-                  <dd className="mt-1 font-medium">
-                    {customer.email || "—"}
-                  </dd>
-                </div>
-
-                <div>
-                  <dt className="text-sm text-base-content/60">
-                    Telefon
-                  </dt>
-                  <dd className="mt-1 font-medium">
-                    {customer.phone || "—"}
-                  </dd>
-                </div>
-
-                <div>
-                  <dt className="text-sm text-base-content/60">
-                    Adresse
-                  </dt>
-                  <dd className="mt-1 font-medium">
-                    {customer.address || "—"}
-                  </dd>
-                </div>
-
-                <div>
-                  <dt className="text-sm text-base-content/60">
-                    USt-IdNr.
-                  </dt>
-                  <dd className="mt-1 font-medium">
-                    {customer.vatId || "—"}
-                  </dd>
-                </div>
-
-                <div>
-                  <dt className="text-sm text-base-content/60">
-                    Rabatt
-                  </dt>
-                  <dd className="mt-1 font-medium">
-                    {customer.discount}%
-                  </dd>
-                </div>
-              </dl>
+              <CustomerOverview customer={customer} />
 
               {deactivateCustomerMutation.isError && (
                 <div
