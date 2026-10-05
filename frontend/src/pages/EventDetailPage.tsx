@@ -1,93 +1,23 @@
 import { useState } from "react";
-import { useAuth } from "@clerk/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 
 import { Button } from "../components/atoms/Button";
-import { StatusChip } from "../components/atoms/StatusChip";
 import { ConfirmDeleteDialog } from "../components/molecules/ConfirmDeleteDialog";
 import {
   EventForm,
   type EventFormData,
 } from "../components/organisms/EventForm";
 import { DetailLayout } from "../components/templates/DetailLayout";
-import { apiFetch } from "../services/api";
-
-type CustomerOption = {
-  id: string;
-  customerNo: string;
-  type: string;
-  companyName?: string | null;
-  firstName?: string | null;
-  lastName?: string | null;
-};
-
-type EventDetail = {
-  id: string;
-  eventNo: string;
-  name: string;
-  type?: string | null;
-  location?: string | null;
-  startDate: string;
-  endDate: string;
-  status: string;
-  description?: string | null;
-  customerId: string;
-
-  customer: {
-    id: string;
-    customerNo: string;
-    type?: string;
-    companyName?: string | null;
-    firstName?: string | null;
-    lastName?: string | null;
-    email?: string | null;
-    phone?: string | null;
-  };
-};
-
-type EventResponse = {
-  data: EventDetail;
-};
-
-function formatDateTime(date: string) {
-  return new Intl.DateTimeFormat("de-DE", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(date));
-}
-
-function toDateTimeLocal(date: string) {
-  const value = new Date(date);
-
-  const year = value.getFullYear();
-  const month = String(value.getMonth() + 1).padStart(2, "0");
-  const day = String(value.getDate()).padStart(2, "0");
-  const hours = String(value.getHours()).padStart(2, "0");
-  const minutes = String(value.getMinutes()).padStart(2, "0");
-
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
-}
-
-function getCustomerName(customer: EventDetail["customer"]) {
-  if (customer.companyName) {
-    return customer.companyName;
-  }
-
-  const fullName = [customer.firstName, customer.lastName]
-    .filter(Boolean)
-    .join(" ");
-
-  return fullName || "—";
-}
+import { useEventDetail } from "../features/events/hooks/useEventDetail";
+import { useEventCustomers } from "../features/events/hooks/useEventCustomers";
+import { useUpdateEvent } from "../features/events/hooks/useUpdateEvent";
+import { useCancelEvent } from "../features/events/hooks/useCancelEvent";
+import { EventOverview } from "../features/events/components/EventOverview";
+import { EventCustomerCard } from "../features/events/components/EventCustomerCard";
+import { toDateTimeLocal } from "../features/events/utils/event-formatters";
 
 export function EventDetailPage() {
-  const { getToken } = useAuth();
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -101,94 +31,23 @@ export function EventDetailPage() {
     data: event,
     isLoading,
     isError,
-  } = useQuery({
-    queryKey: ["events", eventId],
-    queryFn: async () => {
-      const token = await getToken();
+  } = useEventDetail(eventId);
 
-      const response = await apiFetch(`/api/events/${eventId}`, token);
+  const {
+    data: customers = [],
+    isLoading: customersLoading,
+  } = useEventCustomers();
 
-      const result = (await response.json()) as EventResponse;
-
-      return result.data;
-    },
-  });
-
-  const { data: customers = [], isLoading: customersLoading } = useQuery({
-    queryKey: ["customers"],
-    queryFn: async () => {
-      const token = await getToken();
-
-      const response = await apiFetch("/api/customers", token);
-
-      const result = (await response.json()) as {
-        data: CustomerOption[];
-      };
-
-      return result.data;
-    },
-  });
-
-  const updateEventMutation = useMutation({
-    mutationFn: async (data: EventFormData) => {
-      const token = await getToken();
-
-      const payload = {
-        name: data.name,
-        type: data.type || undefined,
-        location: data.location || undefined,
-        startDate: new Date(data.startDate).toISOString(),
-        endDate: new Date(data.endDate).toISOString(),
-        status: data.status,
-        description: data.description || undefined,
-      };
-
-      const response = await apiFetch(`/api/events/${eventId}`, token, {
-        method: "PATCH",
-        body: JSON.stringify(payload),
-      });
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["events", eventId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["events"],
-        }),
-      ]);
-
+  const { updateEventMutation } = useUpdateEvent({
+    eventId,
+    onSuccess: () => {
       setIsEditing(false);
     },
   });
 
-  const cancelEventMutation = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      const response = await apiFetch(`/api/events/${eventId}`, token, {
-        method: "PATCH",
-        body: JSON.stringify({
-          status: "CANCELLED",
-        }),
-      });
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["events", eventId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["events"],
-        }),
-      ]);
-
+  const { cancelEventMutation } = useCancelEvent({
+    eventId,
+    onSuccess: () => {
       setShowCancelDialog(false);
       setIsEditing(false);
     },
@@ -269,38 +128,7 @@ export function EventDetailPage() {
           </>
         }
         sidebar={
-          <motion.div
-            initial={{ opacity: 0, x: 12 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.25, delay: 0.05 }}
-            className="rounded-box border border-base-300 bg-base-100 p-6"
-          >
-            <h2 className="mb-4 text-lg font-semibold">Kunde</h2>
-
-            <div className="space-y-3">
-              <div>
-                <div className="text-sm text-base-content/60">Name</div>
-                <div className="font-medium">
-                  {getCustomerName(event.customer)}
-                </div>
-              </div>
-
-              <div>
-                <div className="text-sm text-base-content/60">Kundennr.</div>
-                <div>{event.customer.customerNo}</div>
-              </div>
-
-              <div>
-                <div className="text-sm text-base-content/60">E-Mail</div>
-                <div>{event.customer.email || "—"}</div>
-              </div>
-
-              <div>
-                <div className="text-sm text-base-content/60">Telefon</div>
-                <div>{event.customer.phone || "—"}</div>
-              </div>
-            </div>
-          </motion.div>
+          <EventCustomerCard customer={event.customer} />
         }
       >
         <AnimatePresence mode="wait">
@@ -336,51 +164,8 @@ export function EventDetailPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.2 }}
-              className="rounded-box border border-base-300 bg-base-100 p-6"
             >
-              <div className="grid gap-6 md:grid-cols-2">
-                <div>
-                  <div className="text-sm text-base-content/60">Status</div>
-
-                  <div className="mt-1">
-                    <StatusChip status={event.status} />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-sm text-base-content/60">Typ</div>
-
-                  <div className="mt-1">{event.type || "—"}</div>
-                </div>
-
-                <div>
-                  <div className="text-sm text-base-content/60">Start</div>
-
-                  <div className="mt-1">{formatDateTime(event.startDate)}</div>
-                </div>
-
-                <div>
-                  <div className="text-sm text-base-content/60">Ende</div>
-
-                  <div className="mt-1">{formatDateTime(event.endDate)}</div>
-                </div>
-
-                <div>
-                  <div className="text-sm text-base-content/60">Ort</div>
-
-                  <div className="mt-1">{event.location || "—"}</div>
-                </div>
-              </div>
-
-              <div className="divider" />
-
-              <div>
-                <div className="text-sm text-base-content/60">Beschreibung</div>
-
-                <p className="mt-2 whitespace-pre-wrap">
-                  {event.description || "Keine Beschreibung vorhanden."}
-                </p>
-              </div>
+              <EventOverview event={event} />
             </motion.div>
           )}
         </AnimatePresence>
