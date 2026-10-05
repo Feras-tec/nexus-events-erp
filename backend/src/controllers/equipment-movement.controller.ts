@@ -49,6 +49,22 @@ export async function createEquipmentMovement(req: Request, res: Response) {
       responsibleEmployeeId,
     } = result.data;
 
+    // Event-Bewegungen benötigen immer eine verknüpfte Reservierung
+    const eventMovementTypes = [
+      "RESERVED",
+      "PICKED",
+      "PACKED",
+      "LOADED",
+      "DELIVERED_TO_EVENT",
+      "RETURNED_FROM_EVENT",
+    ];
+
+    if (eventMovementTypes.includes(type) && !reservationId) {
+      return res.status(400).json({
+        error: "Reservation is required for event equipment movement",
+      });
+    }
+
     // Zugehörige Reservierung prüfen
     if (reservationId) {
       const reservation = await prisma.reservation.findUnique({
@@ -70,6 +86,14 @@ export async function createEquipmentMovement(req: Request, res: Response) {
       if (reservation.status === "CANCELLED") {
         return res.status(409).json({
           error: "Cancelled reservation cannot be used for equipment movement",
+        });
+      }
+
+      // Der Event-Workflow darf nur mit einer bestätigten Reservierung starten
+      if (type === "RESERVED" && reservation.status !== "CONFIRMED") {
+        return res.status(409).json({
+          error: "Only confirmed reservations can start equipment workflow",
+          reservationStatus: reservation.status,
         });
       }
 
