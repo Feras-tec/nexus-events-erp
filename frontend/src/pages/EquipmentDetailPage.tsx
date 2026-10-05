@@ -23,6 +23,7 @@ import { useEquipmentReservations } from "../features/equipment/hooks/useEquipme
 import { useEquipmentProducts } from "../features/equipment/hooks/useEquipmentProducts";
 import { useEquipmentWarehouses } from "../features/equipment/hooks/useEquipmentWarehouses";
 import { useEquipmentEmployees } from "../features/equipment/hooks/useEquipmentEmployees";
+import { useEquipmentEventWorkflow } from "../features/equipment/hooks/useEquipmentEventWorkflow";
 import { apiFetch } from "../services/api";
 
 export function EquipmentDetailPage() {
@@ -109,6 +110,21 @@ export function EquipmentDetailPage() {
           movement.reservation?.id === activeMovementReservation.id,
       )
     : undefined;
+
+  const {
+    startPickingMutation,
+    markPackedMutation,
+    markLoadedMutation,
+    markDeliveredMutation,
+    startReturnMutation,
+    startInspectionMutation,
+    completeInspectionMutation,
+  } = useEquipmentEventWorkflow({
+    equipmentId,
+    equipment,
+    activeReservation: activeMovementReservation,
+    responsibleEmployeeId,
+  });
 
   const transferWarehouseMutation = useMutation({
     mutationFn: async (toWarehouseId: string) => {
@@ -211,306 +227,6 @@ export function EquipmentDetailPage() {
         }),
         queryClient.invalidateQueries({
           queryKey: ["reservations"],
-        }),
-      ]);
-    },
-  });
-
-  const startPickingMutation = useMutation({
-    mutationFn: async () => {
-      if (!activeMovementReservation) {
-        throw new Error("Keine Reservierung für diese Bewegung gefunden.");
-      }
-
-      const token = await getToken();
-
-      const response = await apiFetch(
-        `/api/equipment-movements/${equipmentId}`,
-        token,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            type: "PICKED",
-            toStatus: "PICKING",
-            reservationId: activeMovementReservation.id,
-            notes: "Kommissionierung gestartet",
-          }),
-        },
-      );
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["equipment", equipmentId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment"],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment-movements", equipmentId],
-        }),
-      ]);
-    },
-  });
-
-  const markPackedMutation = useMutation({
-    mutationFn: async () => {
-      if (!activeMovementReservation) {
-        throw new Error("Keine Reservierung für diese Bewegung gefunden.");
-      }
-
-      const token = await getToken();
-
-      const response = await apiFetch(
-        `/api/equipment-movements/${equipmentId}`,
-        token,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            type: "PACKED",
-            toStatus: "PACKED",
-            reservationId: activeMovementReservation.id,
-            notes: "Gerät wurde gepackt",
-          }),
-        },
-      );
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["equipment", equipmentId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment"],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment-movements", equipmentId],
-        }),
-      ]);
-    },
-  });
-
-  const markLoadedMutation = useMutation({
-    mutationFn: async () => {
-      if (!activeMovementReservation) {
-        throw new Error("Keine Reservierung für diese Bewegung gefunden.");
-      }
-
-      const token = await getToken();
-
-      const response = await apiFetch(
-        `/api/equipment-movements/${equipmentId}`,
-        token,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            type: "LOADED",
-            toStatus: "IN_TRANSIT",
-            toLocation: "Unterwegs zum Event",
-            reservationId: activeMovementReservation.id,
-            responsibleEmployeeId,
-            notes: "Gerät wurde verladen",
-          }),
-        },
-      );
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["equipment", equipmentId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment"],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment-movements", equipmentId],
-        }),
-      ]);
-    },
-  });
-
-  const markDeliveredMutation = useMutation({
-    mutationFn: async () => {
-      if (!activeMovementReservation) {
-        throw new Error("Keine Reservierung für diese Bewegung gefunden.");
-      }
-
-      const token = await getToken();
-
-      const response = await apiFetch(
-        `/api/equipment-movements/${equipmentId}`,
-        token,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            type: "DELIVERED_TO_EVENT",
-            toStatus: "AT_EVENT",
-            toLocation:
-              activeMovementReservation.event.location ||
-              activeMovementReservation.event.name,
-            reservationId: activeMovementReservation.id,
-            notes: "Gerät ist am Event angekommen",
-          }),
-        },
-      );
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["equipment", equipmentId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment"],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment-movements", equipmentId],
-        }),
-      ]);
-    },
-  });
-
-  const startReturnMutation = useMutation({
-    mutationFn: async () => {
-      if (!activeMovementReservation) {
-        throw new Error("Keine Reservierung für diese Bewegung gefunden.");
-      }
-
-      const token = await getToken();
-
-      const response = await apiFetch(
-        `/api/equipment-movements/${equipmentId}`,
-        token,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            type: "RETURNED_FROM_EVENT",
-            toStatus: "RETURNING",
-            toLocation: "Rücktransport zum Lager",
-            reservationId: activeMovementReservation.id,
-            notes: "Rücktransport vom Event gestartet",
-          }),
-        },
-      );
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["equipment", equipmentId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment"],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment-movements", equipmentId],
-        }),
-      ]);
-    },
-  });
-
-  const startInspectionMutation = useMutation({
-    mutationFn: async () => {
-      if (!activeMovementReservation) {
-        throw new Error("Keine Reservierung für diese Bewegung gefunden.");
-      }
-
-      const token = await getToken();
-
-      const response = await apiFetch(
-        `/api/equipment-movements/${equipmentId}`,
-        token,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            type: "INSPECTION",
-            toStatus: "INSPECTION",
-            toLocation: `Prüfbereich – ${equipment?.warehouse.name ?? "Lager"}`,
-            reservationId: activeMovementReservation.id,
-            notes: "Geräteprüfung nach Rückkehr gestartet",
-          }),
-        },
-      );
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["equipment", equipmentId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment"],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment-movements", equipmentId],
-        }),
-      ]);
-    },
-  });
-
-  const completeInspectionMutation = useMutation({
-    mutationFn: async (
-      result: "AVAILABLE" | "DAMAGED" | "MAINTENANCE",
-    ) => {
-      if (!activeMovementReservation) {
-        throw new Error("Keine Reservierung für diese Bewegung gefunden.");
-      }
-
-      const token = await getToken();
-
-      const notes = {
-        AVAILABLE: "Prüfung abgeschlossen – Gerät ist einsatzbereit",
-        DAMAGED: "Prüfung abgeschlossen – Gerät ist beschädigt",
-        MAINTENANCE: "Prüfung abgeschlossen – Wartung erforderlich",
-      }[result];
-
-      const response = await apiFetch(
-        `/api/equipment-movements/${equipmentId}`,
-        token,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            type: result === "MAINTENANCE" ? "MAINTENANCE" : "INSPECTION",
-            toStatus: result,
-            ...(result === "AVAILABLE"
-              ? {
-                  toLocation: `Lagerbereich – ${equipment?.warehouse.name ?? "Lager"}`,
-                }
-              : {}),
-            reservationId: activeMovementReservation.id,
-            notes,
-          }),
-        },
-      );
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["equipment", equipmentId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment"],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment-movements", equipmentId],
         }),
       ]);
     },
