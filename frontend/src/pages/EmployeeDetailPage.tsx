@@ -26,6 +26,7 @@ import { DetailLayout } from "../components/templates/DetailLayout";
 import { apiFetch } from "../services/api";
 import { useEmployeeDetail } from "../features/employees/hooks/useEmployeeDetail";
 import { useEmployeeOptions } from "../features/employees/hooks/useEmployeeOptions";
+import { useUpdateEmployee } from "../features/employees/hooks/useUpdateEmployee";
 
 
 export function EmployeeDetailPage() {
@@ -64,46 +65,9 @@ export function EmployeeDetailPage() {
     departments,
   } = useEmployeeOptions();
 
-  const updateEmployeeMutation = useMutation({
-    mutationFn: async (data: EmployeeFormValues) => {
-      const token = await getToken();
-
-      const payload = {
-        firstName: data.firstName.trim(),
-        lastName: data.lastName.trim(),
-        email: data.email.trim() || undefined,
-        phone: data.phone.trim() || undefined,
-        birthDate: data.birthDate || undefined,
-        nationality: data.nationality.trim() || undefined,
-        position: data.position.trim() || undefined,
-        departmentId: data.departmentId || undefined,
-        status: data.status,
-      };
-
-      const response = await apiFetch(
-        `/api/employees/${employeeId}`,
-        token,
-        {
-          method: "PATCH",
-          body: JSON.stringify(payload),
-        },
-      );
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["employees", employeeId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["employees"],
-        }),
-      ]);
-
-      setIsEditing(false);
-    },
+  const { updateEmployeeMutation } = useUpdateEmployee({
+    employeeId,
+    onSuccess: () => setIsEditing(false),
   });
 
   const updateEmployeeDocumentMutation = useMutation({
