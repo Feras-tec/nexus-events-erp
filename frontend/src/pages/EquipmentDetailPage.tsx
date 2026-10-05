@@ -56,6 +56,19 @@ type WarehousesResponse = {
   data: WarehouseOption[];
 };
 
+type EmployeeOption = {
+  id: string;
+  employeeNo: string;
+  firstName: string;
+  lastName: string;
+  position?: string | null;
+  status: string;
+};
+
+type EmployeesResponse = {
+  data: EmployeeOption[];
+};
+
 type EquipmentMovement = {
   id: string;
   type:
@@ -151,6 +164,7 @@ export function EquipmentDetailPage() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [transferWarehouseId, setTransferWarehouseId] = useState("");
+  const [responsibleEmployeeId, setResponsibleEmployeeId] = useState("");
 
   const { equipmentId } = useParams({
     from: "/app/equipment/$equipmentId",
@@ -250,6 +264,22 @@ export function EquipmentDetailPage() {
       const result = (await response.json()) as WarehousesResponse;
 
       return result.data;
+    },
+  });
+
+  const {
+    data: employees = [],
+    isLoading: employeesLoading,
+    isError: employeesError,
+  } = useQuery({
+    queryKey: ["employees"],
+    queryFn: async () => {
+      const token = await getToken();
+
+      const response = await apiFetch("/api/employees", token);
+      const result = (await response.json()) as EmployeesResponse;
+
+      return result.data.filter((employee) => employee.status === "ACTIVE");
     },
   });
 
@@ -402,6 +432,7 @@ export function EquipmentDetailPage() {
             toStatus: "IN_TRANSIT",
             toLocation: "Unterwegs zum Event",
             reservationId: activeMovementReservation.id,
+            responsibleEmployeeId,
             notes: "Gerät wurde verladen",
           }),
         },
@@ -1154,11 +1185,49 @@ export function EquipmentDetailPage() {
                     {activeMovementReservation.event.name}
                   </div>
 
+                  <div className="mt-4">
+                    <label className="label" htmlFor="responsibleEmployee">
+                      Verantwortlicher Mitarbeiter
+                    </label>
+
+                    <select
+                      id="responsibleEmployee"
+                      className="select select-bordered w-full"
+                      value={responsibleEmployeeId}
+                      onChange={(event) =>
+                        setResponsibleEmployeeId(event.target.value)
+                      }
+                      disabled={employeesLoading || markLoadedMutation.isPending}
+                    >
+                      <option value="">
+                        Mitarbeiter auswählen
+                      </option>
+
+                      {employees.map((employee) => (
+                        <option key={employee.id} value={employee.id}>
+                          {employee.employeeNo} – {employee.firstName}{" "}
+                          {employee.lastName}
+                          {employee.position ? ` – ${employee.position}` : ""}
+                        </option>
+                      ))}
+                    </select>
+
+                    {employeesError && (
+                      <div className="alert alert-error mt-3">
+                        Mitarbeiter konnten nicht geladen werden.
+                      </div>
+                    )}
+                  </div>
+
                   <Button
                     type="button"
                     className="mt-4"
                     loading={markLoadedMutation.isPending}
-                    disabled={markLoadedMutation.isPending}
+                    disabled={
+                      markLoadedMutation.isPending ||
+                      employeesLoading ||
+                      !responsibleEmployeeId
+                    }
                     onClick={() => markLoadedMutation.mutate()}
                   >
                     Als verladen markieren
