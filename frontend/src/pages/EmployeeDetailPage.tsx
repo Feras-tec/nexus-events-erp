@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 
 import { Button } from "../components/atoms/Button";
-import { StatusChip } from "../components/atoms/StatusChip";
 import { ConfirmDeleteDialog } from "../components/molecules/ConfirmDeleteDialog";
 import {
   EmployeeForm,
@@ -18,6 +17,7 @@ import { useUpdateEmployee } from "../features/employees/hooks/useUpdateEmployee
 import { useEmployeeDocuments } from "../features/employees/hooks/useEmployeeDocuments";
 import { useEmployeeEmploymentPeriods } from "../features/employees/hooks/useEmployeeEmploymentPeriods";
 import { useEmployeeStatus } from "../features/employees/hooks/useEmployeeStatus";
+import { EmployeeOverview } from "../features/employees/components/EmployeeOverview";
 
 
 export function EmployeeDetailPage() {
@@ -227,105 +227,7 @@ export function EmployeeDetailPage() {
               transition={{ duration: 0.2 }}
               className="space-y-6"
             >
-              <section className="rounded-box border border-base-300 bg-base-100 p-6">
-                <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-                  <h2 className="text-lg font-semibold">
-                    Mitarbeiterdaten
-                  </h2>
-
-                  <StatusChip status={employee.status} />
-                </div>
-
-                <dl className="grid gap-6 md:grid-cols-2">
-                  <div>
-                    <dt className="text-sm text-base-content/60">
-                      Mitarbeiternr.
-                    </dt>
-                    <dd className="mt-1 font-medium">
-                      {employee.employeeNo}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt className="text-sm text-base-content/60">
-                      Position
-                    </dt>
-                    <dd className="mt-1 font-medium">
-                      {employee.position || "—"}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt className="text-sm text-base-content/60">
-                      E-Mail
-                    </dt>
-                    <dd className="mt-1 font-medium">
-                      {employee.email || "—"}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt className="text-sm text-base-content/60">
-                      Telefon
-                    </dt>
-                    <dd className="mt-1 font-medium">
-                      {employee.phone || "—"}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt className="text-sm text-base-content/60">
-                      Geburtsdatum
-                    </dt>
-                    <dd className="mt-1 font-medium">
-                      {employee.birthDate
-                        ? new Date(
-                            employee.birthDate,
-                          ).toLocaleDateString("de-DE")
-                        : "—"}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt className="text-sm text-base-content/60">
-                      Nationalität
-                    </dt>
-                    <dd className="mt-1 font-medium">
-                      {employee.nationality || "—"}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt className="text-sm text-base-content/60">
-                      Niederlassung
-                    </dt>
-                    <dd className="mt-1 font-medium">
-                      {employee.branch.name}
-                      {employee.branch.city
-                        ? ` – ${employee.branch.city}`
-                        : ""}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt className="text-sm text-base-content/60">
-                      Abteilung
-                    </dt>
-                    <dd className="mt-1 font-medium">
-                      {employee.department?.name || "—"}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt className="text-sm text-base-content/60">
-                      Unternehmen
-                    </dt>
-                    <dd className="mt-1 font-medium">
-                      {employee.branch.company?.name || "—"}
-                    </dd>
-                  </div>
-                </dl>
-              </section>
+              <EmployeeOverview employee={employee} />
 
               <div className="grid gap-6 lg:grid-cols-2">
                 <section className="rounded-box border border-base-300 bg-base-100 p-6">
