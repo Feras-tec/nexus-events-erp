@@ -24,6 +24,7 @@ import { useEquipmentProducts } from "../features/equipment/hooks/useEquipmentPr
 import { useEquipmentWarehouses } from "../features/equipment/hooks/useEquipmentWarehouses";
 import { useEquipmentEmployees } from "../features/equipment/hooks/useEquipmentEmployees";
 import { useEquipmentEventWorkflow } from "../features/equipment/hooks/useEquipmentEventWorkflow";
+import { useEquipmentLifecycle } from "../features/equipment/hooks/useEquipmentLifecycle";
 import { apiFetch } from "../services/api";
 
 export function EquipmentDetailPage() {
@@ -124,6 +125,16 @@ export function EquipmentDetailPage() {
     equipment,
     activeReservation: activeMovementReservation,
     responsibleEmployeeId,
+  });
+
+  const {
+    reportLostMutation,
+    recoverLostMutation,
+    retireEquipmentMutation,
+  } = useEquipmentLifecycle({
+    equipmentId,
+    equipment,
+    activeReservation: activeMovementReservation,
   });
 
   const transferWarehouseMutation = useMutation({
@@ -227,138 +238,6 @@ export function EquipmentDetailPage() {
         }),
         queryClient.invalidateQueries({
           queryKey: ["reservations"],
-        }),
-      ]);
-    },
-  });
-
-  const reportLostMutation = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      const response = await apiFetch(
-        `/api/equipment-movements/${equipmentId}`,
-        token,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            type: "LOST",
-            toStatus: "LOST",
-            toLocation: "Unbekannt – Gerät als verloren gemeldet",
-            notes: "Gerät als verloren gemeldet",
-            ...(activeMovementReservation
-              ? { reservationId: activeMovementReservation.id }
-              : {}),
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        const result = await response.json();
-        throw new Error(
-          result.error ?? "Gerät konnte nicht als verloren gemeldet werden.",
-        );
-      }
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["equipment", equipmentId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment"],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment-movements", equipmentId],
-        }),
-      ]);
-    },
-  });
-
-  const recoverLostMutation = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      const response = await apiFetch(
-        `/api/equipment-movements/${equipmentId}`,
-        token,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            type: "RECOVERED",
-            toStatus: "AVAILABLE",
-            toLocation: `Lagerbereich – ${equipment?.warehouse.name ?? "Lager"}`,
-            notes: "Verlorenes Gerät wiedergefunden und zurück ins Lager gebracht",
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        const result = await response.json();
-        throw new Error(
-          result.error ?? "Gerät konnte nicht als wiedergefunden markiert werden.",
-        );
-      }
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["equipment", equipmentId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment"],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment-movements", equipmentId],
-        }),
-      ]);
-    },
-  });
-
-  const retireEquipmentMutation = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      const response = await apiFetch(
-        `/api/equipment-movements/${equipmentId}`,
-        token,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            type: "RETIRED",
-            toStatus: "RETIRED",
-            toLocation: "Ausgemustert",
-            notes: "Gerät dauerhaft ausgemustert",
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        const result = await response.json();
-        throw new Error(
-          result.error ?? "Gerät konnte nicht ausgemustert werden.",
-        );
-      }
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["equipment", equipmentId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment"],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment-movements", equipmentId],
         }),
       ]);
     },
