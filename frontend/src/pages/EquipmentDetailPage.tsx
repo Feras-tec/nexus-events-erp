@@ -342,6 +342,64 @@ export function EquipmentDetailPage() {
     },
   });
 
+  const legacyPickingResetMutation = useMutation({
+    mutationFn: async () => {
+      if (!equipment || equipment.status !== "PICKING") {
+        throw new Error("Gerät befindet sich nicht in Kommissionierung.");
+      }
+
+      if (activeMovementReservation) {
+        throw new Error(
+          "Korrektur nicht erlaubt: Eine Reservierung ist bereits verknüpft.",
+        );
+      }
+
+      const token = await getToken();
+
+      const response = await apiFetch(
+        `/api/equipment-movements/${equipmentId}`,
+        token,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            type: "MANUAL_ADJUSTMENT",
+            toStatus: "AVAILABLE",
+            toLocation: `Lagerbereich – ${equipment.warehouse.name}`,
+            notes:
+              "Legacy-Datenkorrektur: PICKING-Bewegung ohne verknüpfte Reservierung zurückgesetzt",
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        const result = await response.json().catch(() => null);
+
+        throw new Error(
+          result?.error ?? "Legacy-Datenkorrektur fehlgeschlagen.",
+        );
+      }
+
+      return response.json();
+    },
+
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["equipment", equipmentId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["equipment"],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["equipment-movements", equipmentId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["reservations"],
+        }),
+      ]);
+    },
+  });
+
   const startPickingMutation = useMutation({
     mutationFn: async () => {
       if (!activeMovementReservation) {
@@ -1578,8 +1636,32 @@ export function EquipmentDetailPage() {
                   </Button>
                 </div>
               ) : (
-                <div className="alert alert-warning mt-5">
-                  Keine verknüpfte Reservierung gefunden.
+                <div className="mt-5 rounded-box border border-warning bg-warning/10 p-4">
+                  <div className="font-semibold">
+                    Keine verknüpfte Reservierung gefunden.
+                  </div>
+
+                  <p className="mt-2 text-sm text-base-content/70">
+                    Dieses Gerät enthält eine ältere PICKING-Bewegung ohne
+                    Reservierungsverknüpfung. Der Status kann sicher auf
+                    AVAILABLE zurückgesetzt werden.
+                  </p>
+
+                  <Button
+                    type="button"
+                    className="mt-4"
+                    loading={legacyPickingResetMutation.isPending}
+                    disabled={legacyPickingResetMutation.isPending}
+                    onClick={() => legacyPickingResetMutation.mutate()}
+                  >
+                    Legacy-Daten korrigieren
+                  </Button>
+
+                  {legacyPickingResetMutation.isError && (
+                    <div className="alert alert-error mt-4">
+                      Datenkorrektur konnte nicht durchgeführt werden.
+                    </div>
+                  )}
                 </div>
               )}
 
