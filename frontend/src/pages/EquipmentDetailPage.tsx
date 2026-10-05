@@ -21,7 +21,6 @@ import { useEquipmentReservations } from "../features/equipment/hooks/useEquipme
 import { useEquipmentProducts } from "../features/equipment/hooks/useEquipmentProducts";
 import { useEquipmentWarehouses } from "../features/equipment/hooks/useEquipmentWarehouses";
 import { useEquipmentEmployees } from "../features/equipment/hooks/useEquipmentEmployees";
-import { useEquipmentTransfer } from "../features/equipment/hooks/useEquipmentTransfer";
 import { useEquipmentReservationMovement } from "../features/equipment/hooks/useEquipmentReservationMovement";
 import { useUpdateEquipment } from "../features/equipment/hooks/useUpdateEquipment";
 import { EquipmentMovementHistory } from "../features/equipment/components/EquipmentMovementHistory";
@@ -29,12 +28,12 @@ import { EquipmentMaintenance } from "../features/equipment/components/Equipment
 import { EquipmentLifecycle } from "../features/equipment/components/EquipmentLifecycle";
 import { EquipmentInspection } from "../features/equipment/components/EquipmentInspection";
 import { EquipmentEventWorkflow } from "../features/equipment/components/EquipmentEventWorkflow";
+import { EquipmentTransfer } from "../features/equipment/components/EquipmentTransfer";
 
 export function EquipmentDetailPage() {
   const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
-  const [transferWarehouseId, setTransferWarehouseId] = useState("");
   const [responsibleEmployeeId, setResponsibleEmployeeId] = useState("");
 
   const { equipmentId } = useParams({
@@ -114,11 +113,6 @@ export function EquipmentDetailPage() {
     : undefined;
 
 
-
-  const { transferWarehouseMutation } = useEquipmentTransfer({
-    equipmentId,
-    equipment,
-  });
 
   const { createMovementMutation } = useEquipmentReservationMovement({
     equipmentId,
@@ -242,72 +236,10 @@ export function EquipmentDetailPage() {
           )}
         </AnimatePresence>
 
-        {equipment.status === "AVAILABLE" && (
-          <section className="mb-6 rounded-box border border-base-300 bg-base-100 p-6">
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold">Lagertransfer</h2>
-            <p className="text-sm text-base-content/60">
-              Gerät von {equipment.warehouse.name} in ein anderes Lager umlagern
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-            <label className="form-control w-full sm:max-w-md">
-              <span className="label-text mb-2">Ziellager</span>
-
-              <select
-                className="select select-bordered w-full"
-                value={transferWarehouseId}
-                onChange={(event) =>
-                  setTransferWarehouseId(event.target.value)
-                }
-                disabled={transferWarehouseMutation.isPending}
-              >
-                <option value="">Lager auswählen</option>
-
-                {warehouses
-                  .filter((warehouse) => warehouse.id !== equipment.warehouseId)
-                  .map((warehouse) => (
-                    <option key={warehouse.id} value={warehouse.id}>
-                      {warehouse.name}
-                    </option>
-                  ))}
-              </select>
-            </label>
-
-            <Button
-              type="button"
-              disabled={
-                !transferWarehouseId ||
-                transferWarehouseMutation.isPending
-              }
-              onClick={() =>
-                transferWarehouseMutation.mutate(transferWarehouseId, {
-                  onSuccess: () => setTransferWarehouseId(""),
-                })
-              }
-            >
-              {transferWarehouseMutation.isPending
-                ? "Wird umgelagert..."
-                : "Umlagern"}
-            </Button>
-          </div>
-
-          {transferWarehouseMutation.isError && (
-            <div role="alert" className="alert alert-error mt-4">
-              {transferWarehouseMutation.error instanceof Error
-                ? transferWarehouseMutation.error.message
-                : "Lagertransfer fehlgeschlagen."}
-            </div>
-          )}
-
-          {transferWarehouseMutation.isSuccess && (
-            <div role="alert" className="alert alert-success mt-4">
-              Gerät wurde erfolgreich umgelagert.
-            </div>
-          )}
-          </section>
-        )}
+        <EquipmentTransfer
+          equipmentId={equipmentId}
+          equipment={equipment}
+        />
 
         <div className="grid gap-6 lg:grid-cols-2">
           <section className="rounded-box border border-base-300 bg-base-100 p-6">
