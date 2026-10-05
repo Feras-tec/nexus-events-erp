@@ -14,7 +14,6 @@ import { useEquipmentDetail } from "../features/equipment/hooks/useEquipmentDeta
 import { useEquipmentMovements } from "../features/equipment/hooks/useEquipmentMovements";
 import { useEquipmentProducts } from "../features/equipment/hooks/useEquipmentProducts";
 import { useEquipmentWarehouses } from "../features/equipment/hooks/useEquipmentWarehouses";
-import { useEquipmentEmployees } from "../features/equipment/hooks/useEquipmentEmployees";
 import { useUpdateEquipment } from "../features/equipment/hooks/useUpdateEquipment";
 import { EquipmentMovementHistory } from "../features/equipment/components/EquipmentMovementHistory";
 import { EquipmentMaintenance } from "../features/equipment/components/EquipmentMaintenance";
@@ -30,7 +29,6 @@ export function EquipmentDetailPage() {
   const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
-  const [responsibleEmployeeId, setResponsibleEmployeeId] = useState("");
 
   const { equipmentId } = useParams({
     from: "/app/equipment/$equipmentId",
@@ -59,12 +57,6 @@ export function EquipmentDetailPage() {
     isLoading: warehousesLoading,
     isError: warehousesError,
   } = useEquipmentWarehouses();
-
-  const {
-    data: employees = [],
-    isLoading: employeesLoading,
-    isError: employeesError,
-  } = useEquipmentEmployees();
 
   const eventWorkflowStatuses = [
     "RESERVED",
@@ -249,11 +241,6 @@ export function EquipmentDetailPage() {
             equipmentId={equipmentId}
             equipment={equipment}
             activeReservation={activeMovementReservation}
-            employees={employees}
-            employeesLoading={employeesLoading}
-            employeesError={employeesError}
-            responsibleEmployeeId={responsibleEmployeeId}
-            onResponsibleEmployeeChange={setResponsibleEmployeeId}
           />
 
           {equipment.status === "AVAILABLE" && (

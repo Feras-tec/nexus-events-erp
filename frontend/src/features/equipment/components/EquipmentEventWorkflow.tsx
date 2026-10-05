@@ -1,10 +1,11 @@
 import type {
-  EmployeeOption,
   EquipmentDetail,
   EquipmentMovement,
 } from "../types/equipment.types";
 import { useEquipmentEventWorkflow } from "../hooks/useEquipmentEventWorkflow";
 import { useEquipmentLegacyRecovery } from "../hooks/useEquipmentLegacyRecovery";
+import { useEquipmentEmployees } from "../hooks/useEquipmentEmployees";
+import { useState } from "react";
 import { motion } from "motion/react";
 
 import { Button } from "../../../components/atoms/Button";
@@ -15,23 +16,20 @@ type EquipmentEventWorkflowProps = {
   equipmentId: string;
   equipment: EquipmentDetail;
   activeReservation: ActiveReservation | null;
-  employees: EmployeeOption[];
-  employeesLoading: boolean;
-  employeesError: boolean;
-  responsibleEmployeeId: string;
-  onResponsibleEmployeeChange: (employeeId: string) => void;
 };
 
 export function EquipmentEventWorkflow({
   equipmentId,
   equipment,
   activeReservation,
-  employees,
-  employeesLoading,
-  employeesError,
-  responsibleEmployeeId,
-  onResponsibleEmployeeChange,
 }: EquipmentEventWorkflowProps) {
+  const [responsibleEmployeeId, setResponsibleEmployeeId] = useState("");
+
+  const {
+    data: employees = [],
+    isLoading: employeesLoading,
+    isError: employeesError,
+  } = useEquipmentEmployees();
   const {
     startPickingMutation,
     markPackedMutation,
@@ -214,7 +212,7 @@ export function EquipmentEventWorkflow({
                 className="select select-bordered w-full"
                 value={responsibleEmployeeId}
                 onChange={(event) =>
-                  onResponsibleEmployeeChange(event.target.value)
+                  setResponsibleEmployeeId(event.target.value)
                 }
                 disabled={employeesLoading || markLoadedMutation.isPending}
               >
