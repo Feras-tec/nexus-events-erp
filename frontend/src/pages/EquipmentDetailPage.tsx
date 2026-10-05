@@ -26,6 +26,7 @@ import { useEquipmentEmployees } from "../features/equipment/hooks/useEquipmentE
 import { useEquipmentEventWorkflow } from "../features/equipment/hooks/useEquipmentEventWorkflow";
 import { useEquipmentLifecycle } from "../features/equipment/hooks/useEquipmentLifecycle";
 import { useEquipmentMaintenance } from "../features/equipment/hooks/useEquipmentMaintenance";
+import { useEquipmentTransfer } from "../features/equipment/hooks/useEquipmentTransfer";
 import { apiFetch } from "../services/api";
 
 export function EquipmentDetailPage() {
@@ -147,52 +148,9 @@ export function EquipmentDetailPage() {
     equipment,
   });
 
-  const transferWarehouseMutation = useMutation({
-    mutationFn: async (toWarehouseId: string) => {
-      if (!equipment) {
-        throw new Error("Gerät wurde nicht gefunden.");
-      }
-
-      const token = await getToken();
-
-      const response = await apiFetch(
-        `/api/equipment-movements/${equipmentId}`,
-        token,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            type: "TRANSFERRED",
-            toStatus: equipment.status,
-            toWarehouseId,
-            notes: "Gerät wurde in ein anderes Lager übertragen",
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        const result = await response.json();
-        throw new Error(result.error ?? "Lagertransfer fehlgeschlagen.");
-      }
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["equipment", equipmentId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment"],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment-movements", equipmentId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["warehouses"],
-        }),
-      ]);
-    },
+  const { transferWarehouseMutation } = useEquipmentTransfer({
+    equipmentId,
+    equipment,
   });
 
   const legacyPickingResetMutation = useMutation({
