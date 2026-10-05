@@ -21,7 +21,6 @@ import { useEquipmentReservations } from "../features/equipment/hooks/useEquipme
 import { useEquipmentProducts } from "../features/equipment/hooks/useEquipmentProducts";
 import { useEquipmentWarehouses } from "../features/equipment/hooks/useEquipmentWarehouses";
 import { useEquipmentEmployees } from "../features/equipment/hooks/useEquipmentEmployees";
-import { useEquipmentEventWorkflow } from "../features/equipment/hooks/useEquipmentEventWorkflow";
 import { useEquipmentTransfer } from "../features/equipment/hooks/useEquipmentTransfer";
 import { useEquipmentReservationMovement } from "../features/equipment/hooks/useEquipmentReservationMovement";
 import { useUpdateEquipment } from "../features/equipment/hooks/useUpdateEquipment";
@@ -114,14 +113,7 @@ export function EquipmentDetailPage() {
       )
     : undefined;
 
-  const {
-    completeInspectionMutation,
-  } = useEquipmentEventWorkflow({
-    equipmentId,
-    equipment,
-    activeReservation: activeMovementReservation,
-    responsibleEmployeeId,
-  });
+
 
   const { transferWarehouseMutation } = useEquipmentTransfer({
     equipmentId,
@@ -476,11 +468,9 @@ export function EquipmentDetailPage() {
 
           {equipment.status === "INSPECTION" && (
             <EquipmentInspection
-              isPending={completeInspectionMutation.isPending}
-              isError={completeInspectionMutation.isError}
-              onComplete={(result) =>
-                completeInspectionMutation.mutate(result)
-              }
+              equipmentId={equipmentId}
+              equipment={equipment}
+              activeReservation={activeMovementReservation}
             />
           )}
 

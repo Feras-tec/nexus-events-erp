@@ -1,20 +1,33 @@
 import { motion } from "motion/react";
 
 import { Button } from "../../../components/atoms/Button";
+import { useEquipmentInspection } from "../hooks/useEquipmentInspection";
+import type {
+  EquipmentDetail,
+  EquipmentMovement,
+} from "../types/equipment.types";
 
-type InspectionResult = "AVAILABLE" | "DAMAGED" | "MAINTENANCE";
+type ActiveReservation = NonNullable<EquipmentMovement["reservation"]>;
 
 type EquipmentInspectionProps = {
-  isPending: boolean;
-  isError: boolean;
-  onComplete: (result: InspectionResult) => void;
+  equipmentId: string;
+  equipment: EquipmentDetail;
+  activeReservation: ActiveReservation | null;
 };
 
 export function EquipmentInspection({
-  isPending,
-  isError,
-  onComplete,
+  equipmentId,
+  equipment,
+  activeReservation,
 }: EquipmentInspectionProps) {
+  const { completeInspectionMutation } = useEquipmentInspection({
+    equipmentId,
+    equipment,
+    activeReservation,
+  });
+
+  const isPending = completeInspectionMutation.isPending;
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 12 }}
@@ -31,7 +44,7 @@ export function EquipmentInspection({
         <Button
           type="button"
           disabled={isPending}
-          onClick={() => onComplete("AVAILABLE")}
+          onClick={() => completeInspectionMutation.mutate("AVAILABLE")}
         >
           Einsatzbereit
         </Button>
@@ -39,7 +52,7 @@ export function EquipmentInspection({
         <Button
           type="button"
           disabled={isPending}
-          onClick={() => onComplete("DAMAGED")}
+          onClick={() => completeInspectionMutation.mutate("DAMAGED")}
         >
           Beschädigt
         </Button>
@@ -47,13 +60,13 @@ export function EquipmentInspection({
         <Button
           type="button"
           disabled={isPending}
-          onClick={() => onComplete("MAINTENANCE")}
+          onClick={() => completeInspectionMutation.mutate("MAINTENANCE")}
         >
           Wartung erforderlich
         </Button>
       </div>
 
-      {isError && (
+      {completeInspectionMutation.isError && (
         <div className="alert alert-error mt-4">
           Prüfergebnis konnte nicht gespeichert werden.
         </div>
