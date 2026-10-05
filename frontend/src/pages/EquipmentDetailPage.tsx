@@ -7,6 +7,7 @@ import { Button } from "../components/atoms/Button";
 import { DetailLayout } from "../components/templates/DetailLayout";
 import { useEquipmentDetail } from "../features/equipment/hooks/useEquipmentDetail";
 import { useEquipmentMovements } from "../features/equipment/hooks/useEquipmentMovements";
+import { useEquipmentDetailWorkflow } from "../features/equipment/hooks/useEquipmentDetailWorkflow";
 import { useEquipmentProducts } from "../features/equipment/hooks/useEquipmentProducts";
 import { useEquipmentWarehouses } from "../features/equipment/hooks/useEquipmentWarehouses";
 import { useUpdateEquipment } from "../features/equipment/hooks/useUpdateEquipment";
@@ -54,31 +55,10 @@ export function EquipmentDetailPage() {
     isError: warehousesError,
   } = useEquipmentWarehouses();
 
-  const eventWorkflowStatuses = [
-    "RESERVED",
-    "PICKING",
-    "PACKED",
-    "IN_TRANSIT",
-    "AT_EVENT",
-    "RETURNING",
-    "INSPECTION",
-  ] as const;
-
-  const isEventWorkflowActive =
-    equipment &&
-    eventWorkflowStatuses.some((status) => status === equipment.status);
-
-  const activeMovementReservation = isEventWorkflowActive
-    ? movements.find((movement) => movement.reservation)?.reservation ?? null
-    : null;
-
-  const checkedOutMovement = activeMovementReservation
-    ? movements.find(
-        (movement) =>
-          movement.type === "LOADED" &&
-          movement.reservation?.id === activeMovementReservation.id,
-      )
-    : undefined;
+  const {
+    activeMovementReservation,
+    checkedOutMovement,
+  } = useEquipmentDetailWorkflow(equipment, movements);
 
   const { updateEquipmentMutation } = useUpdateEquipment({
     equipmentId,
