@@ -9,153 +9,21 @@ import { StatusChip } from "../components/atoms/StatusChip";
 import {
   EquipmentForm,
   type EquipmentFormValues,
-  type ProductOption,
-  type WarehouseOption,
 } from "../components/organisms/EquipmentForm";
 import type { ReservationItem } from "../components/organisms/ReservationTable";
+import type {
+  EmployeesResponse,
+  ProductsResponse,
+  WarehousesResponse,
+} from "../features/equipment/types/equipment.types";
+import {
+  formatDate,
+  formatPrice,
+} from "../features/equipment/utils/equipment-formatters";
 import { DetailLayout } from "../components/templates/DetailLayout";
+import { useEquipmentDetail } from "../features/equipment/hooks/useEquipmentDetail";
+import { useEquipmentMovements } from "../features/equipment/hooks/useEquipmentMovements";
 import { apiFetch } from "../services/api";
-
-type EquipmentDetail = {
-  id: string;
-  assetNo: string;
-  manufacturerSerial?: string | null;
-  barcode?: string | null;
-  status: EquipmentFormValues["status"];
-  location?: string | null;
-  purchaseDate?: string | null;
-  purchasePrice?: string | number | null;
-  notes?: string | null;
-  createdAt: string;
-  updatedAt: string;
-  productId: string;
-  warehouseId: string;
-
-  product: ProductOption & {
-    category?: string | null;
-    description?: string | null;
-    trackingType: "SERIALIZED" | "QUANTITY";
-    usageType: "RENTAL" | "SALE" | "BOTH";
-  };
-
-  warehouse: WarehouseOption & {
-    code?: string;
-    address?: string | null;
-  };
-};
-
-type EquipmentResponse = {
-  data: EquipmentDetail;
-};
-
-type ProductsResponse = {
-  data: ProductOption[];
-};
-
-type WarehousesResponse = {
-  data: WarehouseOption[];
-};
-
-type EmployeeOption = {
-  id: string;
-  employeeNo: string;
-  firstName: string;
-  lastName: string;
-  position?: string | null;
-  status: string;
-};
-
-type EmployeesResponse = {
-  data: EmployeeOption[];
-};
-
-type EquipmentMovement = {
-  id: string;
-  type:
-    | "RECEIVED"
-    | "RESERVED"
-    | "RELEASED"
-    | "PICKED"
-    | "PACKED"
-    | "LOADED"
-    | "TRANSFERRED"
-    | "DELIVERED_TO_EVENT"
-    | "RETURNED_FROM_EVENT"
-    | "INSPECTION"
-    | "MAINTENANCE"
-    | "REPAIRED"
-    | "LOST"
-    | "RETIRED"
-    | "MANUAL_ADJUSTMENT";
-  fromStatus?: EquipmentFormValues["status"] | null;
-  toStatus: EquipmentFormValues["status"];
-  fromLocation?: string | null;
-  toLocation?: string | null;
-  notes?: string | null;
-  createdAt: string;
-
-  reservation?: {
-    id: string;
-    startDate: string;
-    endDate: string;
-    status: string;
-    event: {
-      id: string;
-      eventNo: string;
-      name: string;
-      location?: string | null;
-      customer: {
-        id: string;
-        customerNo: string;
-        companyName?: string | null;
-        firstName?: string | null;
-        lastName?: string | null;
-      };
-    };
-  } | null;
-
-  responsibleEmployee?: {
-    id: string;
-    employeeNo: string;
-    firstName: string;
-    lastName: string;
-    position?: string | null;
-  } | null;
-
-  fromWarehouse?: WarehouseOption | null;
-  toWarehouse?: WarehouseOption | null;
-};
-
-type EquipmentMovementsResponse = {
-  inventoryItem: {
-    id: string;
-    assetNo: string;
-  };
-  movements: EquipmentMovement[];
-};
-
-function formatDate(value?: string | null) {
-  if (!value) return "—";
-
-  return new Intl.DateTimeFormat("de-DE").format(new Date(value));
-}
-
-function formatPrice(value?: string | number | null) {
-  if (value === null || value === undefined || value === "") {
-    return "—";
-  }
-
-  const number = Number(value);
-
-  if (Number.isNaN(number)) {
-    return String(value);
-  }
-
-  return new Intl.NumberFormat("de-DE", {
-    style: "currency",
-    currency: "EUR",
-  }).format(number);
-}
 
 export function EquipmentDetailPage() {
   const { getToken } = useAuth();
@@ -174,21 +42,7 @@ export function EquipmentDetailPage() {
     data: equipment,
     isLoading,
     isError,
-  } = useQuery({
-    queryKey: ["equipment", equipmentId],
-    queryFn: async () => {
-      const token = await getToken();
-
-      const response = await apiFetch(
-        `/api/inventory-items/${equipmentId}`,
-        token,
-      );
-
-      const result = (await response.json()) as EquipmentResponse;
-
-      return result.data;
-    },
-  });
+  } = useEquipmentDetail(equipmentId);
 
   const {
     data: reservations = [],
@@ -207,22 +61,7 @@ export function EquipmentDetailPage() {
     data: movements = [],
     isLoading: movementsLoading,
     isError: movementsError,
-  } = useQuery({
-    queryKey: ["equipment-movements", equipmentId],
-    queryFn: async () => {
-      const token = await getToken();
-
-      const response = await apiFetch(
-        `/api/equipment-movements/${equipmentId}`,
-        token,
-      );
-
-      const result =
-        (await response.json()) as EquipmentMovementsResponse;
-
-      return result.movements;
-    },
-  });
+  } = useEquipmentMovements(equipmentId);
 
   const equipmentReservations = reservations.filter(
     (reservation) =>
@@ -283,8 +122,23 @@ export function EquipmentDetailPage() {
     },
   });
 
-  const activeMovementReservation =
-    movements.find((movement) => movement.reservation)?.reservation ?? null;
+  const eventWorkflowStatuses = [
+    "RESERVED",
+    "PICKING",
+    "PACKED",
+    "IN_TRANSIT",
+    "AT_EVENT",
+    "RETURNING",
+    "INSPECTION",
+  ] as const;
+
+  const isEventWorkflowActive =
+    equipment &&
+    eventWorkflowStatuses.some((status) => status === equipment.status);
+
+  const activeMovementReservation = isEventWorkflowActive
+    ? movements.find((movement) => movement.reservation)?.reservation ?? null
+    : null;
 
   const checkedOutMovement = activeMovementReservation
     ? movements.find(
