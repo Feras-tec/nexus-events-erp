@@ -286,6 +286,14 @@ export function EquipmentDetailPage() {
   const activeMovementReservation =
     movements.find((movement) => movement.reservation)?.reservation ?? null;
 
+  const checkedOutMovement = activeMovementReservation
+    ? movements.find(
+        (movement) =>
+          movement.type === "LOADED" &&
+          movement.reservation?.id === activeMovementReservation.id,
+      )
+    : undefined;
+
   const transferWarehouseMutation = useMutation({
     mutationFn: async (toWarehouseId: string) => {
       if (!equipment) {
@@ -940,6 +948,23 @@ export function EquipmentDetailPage() {
                         dateStyle: "medium",
                         timeStyle: "short",
                       }).format(new Date(activeMovementReservation.endDate))}
+                    </dd>
+                  </div>
+                )}
+
+              {checkedOutMovement &&
+                ["IN_TRANSIT", "AT_EVENT", "RETURNING", "INSPECTION"].includes(
+                  equipment.status,
+                ) && (
+                  <div>
+                    <dt className="text-sm text-base-content/60">
+                      Ausgecheckt am
+                    </dt>
+                    <dd className="font-medium">
+                      {new Intl.DateTimeFormat("de-DE", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      }).format(new Date(checkedOutMovement.createdAt))}
                     </dd>
                   </div>
                 )}
