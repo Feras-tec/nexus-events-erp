@@ -166,37 +166,6 @@ export function useEquipmentEventWorkflow({
     onSuccess: invalidateWorkflowQueries,
   });
 
-  const completeInspectionMutation = useMutation({
-    mutationFn: async (
-      result: "AVAILABLE" | "DAMAGED" | "MAINTENANCE",
-    ) => {
-      const reservation = requireReservation();
-
-      const notes = {
-        AVAILABLE: "Prüfung abgeschlossen – Gerät ist einsatzbereit",
-        DAMAGED: "Prüfung abgeschlossen – Gerät ist beschädigt",
-        MAINTENANCE: "Prüfung abgeschlossen – Wartung erforderlich",
-      }[result];
-
-      return createMovement({
-        type:
-          result === "MAINTENANCE"
-            ? "MAINTENANCE"
-            : "INSPECTION",
-        toStatus: result,
-        ...(result === "AVAILABLE"
-          ? {
-              toLocation: `Lagerbereich – ${
-                equipment?.warehouse.name ?? "Lager"
-              }`,
-            }
-          : {}),
-        reservationId: reservation.id,
-        notes,
-      });
-    },
-    onSuccess: invalidateWorkflowQueries,
-  });
 
   return {
     startPickingMutation,
@@ -205,6 +174,5 @@ export function useEquipmentEventWorkflow({
     markDeliveredMutation,
     startReturnMutation,
     startInspectionMutation,
-    completeInspectionMutation,
   };
 }
