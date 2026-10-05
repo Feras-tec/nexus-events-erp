@@ -28,6 +28,7 @@ import { useEquipmentLifecycle } from "../features/equipment/hooks/useEquipmentL
 import { useEquipmentMaintenance } from "../features/equipment/hooks/useEquipmentMaintenance";
 import { useEquipmentTransfer } from "../features/equipment/hooks/useEquipmentTransfer";
 import { useEquipmentLegacyRecovery } from "../features/equipment/hooks/useEquipmentLegacyRecovery";
+import { useEquipmentReservationMovement } from "../features/equipment/hooks/useEquipmentReservationMovement";
 import { apiFetch } from "../services/api";
 
 export function EquipmentDetailPage() {
@@ -160,40 +161,8 @@ export function EquipmentDetailPage() {
     activeReservation: activeMovementReservation,
   });
 
-  const createMovementMutation = useMutation({
-    mutationFn: async (reservationId: string) => {
-      const token = await getToken();
-
-      const response = await apiFetch(
-        `/api/equipment-movements/${equipmentId}`,
-        token,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            type: "RESERVED",
-            toStatus: "RESERVED",
-            reservationId,
-            notes: "Für Event reserviert",
-          }),
-        },
-      );
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["equipment", equipmentId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment"],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment-movements", equipmentId],
-        }),
-      ]);
-    },
+  const { createMovementMutation } = useEquipmentReservationMovement({
+    equipmentId,
   });
 
   const updateEquipmentMutation = useMutation({
