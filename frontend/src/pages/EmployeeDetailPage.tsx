@@ -1,9 +1,4 @@
 import { useState } from "react";
-import { useAuth } from "@clerk/react";
-import {
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -17,17 +12,15 @@ import {
 import { EmploymentPeriodForm } from "../components/organisms/EmploymentPeriodForm";
 import { EmployeeDocumentForm } from "../components/organisms/EmployeeDocumentForm";
 import { DetailLayout } from "../components/templates/DetailLayout";
-import { apiFetch } from "../services/api";
 import { useEmployeeDetail } from "../features/employees/hooks/useEmployeeDetail";
 import { useEmployeeOptions } from "../features/employees/hooks/useEmployeeOptions";
 import { useUpdateEmployee } from "../features/employees/hooks/useUpdateEmployee";
 import { useEmployeeDocuments } from "../features/employees/hooks/useEmployeeDocuments";
 import { useEmployeeEmploymentPeriods } from "../features/employees/hooks/useEmployeeEmploymentPeriods";
+import { useEmployeeStatus } from "../features/employees/hooks/useEmployeeStatus";
 
 
 export function EmployeeDetailPage() {
-  const { getToken } = useAuth();
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -94,63 +87,12 @@ export function EmployeeDetailPage() {
     },
   });
 
-  const deactivateEmployeeMutation = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      const response = await apiFetch(
-        `/api/employees/${employeeId}/deactivate`,
-        token,
-        {
-          method: "PATCH",
-        },
-      );
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["employees", employeeId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["employees"],
-        }),
-      ]);
-
-      setShowDeactivateDialog(false);
-    },
-  });
-
-  const activateEmployeeMutation = useMutation({
-    mutationFn: async () => {
-      const token = await getToken();
-
-      const response = await apiFetch(
-        `/api/employees/${employeeId}`,
-        token,
-        {
-          method: "PATCH",
-          body: JSON.stringify({
-            status: "ACTIVE",
-          }),
-        },
-      );
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["employees", employeeId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["employees"],
-        }),
-      ]);
-    },
+  const {
+    deactivateEmployeeMutation,
+    activateEmployeeMutation,
+  } = useEmployeeStatus({
+    employeeId,
+    onDeactivateSuccess: () => setShowDeactivateDialog(false),
   });
 
   if (isLoading) {
