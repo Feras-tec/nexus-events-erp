@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@clerk/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -10,11 +10,7 @@ import {
   EquipmentForm,
   type EquipmentFormValues,
 } from "../components/organisms/EquipmentForm";
-import type { ReservationItem } from "../components/organisms/ReservationTable";
 import type {
-  EmployeesResponse,
-  ProductsResponse,
-  WarehousesResponse,
 } from "../features/equipment/types/equipment.types";
 import {
   formatDate,
@@ -23,6 +19,10 @@ import {
 import { DetailLayout } from "../components/templates/DetailLayout";
 import { useEquipmentDetail } from "../features/equipment/hooks/useEquipmentDetail";
 import { useEquipmentMovements } from "../features/equipment/hooks/useEquipmentMovements";
+import { useEquipmentReservations } from "../features/equipment/hooks/useEquipmentReservations";
+import { useEquipmentProducts } from "../features/equipment/hooks/useEquipmentProducts";
+import { useEquipmentWarehouses } from "../features/equipment/hooks/useEquipmentWarehouses";
+import { useEquipmentEmployees } from "../features/equipment/hooks/useEquipmentEmployees";
 import { apiFetch } from "../services/api";
 
 export function EquipmentDetailPage() {
@@ -47,15 +47,7 @@ export function EquipmentDetailPage() {
   const {
     data: reservations = [],
     isLoading: reservationsLoading,
-  } = useQuery({
-    queryKey: ["reservations"],
-    queryFn: async () => {
-      const token = await getToken();
-      const response = await apiFetch("/api/reservations", token);
-
-      return (await response.json()) as ReservationItem[];
-    },
-  });
+  } = useEquipmentReservations();
 
   const {
     data: movements = [],
@@ -78,49 +70,19 @@ export function EquipmentDetailPage() {
     data: products = [],
     isLoading: productsLoading,
     isError: productsError,
-  } = useQuery({
-    queryKey: ["products"],
-    queryFn: async () => {
-      const token = await getToken();
-
-      const response = await apiFetch("/api/products", token);
-      const result = (await response.json()) as ProductsResponse;
-
-      return result.data;
-    },
-  });
+  } = useEquipmentProducts();
 
   const {
     data: warehouses = [],
     isLoading: warehousesLoading,
     isError: warehousesError,
-  } = useQuery({
-    queryKey: ["warehouses"],
-    queryFn: async () => {
-      const token = await getToken();
-
-      const response = await apiFetch("/api/warehouses", token);
-      const result = (await response.json()) as WarehousesResponse;
-
-      return result.data;
-    },
-  });
+  } = useEquipmentWarehouses();
 
   const {
     data: employees = [],
     isLoading: employeesLoading,
     isError: employeesError,
-  } = useQuery({
-    queryKey: ["employees"],
-    queryFn: async () => {
-      const token = await getToken();
-
-      const response = await apiFetch("/api/employees", token);
-      const result = (await response.json()) as EmployeesResponse;
-
-      return result.data.filter((employee) => employee.status === "ACTIVE");
-    },
-  });
+  } = useEquipmentEmployees();
 
   const eventWorkflowStatuses = [
     "RESERVED",
