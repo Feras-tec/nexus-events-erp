@@ -3,54 +3,18 @@ import { useState, type FormEvent } from "react";
 import { Button } from "../atoms/Button";
 import { Input } from "../atoms/Input";
 import { Select } from "../atoms/Select";
+import { InvoiceItems } from "../../features/invoices/components/InvoiceItems";
 
-type CustomerOption = {
-  id: string;
-  customerNo: string;
-  companyName?: string | null;
-  firstName?: string | null;
-  lastName?: string | null;
-};
+import type {
+  CustomerOption,
+  EventOption,
+  InvoiceFormData,
+  InvoiceItem,
+  ProductOption,
+  QuoteOption,
+} from "../../features/invoices/types/invoice.types";
 
-type EventOption = {
-  id: string;
-  eventNo: string;
-  name: string;
-};
-
-type QuoteOption = {
-  id: string;
-  quoteNo: string;
-};
-
-type ProductOption = {
-  id: string;
-  productNo: string;
-  name: string;
-};
-
-type InvoiceItem = {
-  type: string;
-  description: string;
-  quantity: number;
-  unitPrice: number;
-  discount: number;
-  productId?: string;
-};
-
-export type InvoiceFormData = {
-  invoiceNo: string;
-  status: string;
-  issueDate: string;
-  dueDate: string;
-  notes: string;
-  customerId: string;
-  eventId?: string;
-  quoteId?: string;
-  tax: number;
-  discount: number;
-  items: InvoiceItem[];
-};
+export type { InvoiceFormData } from "../../features/invoices/types/invoice.types";
 
 type InvoiceFormProps = {
   customers: CustomerOption[];
@@ -60,14 +24,6 @@ type InvoiceFormProps = {
   loading?: boolean;
   onSubmit: (data: InvoiceFormData) => void;
 };
-
-const itemTypes = [
-  "EQUIPMENT",
-  "SERVICE",
-  "TRANSPORT",
-  "PERSONNEL",
-  "OTHER",
-];
 
 const invoiceStatuses = [
   "DRAFT",
@@ -117,37 +73,6 @@ export function InvoiceForm({
     }));
   }
 
-  function updateItem(
-    index: number,
-    field: keyof InvoiceItem,
-    value: string | number,
-  ) {
-    setFormData((current) => ({
-      ...current,
-      items: current.items.map((item, itemIndex) =>
-        itemIndex === index
-          ? { ...item, [field]: value }
-          : item,
-      ),
-    }));
-  }
-
-  function addItem() {
-    setFormData((current) => ({
-      ...current,
-      items: [...current.items, { ...emptyItem }],
-    }));
-  }
-
-  function removeItem(index: number) {
-    setFormData((current) => ({
-      ...current,
-      items: current.items.filter(
-        (_, itemIndex) => itemIndex !== index,
-      ),
-    }));
-  }
-
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -180,11 +105,6 @@ export function InvoiceForm({
   const quoteOptions = quotes.map((quote) => ({
     value: quote.id,
     label: quote.quoteNo,
-  }));
-
-  const productOptions = products.map((product) => ({
-    value: product.id,
-    label: `${product.productNo} – ${product.name}`,
   }));
 
   return (
@@ -287,125 +207,34 @@ export function InvoiceForm({
         </div>
       </section>
 
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">
-            Rechnungspositionen
-          </h2>
-
-          <Button type="button" variant="ghost" onClick={addItem}>
-            + Position
-          </Button>
-        </div>
-
-        {formData.items.map((item, index) => (
-          <div
-            key={index}
-            className="rounded-box border border-base-300 bg-base-100 p-5"
-          >
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <Select
-                label="Typ"
-                value={item.type}
-                options={itemTypes.map((type) => ({
-                  value: type,
-                  label: type,
-                }))}
-                onChange={(event) =>
-                  updateItem(index, "type", event.target.value)
-                }
-              />
-
-              <Select
-                label="Produkt"
-                value={item.productId ?? ""}
-                options={productOptions}
-                placeholder="Kein Produkt"
-                onChange={(event) =>
-                  updateItem(
-                    index,
-                    "productId",
-                    event.target.value,
-                  )
-                }
-              />
-
-              <Input
-                label="Beschreibung"
-                value={item.description}
-                required
-                maxLength={500}
-                onChange={(event) =>
-                  updateItem(
-                    index,
-                    "description",
-                    event.target.value,
-                  )
-                }
-              />
-
-              <Input
-                type="number"
-                label="Menge"
-                min={0.01}
-                step="0.01"
-                value={item.quantity}
-                required
-                onChange={(event) =>
-                  updateItem(
-                    index,
-                    "quantity",
-                    Number(event.target.value),
-                  )
-                }
-              />
-
-              <Input
-                type="number"
-                label="Einzelpreis"
-                min={0}
-                step="0.01"
-                value={item.unitPrice}
-                required
-                onChange={(event) =>
-                  updateItem(
-                    index,
-                    "unitPrice",
-                    Number(event.target.value),
-                  )
-                }
-              />
-
-              <Input
-                type="number"
-                label="Rabatt %"
-                min={0}
-                max={100}
-                value={item.discount}
-                onChange={(event) =>
-                  updateItem(
-                    index,
-                    "discount",
-                    Number(event.target.value),
-                  )
-                }
-              />
-            </div>
-
-            {formData.items.length > 1 && (
-              <div className="mt-4 flex justify-end">
-                <Button
-                  type="button"
-                  variant="error"
-                  onClick={() => removeItem(index)}
-                >
-                  Position entfernen
-                </Button>
-              </div>
-            )}
-          </div>
-        ))}
-      </section>
+      <InvoiceItems
+        items={formData.items}
+        products={products}
+        onAdd={() =>
+          setFormData((current) => ({
+            ...current,
+            items: [...current.items, { ...emptyItem }],
+          }))
+        }
+        onRemove={(index) =>
+          setFormData((current) => ({
+            ...current,
+            items: current.items.filter(
+              (_, itemIndex) => itemIndex !== index,
+            ),
+          }))
+        }
+        onUpdate={(index, field, value) =>
+          setFormData((current) => ({
+            ...current,
+            items: current.items.map((item, itemIndex) =>
+              itemIndex === index
+                ? { ...item, [field]: value }
+                : item,
+            ),
+          }))
+        }
+      />
 
       <div>
         <label
