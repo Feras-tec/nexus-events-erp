@@ -22,13 +22,13 @@ import { useEquipmentProducts } from "../features/equipment/hooks/useEquipmentPr
 import { useEquipmentWarehouses } from "../features/equipment/hooks/useEquipmentWarehouses";
 import { useEquipmentEmployees } from "../features/equipment/hooks/useEquipmentEmployees";
 import { useEquipmentEventWorkflow } from "../features/equipment/hooks/useEquipmentEventWorkflow";
-import { useEquipmentLifecycle } from "../features/equipment/hooks/useEquipmentLifecycle";
 import { useEquipmentTransfer } from "../features/equipment/hooks/useEquipmentTransfer";
 import { useEquipmentLegacyRecovery } from "../features/equipment/hooks/useEquipmentLegacyRecovery";
 import { useEquipmentReservationMovement } from "../features/equipment/hooks/useEquipmentReservationMovement";
 import { useUpdateEquipment } from "../features/equipment/hooks/useUpdateEquipment";
 import { EquipmentMovementHistory } from "../features/equipment/components/EquipmentMovementHistory";
 import { EquipmentMaintenance } from "../features/equipment/components/EquipmentMaintenance";
+import { EquipmentLifecycle } from "../features/equipment/components/EquipmentLifecycle";
 
 export function EquipmentDetailPage() {
   const navigate = useNavigate();
@@ -126,16 +126,6 @@ export function EquipmentDetailPage() {
     equipment,
     activeReservation: activeMovementReservation,
     responsibleEmployeeId,
-  });
-
-  const {
-    reportLostMutation,
-    recoverLostMutation,
-    retireEquipmentMutation,
-  } = useEquipmentLifecycle({
-    equipmentId,
-    equipment,
-    activeReservation: activeMovementReservation,
   });
 
   const { transferWarehouseMutation } = useEquipmentTransfer({
@@ -489,121 +479,11 @@ export function EquipmentDetailPage() {
             equipment={equipment}
           />
 
-          {["AVAILABLE", "IN_TRANSIT", "AT_EVENT", "RETURNING"].includes(
-            equipment.status,
-          ) && (
-            <motion.section
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-box border border-error/30 bg-base-100 p-6 lg:col-span-2"
-            >
-              <h2 className="text-lg font-semibold">
-                Verlust melden
-              </h2>
-
-              <p className="mt-1 text-sm text-base-content/60">
-                Wenn das Gerät nicht mehr auffindbar ist, kann es als verloren
-                gemeldet werden.
-              </p>
-
-              <div className="mt-5">
-                <Button
-                  type="button"
-                  disabled={reportLostMutation.isPending}
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        "Gerät wirklich als verloren melden?",
-                      )
-                    ) {
-                      reportLostMutation.mutate();
-                    }
-                  }}
-                >
-                  {reportLostMutation.isPending
-                    ? "Wird gemeldet..."
-                    : "Als verloren melden"}
-                </Button>
-              </div>
-
-              {reportLostMutation.isError && (
-                <div className="alert alert-error mt-4">
-                  {reportLostMutation.error instanceof Error
-                    ? reportLostMutation.error.message
-                    : "Gerät konnte nicht als verloren gemeldet werden."}
-                </div>
-              )}
-            </motion.section>
-          )}
-
-          {equipment.status === "LOST" && (
-            <motion.section
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-box border border-error/40 bg-base-100 p-6 lg:col-span-2"
-            >
-              <h2 className="text-lg font-semibold">
-                Gerät als verloren gemeldet
-              </h2>
-
-              <p className="mt-1 text-sm text-base-content/60">
-                Das Gerät ist derzeit als verloren registriert. Es kann als
-                wiedergefunden markiert oder dauerhaft ausgemustert werden.
-              </p>
-
-              <div className="mt-5 flex flex-wrap gap-3">
-                <Button
-                  type="button"
-                  disabled={
-                    recoverLostMutation.isPending ||
-                    retireEquipmentMutation.isPending
-                  }
-                  onClick={() => recoverLostMutation.mutate()}
-                >
-                  {recoverLostMutation.isPending
-                    ? "Wird zurückgeführt..."
-                    : "Wiedergefunden"}
-                </Button>
-
-                <Button
-                  type="button"
-                  disabled={
-                    recoverLostMutation.isPending ||
-                    retireEquipmentMutation.isPending
-                  }
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        "Gerät wirklich dauerhaft ausmustern? Dieser Status kann nicht rückgängig gemacht werden.",
-                      )
-                    ) {
-                      retireEquipmentMutation.mutate();
-                    }
-                  }}
-                >
-                  {retireEquipmentMutation.isPending
-                    ? "Wird ausgemustert..."
-                    : "Ausmustern"}
-                </Button>
-              </div>
-
-              {recoverLostMutation.isError && (
-                <div className="alert alert-error mt-4">
-                  {recoverLostMutation.error instanceof Error
-                    ? recoverLostMutation.error.message
-                    : "Gerät konnte nicht zurückgeführt werden."}
-                </div>
-              )}
-
-              {retireEquipmentMutation.isError && (
-                <div className="alert alert-error mt-4">
-                  {retireEquipmentMutation.error instanceof Error
-                    ? retireEquipmentMutation.error.message
-                    : "Gerät konnte nicht ausgemustert werden."}
-                </div>
-              )}
-            </motion.section>
-          )}
+          <EquipmentLifecycle
+            equipmentId={equipmentId}
+            equipment={equipment}
+            activeReservation={activeMovementReservation}
+          />
 
           {equipment.status === "INSPECTION" && (
             <motion.section
