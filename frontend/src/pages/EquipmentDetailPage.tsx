@@ -826,7 +826,8 @@ export function EquipmentDetailPage() {
           )}
         </AnimatePresence>
 
-        <section className="mb-6 rounded-box border border-base-300 bg-base-100 p-6">
+        {equipment.status === "AVAILABLE" && (
+          <section className="mb-6 rounded-box border border-base-300 bg-base-100 p-6">
           <div className="mb-4">
             <h2 className="text-lg font-semibold">Lagertransfer</h2>
             <p className="text-sm text-base-content/60">
@@ -889,7 +890,8 @@ export function EquipmentDetailPage() {
               Gerät wurde erfolgreich umgelagert.
             </div>
           )}
-        </section>
+          </section>
+        )}
 
         <div className="grid gap-6 lg:grid-cols-2">
           <section className="rounded-box border border-base-300 bg-base-100 p-6">

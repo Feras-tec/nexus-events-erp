@@ -116,6 +116,13 @@ export async function createEquipmentMovement(req: Request, res: Response) {
 
     // Internen Lagertransfer prüfen
     if (type === "TRANSFERRED") {
+      if (inventoryItem.status !== "AVAILABLE") {
+        return res.status(409).json({
+          error: "Only available equipment can be transferred between warehouses",
+          currentStatus: inventoryItem.status,
+        });
+      }
+
       if (toStatus !== inventoryItem.status) {
         return res.status(409).json({
           error: "Warehouse transfer cannot change equipment status",
