@@ -925,6 +925,23 @@ export function EquipmentDetailPage() {
                 <dd>{equipment.location ?? "—"}</dd>
               </div>
 
+              {activeMovementReservation &&
+                ["RESERVED", "PICKING", "PACKED", "IN_TRANSIT", "AT_EVENT", "RETURNING", "INSPECTION"].includes(
+                  equipment.status,
+                ) && (
+                  <div>
+                    <dt className="text-sm text-base-content/60">
+                      Erwartete Rückgabe
+                    </dt>
+                    <dd className="font-medium">
+                      {new Intl.DateTimeFormat("de-DE", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      }).format(new Date(activeMovementReservation.endDate))}
+                    </dd>
+                  </div>
+                )}
+
               <div>
                 <dt className="text-sm text-base-content/60">Kaufdatum</dt>
                 <dd>{formatDate(equipment.purchaseDate)}</dd>
