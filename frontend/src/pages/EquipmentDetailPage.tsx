@@ -27,6 +27,7 @@ import { useEquipmentEventWorkflow } from "../features/equipment/hooks/useEquipm
 import { useEquipmentLifecycle } from "../features/equipment/hooks/useEquipmentLifecycle";
 import { useEquipmentMaintenance } from "../features/equipment/hooks/useEquipmentMaintenance";
 import { useEquipmentTransfer } from "../features/equipment/hooks/useEquipmentTransfer";
+import { useEquipmentLegacyRecovery } from "../features/equipment/hooks/useEquipmentLegacyRecovery";
 import { apiFetch } from "../services/api";
 
 export function EquipmentDetailPage() {
@@ -153,62 +154,10 @@ export function EquipmentDetailPage() {
     equipment,
   });
 
-  const legacyPickingResetMutation = useMutation({
-    mutationFn: async () => {
-      if (!equipment || equipment.status !== "PICKING") {
-        throw new Error("Gerät befindet sich nicht in Kommissionierung.");
-      }
-
-      if (activeMovementReservation) {
-        throw new Error(
-          "Korrektur nicht erlaubt: Eine Reservierung ist bereits verknüpft.",
-        );
-      }
-
-      const token = await getToken();
-
-      const response = await apiFetch(
-        `/api/equipment-movements/${equipmentId}`,
-        token,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            type: "MANUAL_ADJUSTMENT",
-            toStatus: "AVAILABLE",
-            toLocation: `Lagerbereich – ${equipment.warehouse.name}`,
-            notes:
-              "Legacy-Datenkorrektur: PICKING-Bewegung ohne verknüpfte Reservierung zurückgesetzt",
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        const result = await response.json().catch(() => null);
-
-        throw new Error(
-          result?.error ?? "Legacy-Datenkorrektur fehlgeschlagen.",
-        );
-      }
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["equipment", equipmentId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment"],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment-movements", equipmentId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["reservations"],
-        }),
-      ]);
-    },
+  const { legacyPickingResetMutation } = useEquipmentLegacyRecovery({
+    equipmentId,
+    equipment,
+    activeReservation: activeMovementReservation,
   });
 
   const createMovementMutation = useMutation({
