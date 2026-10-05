@@ -1,11 +1,8 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 
-import {
-  EquipmentForm,
-  type EquipmentFormValues,
-} from "../components/organisms/EquipmentForm";
+import type { EquipmentFormValues } from "../components/organisms/EquipmentForm";
 import { Button } from "../components/atoms/Button";
 import { DetailLayout } from "../components/templates/DetailLayout";
 import { useEquipmentDetail } from "../features/equipment/hooks/useEquipmentDetail";
@@ -22,6 +19,7 @@ import { EquipmentTransfer } from "../features/equipment/components/EquipmentTra
 import { EquipmentOverview } from "../features/equipment/components/EquipmentOverview";
 import { EquipmentProductWarehouse } from "../features/equipment/components/EquipmentProductWarehouse";
 import { EquipmentReservationStart } from "../features/equipment/components/EquipmentReservationStart";
+import { EquipmentEditPanel } from "../features/equipment/components/EquipmentEditPanel";
 
 export function EquipmentDetailPage() {
   const navigate = useNavigate();
@@ -159,48 +157,20 @@ export function EquipmentDetailPage() {
           </>
         }
       >
-        <AnimatePresence>
-          {isEditing && (
-            <motion.div
-              initial={{ opacity: 0, y: -12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.2 }}
-              className="mb-6 rounded-box border border-base-300 bg-base-100 p-6"
-            >
-              {formDataLoading && (
-                <div className="flex justify-center py-8">
-                  <span className="loading loading-spinner loading-lg" />
-                </div>
-              )}
-
-              {formDataError && (
-                <div role="alert" className="alert alert-error">
-                  Produkte oder Lager konnten nicht geladen werden.
-                </div>
-              )}
-
-              {!formDataLoading && !formDataError && (
-                <EquipmentForm
-                  mode="edit"
-                  products={products}
-                  warehouses={warehouses}
-                  initialValues={initialValues}
-                  loading={updateEquipmentMutation.isPending}
-                  onSubmit={(data) => updateEquipmentMutation.mutate(data)}
-                />
-              )}
-
-              {updateEquipmentMutation.isError && (
-                <div role="alert" className="alert alert-error mt-4">
-                  Änderungen konnten nicht gespeichert werden.
-                </div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <EquipmentEditPanel
+          isEditing={isEditing}
+          initialValues={initialValues}
+          products={products}
+          warehouses={warehouses}
+          dataLoading={formDataLoading}
+          dataError={formDataError}
+          loading={updateEquipmentMutation.isPending}
+          updateError={updateEquipmentMutation.isError}
+          onSubmit={(data) => updateEquipmentMutation.mutate(data)}
+        />
 
         <EquipmentTransfer
+
           equipmentId={equipmentId}
           equipment={equipment}
         />
