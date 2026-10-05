@@ -29,6 +29,7 @@ import { useUpdateEquipment } from "../features/equipment/hooks/useUpdateEquipme
 import { EquipmentMovementHistory } from "../features/equipment/components/EquipmentMovementHistory";
 import { EquipmentMaintenance } from "../features/equipment/components/EquipmentMaintenance";
 import { EquipmentLifecycle } from "../features/equipment/components/EquipmentLifecycle";
+import { EquipmentInspection } from "../features/equipment/components/EquipmentInspection";
 
 export function EquipmentDetailPage() {
   const navigate = useNavigate();
@@ -486,57 +487,13 @@ export function EquipmentDetailPage() {
           />
 
           {equipment.status === "INSPECTION" && (
-            <motion.section
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-box border border-base-300 bg-base-100 p-6 lg:col-span-2"
-            >
-              <h2 className="text-lg font-semibold">
-                Prüfung abschließen
-              </h2>
-
-              <p className="mt-1 text-sm text-base-content/60">
-                Ergebnis der Geräteprüfung auswählen.
-              </p>
-
-              <div className="mt-5 flex flex-wrap gap-3">
-                <Button
-                  type="button"
-                  disabled={completeInspectionMutation.isPending}
-                  onClick={() =>
-                    completeInspectionMutation.mutate("AVAILABLE")
-                  }
-                >
-                  Einsatzbereit
-                </Button>
-
-                <Button
-                  type="button"
-                  disabled={completeInspectionMutation.isPending}
-                  onClick={() =>
-                    completeInspectionMutation.mutate("DAMAGED")
-                  }
-                >
-                  Beschädigt
-                </Button>
-
-                <Button
-                  type="button"
-                  disabled={completeInspectionMutation.isPending}
-                  onClick={() =>
-                    completeInspectionMutation.mutate("MAINTENANCE")
-                  }
-                >
-                  Wartung erforderlich
-                </Button>
-              </div>
-
-              {completeInspectionMutation.isError && (
-                <div className="alert alert-error mt-4">
-                  Prüfergebnis konnte nicht gespeichert werden.
-                </div>
-              )}
-            </motion.section>
+            <EquipmentInspection
+              isPending={completeInspectionMutation.isPending}
+              isError={completeInspectionMutation.isError}
+              onComplete={(result) =>
+                completeInspectionMutation.mutate(result)
+              }
+            />
           )}
 
           {equipment.status === "RETURNING" && (
