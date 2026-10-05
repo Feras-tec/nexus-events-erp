@@ -139,7 +139,7 @@ export async function getReservations(_req: Request, res: Response) {
         },
       },
       orderBy: {
-        startDate: "asc",
+        createdAt: "desc",
       },
     });
 
