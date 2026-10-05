@@ -23,12 +23,12 @@ import { useEquipmentWarehouses } from "../features/equipment/hooks/useEquipment
 import { useEquipmentEmployees } from "../features/equipment/hooks/useEquipmentEmployees";
 import { useEquipmentEventWorkflow } from "../features/equipment/hooks/useEquipmentEventWorkflow";
 import { useEquipmentLifecycle } from "../features/equipment/hooks/useEquipmentLifecycle";
-import { useEquipmentMaintenance } from "../features/equipment/hooks/useEquipmentMaintenance";
 import { useEquipmentTransfer } from "../features/equipment/hooks/useEquipmentTransfer";
 import { useEquipmentLegacyRecovery } from "../features/equipment/hooks/useEquipmentLegacyRecovery";
 import { useEquipmentReservationMovement } from "../features/equipment/hooks/useEquipmentReservationMovement";
 import { useUpdateEquipment } from "../features/equipment/hooks/useUpdateEquipment";
 import { EquipmentMovementHistory } from "../features/equipment/components/EquipmentMovementHistory";
+import { EquipmentMaintenance } from "../features/equipment/components/EquipmentMaintenance";
 
 export function EquipmentDetailPage() {
   const navigate = useNavigate();
@@ -136,15 +136,6 @@ export function EquipmentDetailPage() {
     equipmentId,
     equipment,
     activeReservation: activeMovementReservation,
-  });
-
-  const {
-    startMaintenanceMutation,
-    completeRepairMutation,
-    returnRepairedToAvailableMutation,
-  } = useEquipmentMaintenance({
-    equipmentId,
-    equipment,
   });
 
   const { transferWarehouseMutation } = useEquipmentTransfer({
@@ -493,113 +484,10 @@ export function EquipmentDetailPage() {
             </dl>
           </section>
 
-          {equipment.status === "REPAIRED" && (
-            <motion.section
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-box border border-success/30 bg-base-100 p-6 lg:col-span-2"
-            >
-              <h2 className="text-lg font-semibold">
-                Reparatur abgeschlossen
-              </h2>
-
-              <p className="mt-1 text-sm text-base-content/60">
-                Das reparierte Gerät prüfen und wieder für den Einsatz freigeben.
-              </p>
-
-              <div className="mt-5">
-                <Button
-                  type="button"
-                  disabled={returnRepairedToAvailableMutation.isPending}
-                  onClick={() => returnRepairedToAvailableMutation.mutate()}
-                >
-                  {returnRepairedToAvailableMutation.isPending
-                    ? "Wird freigegeben..."
-                    : "Gerät freigeben"}
-                </Button>
-              </div>
-
-              {returnRepairedToAvailableMutation.isError && (
-                <div className="alert alert-error mt-4">
-                  {returnRepairedToAvailableMutation.error instanceof Error
-                    ? returnRepairedToAvailableMutation.error.message
-                    : "Gerät konnte nicht freigegeben werden."}
-                </div>
-              )}
-            </motion.section>
-          )}
-
-          {equipment.status === "MAINTENANCE" && (
-            <motion.section
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-box border border-warning/30 bg-base-100 p-6 lg:col-span-2"
-            >
-              <h2 className="text-lg font-semibold">
-                Gerät in Wartung
-              </h2>
-
-              <p className="mt-1 text-sm text-base-content/60">
-                Wartung oder Reparatur des Geräts abschließen.
-              </p>
-
-              <div className="mt-5">
-                <Button
-                  type="button"
-                  disabled={completeRepairMutation.isPending}
-                  onClick={() => completeRepairMutation.mutate()}
-                >
-                  {completeRepairMutation.isPending
-                    ? "Wird abgeschlossen..."
-                    : "Reparatur abschließen"}
-                </Button>
-              </div>
-
-              {completeRepairMutation.isError && (
-                <div className="alert alert-error mt-4">
-                  {completeRepairMutation.error instanceof Error
-                    ? completeRepairMutation.error.message
-                    : "Reparatur konnte nicht abgeschlossen werden."}
-                </div>
-              )}
-            </motion.section>
-          )}
-
-          {equipment.status === "DAMAGED" && (
-            <motion.section
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-box border border-error/30 bg-base-100 p-6 lg:col-span-2"
-            >
-              <h2 className="text-lg font-semibold">
-                Beschädigtes Gerät
-              </h2>
-
-              <p className="mt-1 text-sm text-base-content/60">
-                Das Gerät wurde bei der Prüfung als beschädigt eingestuft.
-              </p>
-
-              <div className="mt-5">
-                <Button
-                  type="button"
-                  disabled={startMaintenanceMutation.isPending}
-                  onClick={() => startMaintenanceMutation.mutate()}
-                >
-                  {startMaintenanceMutation.isPending
-                    ? "Wird übergeben..."
-                    : "Zur Wartung übergeben"}
-                </Button>
-              </div>
-
-              {startMaintenanceMutation.isError && (
-                <div className="alert alert-error mt-4">
-                  {startMaintenanceMutation.error instanceof Error
-                    ? startMaintenanceMutation.error.message
-                    : "Gerät konnte nicht zur Wartung übergeben werden."}
-                </div>
-              )}
-            </motion.section>
-          )}
+          <EquipmentMaintenance
+            equipmentId={equipmentId}
+            equipment={equipment}
+          />
 
           {["AVAILABLE", "IN_TRANSIT", "AT_EVENT", "RETURNING"].includes(
             equipment.status,
