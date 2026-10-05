@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useAuth } from "@clerk/react";
 import {
   useMutation,
-  useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
@@ -13,8 +12,6 @@ import { StatusChip } from "../components/atoms/StatusChip";
 import { ConfirmDeleteDialog } from "../components/molecules/ConfirmDeleteDialog";
 import {
   EmployeeForm,
-  type BranchOption,
-  type DepartmentOption,
   type EmployeeFormValues,
 } from "../components/organisms/EmployeeForm";
 import {
@@ -27,78 +24,9 @@ import {
 } from "../components/organisms/EmployeeDocumentForm";
 import { DetailLayout } from "../components/templates/DetailLayout";
 import { apiFetch } from "../services/api";
+import { useEmployeeDetail } from "../features/employees/hooks/useEmployeeDetail";
+import { useEmployeeOptions } from "../features/employees/hooks/useEmployeeOptions";
 
-type EmployeeDetail = {
-  id: string;
-  employeeNo: string;
-  firstName: string;
-  lastName: string;
-  email?: string | null;
-  phone?: string | null;
-  birthDate?: string | null;
-  nationality?: string | null;
-  position?: string | null;
-  status: "ACTIVE" | "INACTIVE" | "ON_LEAVE" | "SUSPENDED";
-
-  branch: {
-    id: string;
-    code: string;
-    name: string;
-    city: string;
-    isActive: boolean;
-    company?: {
-      id: string;
-      name: string;
-    };
-  };
-
-  department?: {
-    id: string;
-    name: string;
-    branchId: string;
-    isActive: boolean;
-  } | null;
-
-  employmentPeriods: {
-    id: string;
-    startDate: string;
-    endDate?: string | null;
-    position?: string | null;
-    reason?: string | null;
-    createdAt: string;
-    updatedAt: string;
-    employeeId: string;
-  }[];
-  documents: {
-    id: string;
-    type:
-      | "RESIDENCE_PERMIT"
-      | "WORK_PERMIT"
-      | "PASSPORT"
-      | "CONTRACT"
-      | "OTHER";
-    documentNumber?: string | null;
-    issueDate?: string | null;
-    expiryDate?: string | null;
-    fileUrl?: string | null;
-    notes?: string | null;
-    createdAt: string;
-    updatedAt: string;
-    employeeId: string;
-  }[];
-};
-
-type EmployeeResponse = {
-  data: EmployeeDetail;
-};
-
-type BranchesResponse = {
-  data: BranchOption[];
-};
-
-type DepartmentsResponse = {
-  data: DepartmentOption[];
-};
 
 export function EmployeeDetailPage() {
   const { getToken } = useAuth();
@@ -129,45 +57,12 @@ export function EmployeeDetailPage() {
     data: employee,
     isLoading,
     isError,
-  } = useQuery({
-    queryKey: ["employees", employeeId],
-    queryFn: async () => {
-      const token = await getToken();
+  } = useEmployeeDetail(employeeId);
 
-      const response = await apiFetch(
-        `/api/employees/${employeeId}`,
-        token,
-      );
-
-      const result = (await response.json()) as EmployeeResponse;
-
-      return result.data;
-    },
-  });
-
-  const { data: branches = [] } = useQuery({
-    queryKey: ["branches"],
-    queryFn: async () => {
-      const token = await getToken();
-
-      const response = await apiFetch("/api/branches", token);
-      const result = (await response.json()) as BranchesResponse;
-
-      return result.data;
-    },
-  });
-
-  const { data: departments = [] } = useQuery({
-    queryKey: ["departments"],
-    queryFn: async () => {
-      const token = await getToken();
-
-      const response = await apiFetch("/api/departments", token);
-      const result = (await response.json()) as DepartmentsResponse;
-
-      return result.data;
-    },
-  });
+  const {
+    branches,
+    departments,
+  } = useEmployeeOptions();
 
   const updateEmployeeMutation = useMutation({
     mutationFn: async (data: EmployeeFormValues) => {
