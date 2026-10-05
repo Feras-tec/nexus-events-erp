@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { useAuth } from "@clerk/react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -29,11 +27,9 @@ import { useEquipmentMaintenance } from "../features/equipment/hooks/useEquipmen
 import { useEquipmentTransfer } from "../features/equipment/hooks/useEquipmentTransfer";
 import { useEquipmentLegacyRecovery } from "../features/equipment/hooks/useEquipmentLegacyRecovery";
 import { useEquipmentReservationMovement } from "../features/equipment/hooks/useEquipmentReservationMovement";
-import { apiFetch } from "../services/api";
+import { useUpdateEquipment } from "../features/equipment/hooks/useUpdateEquipment";
 
 export function EquipmentDetailPage() {
-  const { getToken } = useAuth();
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -165,47 +161,9 @@ export function EquipmentDetailPage() {
     equipmentId,
   });
 
-  const updateEquipmentMutation = useMutation({
-    mutationFn: async (data: EquipmentFormValues) => {
-      const token = await getToken();
-
-      const payload = {
-        manufacturerSerial: data.manufacturerSerial.trim() || undefined,
-        barcode: data.barcode.trim() || undefined,
-        status: data.status,
-        location: data.location.trim() || undefined,
-        purchaseDate: data.purchaseDate || undefined,
-        purchasePrice: data.purchasePrice
-          ? Number(data.purchasePrice)
-          : undefined,
-        notes: data.notes.trim() || undefined,
-        warehouseId: data.warehouseId,
-      };
-
-      const response = await apiFetch(
-        `/api/inventory-items/${equipmentId}`,
-        token,
-        {
-          method: "PATCH",
-          body: JSON.stringify(payload),
-        },
-      );
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["equipment", equipmentId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["equipment"],
-        }),
-      ]);
-
-      setIsEditing(false);
-    },
+  const { updateEquipmentMutation } = useUpdateEquipment({
+    equipmentId,
+    onSuccess: () => setIsEditing(false),
   });
 
   if (isLoading) {
