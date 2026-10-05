@@ -373,6 +373,7 @@ enum EquipmentMovementType {
   MAINTENANCE
   REPAIRED
   LOST
+  RECOVERED
   RETIRED
   MANUAL_ADJUSTMENT
 }

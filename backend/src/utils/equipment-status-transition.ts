@@ -53,6 +53,7 @@ type EquipmentMovementType =
   | "MAINTENANCE"
   | "REPAIRED"
   | "LOST"
+  | "RECOVERED"
   | "RETIRED"
   | "MANUAL_ADJUSTMENT";
 
@@ -140,7 +141,7 @@ export function isEquipmentMovementTypeValid(
     },
 
     LOST: {
-      AVAILABLE: ["RELEASED"],
+      AVAILABLE: ["RECOVERED"],
       RETIRED: ["RETIRED"],
     },
   };

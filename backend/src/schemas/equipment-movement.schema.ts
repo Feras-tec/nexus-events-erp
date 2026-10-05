@@ -31,6 +31,7 @@ const equipmentMovementTypeSchema = z.enum([
   "MAINTENANCE",
   "REPAIRED",
   "LOST",
+  "RECOVERED",
   "RETIRED",
   "MANUAL_ADJUSTMENT",
 ]);
