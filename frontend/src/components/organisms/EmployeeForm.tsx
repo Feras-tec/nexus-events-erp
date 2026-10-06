@@ -6,6 +6,7 @@ import type {
   EmployeeFormValues,
 } from "../../features/employees/types/employee-form.types";
 import { EmployeeOrganizationFields } from "../../features/employees/components/EmployeeOrganizationFields";
+import { EmployeePersonalFields } from "../../features/employees/components/EmployeePersonalFields";
 
 export type {
   BranchOption,
@@ -147,110 +148,11 @@ export function EmployeeForm({
           </select>
         </fieldset>
 
-        <fieldset className="fieldset">
-          <legend className="fieldset-legend">Vorname</legend>
-          <input
-            type="text"
-            className="input w-full"
-            value={values.firstName}
-            onChange={(event) =>
-              updateField("firstName", event.target.value)
-            }
-            disabled={loading}
-            required
-            minLength={2}
-            maxLength={100}
-          />
-        </fieldset>
-
-        <fieldset className="fieldset">
-          <legend className="fieldset-legend">Nachname</legend>
-          <input
-            type="text"
-            className="input w-full"
-            value={values.lastName}
-            onChange={(event) =>
-              updateField("lastName", event.target.value)
-            }
-            disabled={loading}
-            required
-            minLength={2}
-            maxLength={100}
-          />
-        </fieldset>
-
-        <fieldset className="fieldset">
-          <legend className="fieldset-legend">E-Mail</legend>
-          <input
-            type="email"
-            className="input w-full"
-            value={values.email}
-            onChange={(event) =>
-              updateField("email", event.target.value)
-            }
-            disabled={loading}
-            maxLength={254}
-          />
-        </fieldset>
-
-        <fieldset className="fieldset">
-          <legend className="fieldset-legend">Telefon</legend>
-          <input
-            type="tel"
-            className="input w-full"
-            value={values.phone}
-            onChange={(event) =>
-              updateField("phone", event.target.value)
-            }
-            disabled={loading}
-            maxLength={50}
-          />
-        </fieldset>
-
-        <fieldset className="fieldset">
-          <legend className="fieldset-legend">
-            Geburtsdatum
-          </legend>
-          <input
-            type="date"
-            className="input w-full"
-            value={values.birthDate}
-            onChange={(event) =>
-              updateField("birthDate", event.target.value)
-            }
-            disabled={loading}
-          />
-        </fieldset>
-
-        <fieldset className="fieldset">
-          <legend className="fieldset-legend">
-            Nationalität
-          </legend>
-          <input
-            type="text"
-            className="input w-full"
-            value={values.nationality}
-            onChange={(event) =>
-              updateField("nationality", event.target.value)
-            }
-            disabled={loading}
-            maxLength={100}
-          />
-        </fieldset>
-
-        <fieldset className="fieldset">
-          <legend className="fieldset-legend">Position</legend>
-          <input
-            type="text"
-            className="input w-full"
-            value={values.position}
-            onChange={(event) =>
-              updateField("position", event.target.value)
-            }
-            disabled={loading}
-            maxLength={100}
-          />
-        </fieldset>
+        <EmployeePersonalFields
+          values={values}
+          loading={loading}
+          onUpdate={updateField}
+        />
 
         <EmployeeOrganizationFields
           mode={mode}
