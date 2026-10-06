@@ -1,13 +1,12 @@
 import { useState, type FormEvent } from "react";
 
 import { Button } from "../atoms/Button";
-import { Input } from "../atoms/Input";
-import { Select } from "../atoms/Select";
 import type {
   CustomerFormData,
   CustomerFormErrors,
 } from "../../features/customers/types/customer-form.types";
 import { validateCustomerForm } from "../../features/customers/utils/customer-form-validation";
+import { CustomerFormFields } from "../../features/customers/components/CustomerFormFields";
 
 export type {
   CustomerFormData,
@@ -82,125 +81,12 @@ export function CustomerForm({
       onSubmit={handleSubmit}
       className="rounded-box border border-base-300 bg-base-100 p-6"
     >
-      <div className="grid gap-5 md:grid-cols-2">
-        <Input
-          label="Kundennr."
-          value={formData.customerNo}
-          disabled={mode === "edit"}
-          error={errors.customerNo}
-          onChange={(event) =>
-            updateField("customerNo", event.target.value)
-          }
-        />
-
-        <Select
-          label="Kundentyp"
-          value={formData.type}
-          options={[
-            {
-              value: "COMPANY",
-              label: "Unternehmen",
-            },
-            {
-              value: "PRIVATE",
-              label: "Privatkunde",
-            },
-          ]}
-          onChange={(event) =>
-            updateField(
-              "type",
-              event.target.value as CustomerFormData["type"],
-            )
-          }
-        />
-
-        {formData.type === "COMPANY" && (
-          <Input
-            label="Firmenname"
-            value={formData.companyName}
-            error={errors.companyName}
-            onChange={(event) =>
-              updateField("companyName", event.target.value)
-            }
-          />
-        )}
-
-        {formData.type === "PRIVATE" && (
-          <>
-            <Input
-              label="Vorname"
-              value={formData.firstName}
-              error={errors.firstName}
-              onChange={(event) =>
-                updateField("firstName", event.target.value)
-              }
-            />
-
-            <Input
-              label="Nachname"
-              value={formData.lastName}
-              error={errors.lastName}
-              onChange={(event) =>
-                updateField("lastName", event.target.value)
-              }
-            />
-          </>
-        )}
-
-        <Input
-          label="Ansprechpartner"
-          value={formData.contactName}
-          onChange={(event) =>
-            updateField("contactName", event.target.value)
-          }
-        />
-
-        <Input
-          label="E-Mail"
-          type="email"
-          value={formData.email}
-          onChange={(event) =>
-            updateField("email", event.target.value)
-          }
-        />
-
-        <Input
-          label="Telefon"
-          value={formData.phone}
-          onChange={(event) =>
-            updateField("phone", event.target.value)
-          }
-        />
-
-        <Input
-          label="Adresse"
-          value={formData.address}
-          onChange={(event) =>
-            updateField("address", event.target.value)
-          }
-        />
-
-        <Input
-          label="USt-IdNr."
-          value={formData.vatId}
-          onChange={(event) =>
-            updateField("vatId", event.target.value)
-          }
-        />
-
-        <Input
-          label="Rabatt (%)"
-          type="number"
-          min="0"
-          max="100"
-          step="0.01"
-          value={formData.discount}
-          error={errors.discount}
-          onChange={(event) =>
-            updateField("discount", event.target.value)
-          }
-        />
-      </div>
+      <CustomerFormFields
+        values={formData}
+        errors={errors}
+        mode={mode}
+        onUpdate={updateField}
+      />
 
       <div className="mt-6 flex justify-end">
         <Button type="submit" disabled={loading}>
