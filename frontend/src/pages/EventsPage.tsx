@@ -1,95 +1,32 @@
 import { useState } from "react";
-import { useAuth } from "@clerk/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "../components/atoms/Button";
-import {
-  EventForm,
-  type EventFormData,
-} from "../components/organisms/EventForm";
-import { EventTable, type EventItem } from "../components/organisms/EventTable";
+import { EventForm } from "../components/organisms/EventForm";
+import { EventTable } from "../components/organisms/EventTable";
 import { ListLayout } from "../components/templates/ListLayout";
-import { apiFetch } from "../services/api";
-
-type EventsResponse = {
-  data: EventItem[];
-};
+import { useEvents } from "../features/events/hooks/useEvents";
+import { useEventFormCustomers } from "../features/events/hooks/useEventFormCustomers";
+import { useCreateEvent } from "../features/events/hooks/useCreateEvent";
 
 export function EventsPage() {
-  const { getToken } = useAuth();
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
   const [showEventForm, setShowEventForm] = useState(false);
 
-  const { data: customers = [], isLoading: customersLoading } = useQuery({
-    queryKey: ["customers"],
-    queryFn: async () => {
-      const token = await getToken();
-
-      const response = await apiFetch("/api/customers", token);
-
-      const result = (await response.json()) as {
-        data: {
-          id: string;
-          customerNo: string;
-          type: string;
-          companyName?: string | null;
-          firstName?: string | null;
-          lastName?: string | null;
-        }[];
-      };
-
-      return result.data;
-    },
-  });
+  const {
+    customers,
+    customersLoading,
+  } = useEventFormCustomers();
 
   const {
-    data: events = [],
+    events,
     isLoading,
     isError,
-  } = useQuery({
-    queryKey: ["events"],
-    queryFn: async () => {
-      const token = await getToken();
+  } = useEvents();
 
-      const response = await apiFetch("/api/events", token);
-
-      const result = (await response.json()) as EventsResponse;
-
-      return result.data;
-    },
-  });
-
-  const createEventMutation = useMutation({
-    mutationFn: async (data: EventFormData) => {
-      const token = await getToken();
-
-      const payload = {
-        ...data,
-        type: data.type || undefined,
-        location: data.location || undefined,
-        description: data.description || undefined,
-        startDate: new Date(data.startDate).toISOString(),
-        endDate: new Date(data.endDate).toISOString(),
-      };
-
-      const response = await apiFetch("/api/events", token, {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["events"],
-      });
-
-      setShowEventForm(false);
-    },
+  const { createEventMutation } = useCreateEvent({
+    onSuccess: () => setShowEventForm(false),
   });
 
   const normalizedSearch = search.trim().toLowerCase();
