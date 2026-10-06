@@ -140,6 +140,8 @@ export function QuoteDetailPage() {
           <QuoteEmailAction
             quoteId={quote.id}
             customerEmail={quote.customer.email}
+            lastSentAt={quote.lastSentAt}
+            lastSentTo={quote.lastSentTo}
             disabled={quote.status === "CANCELLED"}
           />
 

@@ -606,10 +606,21 @@ export async function sendQuoteEmail(req: Request, res: Response) {
       html,
     });
 
+    const sentAt = new Date();
+
+    await prisma.quote.update({
+      where: { id: quote.id },
+      data: {
+        lastSentAt: sentAt,
+        lastSentTo: quote.customer.email,
+      },
+    });
+
     return res.json({
       message: "Quote email sent successfully",
       recipient: quote.customer.email,
       emailId: email?.id ?? null,
+      sentAt,
     });
   } catch (error) {
     console.error("Send quote email error:", error);

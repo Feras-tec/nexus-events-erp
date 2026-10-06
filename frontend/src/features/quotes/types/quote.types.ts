@@ -53,6 +53,8 @@ export type Quote = {
   status: QuoteStatus;
   validUntil?: string | null;
   notes?: string | null;
+  lastSentAt?: string | null;
+  lastSentTo?: string | null;
 
   subtotal: number;
   discount: number;

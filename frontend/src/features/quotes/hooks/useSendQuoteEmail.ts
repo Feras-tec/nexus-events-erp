@@ -7,6 +7,7 @@ type SendQuoteEmailResult = {
   message: string;
   recipient: string;
   emailId: string | null;
+  sentAt: string;
 };
 
 export function useSendQuoteEmail() {

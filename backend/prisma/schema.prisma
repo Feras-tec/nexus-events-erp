@@ -439,6 +439,9 @@ model Quote {
   validUntil DateTime?
   notes      String?
 
+  lastSentAt DateTime?
+  lastSentTo String?
+
   subtotal Decimal @default(0)
   discount Decimal @default(0)
   tax      Decimal @default(0)

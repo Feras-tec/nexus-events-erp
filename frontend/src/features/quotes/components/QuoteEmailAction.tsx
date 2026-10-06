@@ -3,12 +3,16 @@ import { useSendQuoteEmail } from "../hooks/useSendQuoteEmail";
 type QuoteEmailActionProps = {
   quoteId: string;
   customerEmail?: string | null;
+  lastSentAt?: string | null;
+  lastSentTo?: string | null;
   disabled?: boolean;
 };
 
 export function QuoteEmailAction({
   quoteId,
   customerEmail,
+  lastSentAt,
+  lastSentTo,
   disabled = false,
 }: QuoteEmailActionProps) {
   const {
@@ -18,6 +22,19 @@ export function QuoteEmailAction({
     sentEmail,
     resetSendEmail,
   } = useSendQuoteEmail();
+
+  const wasSent = Boolean(sentEmail || lastSentAt);
+
+  const sentTo = sentEmail?.recipient ?? lastSentTo;
+
+  const sentAt = sentEmail?.sentAt ?? lastSentAt;
+
+  const formattedSentAt = sentAt
+    ? new Intl.DateTimeFormat("de-DE", {
+        dateStyle: "short",
+        timeStyle: "short",
+      }).format(new Date(sentAt))
+    : null;
 
   const handleSend = async () => {
     resetSendEmail();
@@ -47,16 +64,17 @@ export function QuoteEmailAction({
             <span className="loading loading-spinner loading-xs" />
             Wird gesendet...
           </>
-        ) : sentEmail ? (
+        ) : wasSent ? (
           "✓ Erneut senden"
         ) : (
           "E-Mail senden"
         )}
       </button>
 
-      {sentEmail && (
+      {wasSent && sentTo && (
         <span className="absolute right-0 top-full mt-1 whitespace-nowrap text-xs text-success">
-          Gesendet an {sentEmail.recipient}
+          Gesendet an {sentTo}
+          {formattedSentAt ? ` · ${formattedSentAt}` : ""}
         </span>
       )}
 
