@@ -54,12 +54,34 @@ export const createInvoiceSchema = z
     },
   );
 
-export const updateInvoiceSchema = z.object({
-  status: invoiceStatusSchema.optional(),
-  issueDate: z.coerce.date().optional(),
-  dueDate: z.coerce.date().optional(),
-  notes: z.string().trim().max(1000).optional(),
-});
+export const updateInvoiceSchema = z
+  .object({
+    invoiceNo: z.string().trim().min(1).max(50).optional(),
+    status: invoiceStatusSchema.optional(),
+
+    issueDate: z.coerce.date().optional(),
+    dueDate: z.coerce.date().optional(),
+    notes: z.string().trim().max(1000).optional(),
+
+    customerId: z.uuid().optional(),
+    eventId: z.uuid().optional(),
+    quoteId: z.uuid().optional(),
+
+    tax: z.coerce.number().min(0).max(100).optional(),
+    discount: z.coerce.number().min(0).max(100).optional(),
+
+    items: z.array(invoiceItemSchema).min(1).optional(),
+  })
+  .refine(
+    (data) =>
+      !data.issueDate ||
+      !data.dueDate ||
+      data.dueDate >= data.issueDate,
+    {
+      message: "Due date must not be before issue date",
+      path: ["dueDate"],
+    },
+  );
 
 export type CreateInvoiceInput = z.infer<
   typeof createInvoiceSchema
