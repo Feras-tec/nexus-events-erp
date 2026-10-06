@@ -4,6 +4,8 @@ import {
   createInvoiceSchema,
   updateInvoiceSchema,
 } from "../schemas/invoice.schema.js";
+import { sendEmail } from "../services/email.service.js";
+import { generateInvoicePdf } from "../services/invoice-pdf.service.js";
 
 // Neue Rechnung erstellen
 export async function createInvoice(req: Request, res: Response) {
@@ -543,6 +545,128 @@ export async function updateInvoice(req: Request, res: Response) {
 
     return res.status(500).json({
       error: "Failed to update invoice",
+    });
+  }
+}
+
+// Rechnung per E-Mail an den Kunden senden
+export async function sendInvoiceEmail(
+  req: Request,
+  res: Response,
+) {
+  try {
+    const id = req.params.id;
+
+    if (typeof id !== "string") {
+      return res.status(400).json({
+        error: "Invalid invoice ID",
+      });
+    }
+
+    const invoice = await prisma.invoice.findUnique({
+      where: { id },
+      include: {
+        customer: true,
+        event: true,
+        quote: true,
+        items: {
+          include: {
+            product: true,
+          },
+        },
+      },
+    });
+
+    if (!invoice) {
+      return res.status(404).json({
+        error: "Invoice not found",
+      });
+    }
+
+    if (!invoice.customer.email) {
+      return res.status(400).json({
+        error: "Customer has no email address",
+      });
+    }
+
+    if (invoice.status === "CANCELLED") {
+      return res.status(409).json({
+        error: "Cancelled invoices cannot be sent",
+      });
+    }
+
+    const pdf = await generateInvoicePdf(invoice);
+
+    const customerName =
+      invoice.customer.companyName ||
+      [
+        invoice.customer.firstName,
+        invoice.customer.lastName,
+      ]
+        .filter(Boolean)
+        .join(" ") ||
+      "Kunde";
+
+    const html = `
+      <div style="font-family: Arial, Helvetica, sans-serif; color: #111827; line-height: 1.6;">
+        <p>Guten Tag ${customerName},</p>
+
+        <p>
+          anbei erhalten Sie die Rechnung
+          <strong>${invoice.invoiceNo}</strong>
+          von Nexus Events.
+        </p>
+
+        ${
+          invoice.dueDate
+            ? `<p>
+                Bitte beachten Sie das Fälligkeitsdatum:
+                <strong>${new Intl.DateTimeFormat("de-DE").format(
+                  invoice.dueDate,
+                )}</strong>.
+              </p>`
+            : ""
+        }
+
+        <p>
+          Die Rechnung finden Sie als PDF im Anhang.
+        </p>
+
+        <p>
+          Vielen Dank für Ihren Auftrag.
+        </p>
+
+        <p>
+          Mit freundlichen Grüßen<br />
+          <strong>Nexus Events</strong><br />
+          Event Production & Management
+        </p>
+      </div>
+    `;
+
+    const email = await sendEmail({
+      to: invoice.customer.email,
+      subject: `Rechnung ${invoice.invoiceNo} – Nexus Events`,
+      html,
+      attachments: [
+        {
+          filename: `Rechnung-${invoice.invoiceNo}.pdf`,
+          content: pdf,
+        },
+      ],
+    });
+
+    return res.json({
+      message: "Invoice email sent successfully",
+      recipient: invoice.customer.email,
+      emailId: email?.id ?? null,
+      sentAt: new Date(),
+    });
+  } catch (error) {
+    console.error("Send invoice email error:", error);
+
+    return res.status(500).json({
+      error: "Failed to send invoice email",
     });
   }
 }

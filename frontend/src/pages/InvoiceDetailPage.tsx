@@ -8,6 +8,7 @@ import { InvoicePrintDocument } from "../features/invoices/components/InvoicePri
 import { useInvoiceDetail } from "../features/invoices/hooks/useInvoiceDetail";
 import { useInvoiceFormOptions } from "../features/invoices/hooks/useInvoiceFormOptions";
 import { useUpdateInvoice } from "../features/invoices/hooks/useUpdateInvoice";
+import { useSendInvoiceEmail } from "../features/invoices/hooks/useSendInvoiceEmail";
 import type {
   InvoiceFormData,
   InvoiceStatus,
@@ -39,6 +40,12 @@ function formatDate(value?: string | null) {
 export function InvoiceDetailPage() {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
+
+  const {
+    sendInvoiceEmail,
+    isSending,
+    sendError,
+  } = useSendInvoiceEmail();
 
   const { invoiceId } = useParams({
     strict: false,
@@ -185,8 +192,34 @@ export function InvoiceDetailPage() {
           </button>
 
           <InvoicePrintAction />
+
+          <button
+            type="button"
+            className="btn btn-outline w-36"
+            disabled={isSending}
+            onClick={async () => {
+              await sendInvoiceEmail({
+                invoiceId: invoice.id,
+              });
+            }}
+          >
+            {isSending ? (
+              <>
+                <span className="loading loading-spinner loading-sm" />
+                Senden...
+              </>
+            ) : (
+              "Per E-Mail senden"
+            )}
+          </button>
         </div>
       </div>
+
+      {sendError && (
+        <div role="alert" className="alert alert-error">
+          {sendError}
+        </div>
+      )}
 
       {isEditing && (
         <div className="card border border-base-300 bg-base-100">

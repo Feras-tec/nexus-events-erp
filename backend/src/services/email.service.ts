@@ -1,15 +1,22 @@
 import { Resend } from "resend";
 
+type EmailAttachment = {
+  filename: string;
+  content: Buffer;
+};
+
 type SendEmailInput = {
   to: string;
   subject: string;
   html: string;
+  attachments?: EmailAttachment[];
 };
 
 export async function sendEmail({
   to,
   subject,
   html,
+  attachments,
 }: SendEmailInput) {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM;
@@ -29,6 +36,9 @@ export async function sendEmail({
     to,
     subject,
     html,
+    ...(attachments && attachments.length > 0
+      ? { attachments }
+      : {}),
   });
 
   if (error) {
