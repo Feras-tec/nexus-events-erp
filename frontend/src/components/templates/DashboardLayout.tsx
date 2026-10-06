@@ -25,7 +25,7 @@ export function DashboardLayout({
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-16 items-center justify-between border-b border-base-300 bg-base-100 px-4 sm:px-6">
+        <header className="dashboard-header flex h-16 items-center justify-between border-b border-base-300 bg-base-100 px-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"

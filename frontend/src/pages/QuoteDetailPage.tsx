@@ -4,6 +4,8 @@ import { motion } from "motion/react";
 
 import { QuoteCancelAction } from "../features/quotes/components/QuoteCancelAction";
 import { QuoteForm } from "../features/quotes/components/QuoteForm";
+import { QuotePrintAction } from "../features/quotes/components/QuotePrintAction";
+import { QuotePrintDocument } from "../features/quotes/components/QuotePrintDocument";
 import { QuoteRestoreAction } from "../features/quotes/components/QuoteRestoreAction";
 import { useQuoteDetail } from "../features/quotes/hooks/useQuoteDetail";
 import { useQuoteFormOptions } from "../features/quotes/hooks/useQuoteFormOptions";
@@ -101,6 +103,14 @@ export function QuoteDetailPage() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
     >
+      <div
+        id="quote-print-document"
+        className="hidden print:block"
+        aria-hidden="true"
+      >
+        <QuotePrintDocument quote={quote} />
+      </div>
+
       <button
         type="button"
         className="btn btn-ghost"
@@ -123,6 +133,8 @@ export function QuoteDetailPage() {
           <span className="badge badge-lg badge-outline">
             {statusLabels[quote.status]}
           </span>
+
+          <QuotePrintAction />
 
           {quote.status === "CANCELLED" && (
             <QuoteRestoreAction
