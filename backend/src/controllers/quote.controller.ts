@@ -325,37 +325,56 @@ export async function updateQuote(req: Request, res: Response) {
       };
     });
 
-    // Für die Neuberechnung entweder neue oder bestehende Positionen verwenden
-    const itemsForTotals =
-      calculatedItems ??
-      existingQuote.items.map((item) => ({
-        total: item.total,
-      }));
+    const shouldRecalculateTotals =
+      data.items !== undefined ||
+      data.discount !== undefined ||
+      data.tax !== undefined;
 
-    const subtotalCents = itemsForTotals.reduce(
-      (sum, item) =>
-        sum + Math.round(Number(item.total) * 100),
-      0,
-    );
+    let totalsUpdate:
+      | {
+          subtotal: number;
+          total: number;
+        }
+      | undefined;
 
-    const discount =
-      data.discount ?? Number(existingQuote.discount);
+    if (shouldRecalculateTotals) {
+      // Für die Neuberechnung entweder neue oder bestehende Positionen verwenden
+      const itemsForTotals =
+        calculatedItems ??
+        existingQuote.items.map((item) => ({
+          total: item.total,
+        }));
 
-    const tax =
-      data.tax ?? Number(existingQuote.tax);
+      const subtotalCents = itemsForTotals.reduce(
+        (sum, item) =>
+          sum + Math.round(Number(item.total) * 100),
+        0,
+      );
 
-    const quoteDiscountCents = Math.round(
-      subtotalCents * (discount / 100),
-    );
+      const discount =
+        data.discount ?? Number(existingQuote.discount);
 
-    const netCents =
-      subtotalCents - quoteDiscountCents;
+      const tax =
+        data.tax ?? Number(existingQuote.tax);
 
-    const taxCents = Math.round(
-      netCents * (tax / 100),
-    );
+      const quoteDiscountCents = Math.round(
+        subtotalCents * (discount / 100),
+      );
 
-    const totalCents = netCents + taxCents;
+      const netCents =
+        subtotalCents - quoteDiscountCents;
+
+      const taxCents = Math.round(
+        netCents * (tax / 100),
+      );
+
+      const totalCents = netCents + taxCents;
+
+      totalsUpdate = {
+        subtotal: subtotalCents / 100,
+        total: totalCents / 100,
+      };
+    }
 
     const quote = await prisma.$transaction(async (tx) => {
       if (
@@ -415,8 +434,7 @@ export async function updateQuote(req: Request, res: Response) {
             tax: data.tax,
           }),
 
-          subtotal: subtotalCents / 100,
-          total: totalCents / 100,
+          ...(totalsUpdate && totalsUpdate),
 
           ...(calculatedItems && {
             items: {
