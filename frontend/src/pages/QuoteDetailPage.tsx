@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "@tanstack/react-router";
 import { motion } from "motion/react";
 
 import { QuoteCancelAction } from "../features/quotes/components/QuoteCancelAction";
+import { QuoteEmailAction } from "../features/quotes/components/QuoteEmailAction";
 import { QuoteForm } from "../features/quotes/components/QuoteForm";
 import { QuotePrintAction } from "../features/quotes/components/QuotePrintAction";
 import { QuotePrintDocument } from "../features/quotes/components/QuotePrintDocument";
@@ -135,6 +136,12 @@ export function QuoteDetailPage() {
           </span>
 
           <QuotePrintAction />
+
+          <QuoteEmailAction
+            quoteId={quote.id}
+            customerEmail={quote.customer.email}
+            disabled={quote.status === "CANCELLED"}
+          />
 
           {quote.status === "CANCELLED" && (
             <QuoteRestoreAction

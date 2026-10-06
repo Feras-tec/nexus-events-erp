@@ -4,6 +4,7 @@ import {
   getQuotes,
   getQuoteById,
   restoreQuote,
+  sendQuoteEmail,
   updateQuote,
 } from "../controllers/quote.controller.js";
 import { requireRole } from "../middleware/require-role.js";
@@ -50,6 +51,13 @@ router.post(
   "/:id/restore",
   requireRole("OWNER", "ADMIN", "SALES_MANAGER", "SALES_EMPLOYEE"),
   restoreQuote,
+);
+
+// Angebot per E-Mail senden
+router.post(
+  "/:id/send-email",
+  requireRole("OWNER", "ADMIN", "SALES_MANAGER", "SALES_EMPLOYEE"),
+  sendQuoteEmail,
 );
 
 // Angebot aktualisieren

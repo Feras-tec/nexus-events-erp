@@ -1,5 +1,7 @@
 import type { Request, Response } from "express";
 import prisma from "../lib/prisma.js";
+import { sendEmail } from "../services/email.service.js";
+import { buildQuoteEmailHtml } from "../utils/quote-email.js";
 import {
   createQuoteSchema,
   updateQuoteSchema,
@@ -550,6 +552,70 @@ export async function restoreQuote(req: Request, res: Response) {
 
     return res.status(500).json({
       error: "Failed to restore quote",
+    });
+  }
+}
+
+// Angebot per E-Mail an den Kunden senden
+export async function sendQuoteEmail(req: Request, res: Response) {
+  try {
+    const id = req.params.id;
+
+    if (typeof id !== "string") {
+      return res.status(400).json({
+        error: "Invalid quote ID",
+      });
+    }
+
+    const quote = await prisma.quote.findUnique({
+      where: { id },
+      include: {
+        customer: true,
+        event: true,
+        items: {
+          include: {
+            product: true,
+          },
+        },
+      },
+    });
+
+    if (!quote) {
+      return res.status(404).json({
+        error: "Quote not found",
+      });
+    }
+
+    if (!quote.customer.email) {
+      return res.status(400).json({
+        error: "Customer has no email address",
+      });
+    }
+
+    if (quote.status === "CANCELLED") {
+      return res.status(409).json({
+        error: "Cancelled quotes cannot be sent",
+      });
+    }
+
+    const html = buildQuoteEmailHtml(quote);
+
+    const email = await sendEmail({
+      to: quote.customer.email,
+      subject: `Angebot ${quote.quoteNo} – Nexus Events`,
+      html,
+    });
+
+    return res.json({
+      message: "Quote email sent successfully",
+      recipient: quote.customer.email,
+      emailId: email?.id ?? null,
+    });
+  } catch (error) {
+    console.error("Send quote email error:", error);
+
+    return res.status(500).json({
+      error: "Failed to send quote email",
     });
   }
 }
