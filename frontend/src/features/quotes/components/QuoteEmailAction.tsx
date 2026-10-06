@@ -30,10 +30,10 @@ export function QuoteEmailAction({
   };
 
   return (
-    <div className="flex flex-col items-end gap-1">
+    <div className="relative">
       <button
         type="button"
-        className="btn btn-outline btn-sm"
+        className="btn btn-outline btn-sm w-40"
         disabled={disabled || isSending || !customerEmail}
         title={
           customerEmail
@@ -47,19 +47,21 @@ export function QuoteEmailAction({
             <span className="loading loading-spinner loading-xs" />
             Wird gesendet...
           </>
+        ) : sentEmail ? (
+          "✓ Erneut senden"
         ) : (
           "E-Mail senden"
         )}
       </button>
 
       {sentEmail && (
-        <span className="text-xs text-success">
+        <span className="absolute right-0 top-full mt-1 whitespace-nowrap text-xs text-success">
           Gesendet an {sentEmail.recipient}
         </span>
       )}
 
       {sendError && (
-        <span className="max-w-72 text-right text-xs text-error">
+        <span className="absolute right-0 top-full mt-1 w-72 text-right text-xs text-error">
           {sendError}
         </span>
       )}
