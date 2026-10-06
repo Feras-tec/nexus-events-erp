@@ -1,83 +1,28 @@
 import { useState } from "react";
-import { useAuth } from "@clerk/react";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 
 import { Button } from "../components/atoms/Button";
-import {
-  ProductForm,
-  type ProductFormValues,
-} from "../components/organisms/ProductForm";
-import {
-  ProductTable,
-  type ProductTableItem,
-} from "../components/organisms/ProductTable";
+import { ProductForm } from "../components/organisms/ProductForm";
+import { ProductTable } from "../components/organisms/ProductTable";
 import { ListLayout } from "../components/templates/ListLayout";
-import { apiFetch } from "../services/api";
-
-type ProductsResponse = {
-  data: ProductTableItem[];
-};
+import { useProducts } from "../features/products/hooks/useProducts";
+import { useCreateProduct } from "../features/products/hooks/useCreateProduct";
 
 export function ProductsPage() {
-  const { getToken } = useAuth();
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
 
   const {
-    data: products = [],
+    products,
     isLoading,
     isError,
-  } = useQuery({
-    queryKey: ["products"],
-    queryFn: async () => {
-      const token = await getToken();
+  } = useProducts();
 
-      const response = await apiFetch("/api/products", token);
-      const result = (await response.json()) as ProductsResponse;
-
-      return result.data;
-    },
-  });
-
-  const createProductMutation = useMutation({
-    mutationFn: async (data: ProductFormValues) => {
-      const token = await getToken();
-
-      const payload = {
-        productNo: data.productNo.trim(),
-        name: data.name.trim(),
-        brand: data.brand.trim() || undefined,
-        model: data.model.trim() || undefined,
-        category: data.category.trim() || undefined,
-        description: data.description.trim() || undefined,
-        trackingType: data.trackingType,
-        usageType: data.usageType,
-      };
-
-      const response = await apiFetch("/api/products", token, {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["products"],
-      });
-
-      setShowCreateForm(false);
-    },
+  const { createProductMutation } = useCreateProduct({
+    onSuccess: () => setShowCreateForm(false),
   });
 
   const normalizedSearch = search.trim().toLowerCase();
