@@ -453,12 +453,29 @@ model Quote {
   eventId String?
   event   Event?  @relation(fields: [eventId], references: [id])
 
-  items    QuoteItem[]
-  invoices Invoice[]
+  items         QuoteItem[]
+  invoices      Invoice[]
+  statusHistory QuoteStatusHistory[]
 
   @@index([customerId])
   @@index([eventId])
   @@index([status])
+}
+
+// Verlauf der Statusänderungen eines Angebots
+model QuoteStatusHistory {
+  id String @id @default(uuid())
+
+  fromStatus QuoteStatus
+  toStatus   QuoteStatus
+
+  createdAt DateTime @default(now())
+
+  quoteId String
+  quote   Quote  @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  @@index([quoteId])
+  @@index([createdAt])
 }
 
 // Einzelne Position innerhalb eines Angebots

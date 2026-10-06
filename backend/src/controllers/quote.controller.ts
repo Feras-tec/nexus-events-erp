@@ -358,6 +358,19 @@ export async function updateQuote(req: Request, res: Response) {
     const totalCents = netCents + taxCents;
 
     const quote = await prisma.$transaction(async (tx) => {
+      if (
+        data.status !== undefined &&
+        data.status !== existingQuote.status
+      ) {
+        await tx.quoteStatusHistory.create({
+          data: {
+            quoteId: id,
+            fromStatus: existingQuote.status,
+            toStatus: data.status,
+          },
+        });
+      }
+
       if (calculatedItems) {
         await tx.quoteItem.deleteMany({
           where: {
@@ -438,6 +451,87 @@ export async function updateQuote(req: Request, res: Response) {
 
     return res.status(500).json({
       error: "Failed to update quote",
+    });
+  }
+}
+
+// Stornierung eines Angebots aufheben
+export async function restoreQuote(req: Request, res: Response) {
+  try {
+    const id = req.params.id;
+
+    if (typeof id !== "string") {
+      return res.status(400).json({
+        error: "Invalid quote ID",
+      });
+    }
+
+    const quote = await prisma.quote.findUnique({
+      where: { id },
+    });
+
+    if (!quote) {
+      return res.status(404).json({
+        error: "Quote not found",
+      });
+    }
+
+    if (quote.status !== "CANCELLED") {
+      return res.status(400).json({
+        error: "Only cancelled quotes can be restored",
+      });
+    }
+
+    const cancellation = await prisma.quoteStatusHistory.findFirst({
+      where: {
+        quoteId: id,
+        toStatus: "CANCELLED",
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    if (!cancellation) {
+      return res.status(409).json({
+        error: "Previous quote status could not be determined",
+      });
+    }
+
+    const restoredQuote = await prisma.$transaction(
+      async (tx) => {
+        await tx.quoteStatusHistory.create({
+          data: {
+            quoteId: id,
+            fromStatus: "CANCELLED",
+            toStatus: cancellation.fromStatus,
+          },
+        });
+
+        return tx.quote.update({
+          where: { id },
+          data: {
+            status: cancellation.fromStatus,
+          },
+          include: {
+            customer: true,
+            event: true,
+            items: {
+              include: {
+                product: true,
+              },
+            },
+          },
+        });
+      },
+    );
+
+    return res.json(restoredQuote);
+  } catch (error) {
+    console.error("Restore quote error:", error);
+
+    return res.status(500).json({
+      error: "Failed to restore quote",
     });
   }
 }

@@ -2,7 +2,9 @@ import { useState } from "react";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { motion } from "motion/react";
 
+import { QuoteCancelAction } from "../features/quotes/components/QuoteCancelAction";
 import { QuoteForm } from "../features/quotes/components/QuoteForm";
+import { QuoteRestoreAction } from "../features/quotes/components/QuoteRestoreAction";
 import { useQuoteDetail } from "../features/quotes/hooks/useQuoteDetail";
 import { useQuoteFormOptions } from "../features/quotes/hooks/useQuoteFormOptions";
 import { useUpdateQuote } from "../features/quotes/hooks/useUpdateQuote";
@@ -122,13 +124,35 @@ export function QuoteDetailPage() {
             {statusLabels[quote.status]}
           </span>
 
-          <button
-            type="button"
-            className="btn btn-primary btn-sm"
-            onClick={() => setIsEditing((current) => !current)}
-          >
-            {isEditing ? "Bearbeiten schließen" : "Bearbeiten"}
-          </button>
+          {quote.status === "CANCELLED" && (
+            <QuoteRestoreAction
+              quoteId={quote.id}
+              quoteNo={quote.quoteNo}
+            />
+          )}
+
+          {quote.status !== "CANCELLED" && (
+            <>
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={() =>
+                  setIsEditing((current) => !current)
+                }
+              >
+                {isEditing
+                  ? "Bearbeiten schließen"
+                  : "Bearbeiten"}
+              </button>
+
+              {!isEditing && (
+                <QuoteCancelAction
+                  quoteId={quote.id}
+                  quoteNo={quote.quoteNo}
+                />
+              )}
+            </>
+          )}
         </div>
       </div>
 
