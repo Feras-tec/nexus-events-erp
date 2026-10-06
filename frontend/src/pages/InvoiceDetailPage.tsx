@@ -1,10 +1,17 @@
+import { useState } from "react";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { motion } from "motion/react";
 
+import { InvoiceForm } from "../components/organisms/InvoiceForm";
 import { InvoicePrintAction } from "../features/invoices/components/InvoicePrintAction";
 import { InvoicePrintDocument } from "../features/invoices/components/InvoicePrintDocument";
 import { useInvoiceDetail } from "../features/invoices/hooks/useInvoiceDetail";
-import type { InvoiceStatus } from "../features/invoices/types/invoice.types";
+import { useInvoiceFormOptions } from "../features/invoices/hooks/useInvoiceFormOptions";
+import { useUpdateInvoice } from "../features/invoices/hooks/useUpdateInvoice";
+import type {
+  InvoiceFormData,
+  InvoiceStatus,
+} from "../features/invoices/types/invoice.types";
 
 const statusLabels: Record<InvoiceStatus, string> = {
   DRAFT: "Entwurf",
@@ -31,6 +38,7 @@ function formatDate(value?: string | null) {
 
 export function InvoiceDetailPage() {
   const navigate = useNavigate();
+  const [isEditing, setIsEditing] = useState(false);
 
   const { invoiceId } = useParams({
     strict: false,
@@ -41,6 +49,21 @@ export function InvoiceDetailPage() {
     isLoading,
     isError,
   } = useInvoiceDetail(invoiceId ?? "");
+
+  const {
+    customers,
+    events,
+    quotes,
+    products,
+    isLoading: areOptionsLoading,
+    isError: areOptionsError,
+  } = useInvoiceFormOptions();
+
+  const {
+    updateInvoice,
+    isUpdating,
+    updateError,
+  } = useUpdateInvoice();
 
   if (isLoading) {
     return (
@@ -76,6 +99,43 @@ export function InvoiceDetailPage() {
     ]
       .filter(Boolean)
       .join(" ");
+
+  const toDateInputValue = (value?: string | null) =>
+    value ? value.slice(0, 10) : "";
+
+  const initialFormData = {
+    invoiceNo: invoice.invoiceNo,
+    status: invoice.status,
+    issueDate: toDateInputValue(invoice.issueDate),
+    dueDate: toDateInputValue(invoice.dueDate),
+    notes: invoice.notes ?? "",
+    customerId: invoice.customerId,
+    eventId: invoice.eventId ?? "",
+    quoteId: invoice.quoteId ?? "",
+    tax: Number(invoice.tax),
+    discount: Number(invoice.discount),
+    items: invoice.items.map((item) => ({
+      type: item.type,
+      description: item.description,
+      quantity: Number(item.quantity),
+      unitPrice: Number(item.unitPrice),
+      discount: Number(item.discount),
+      productId: item.productId ?? undefined,
+    })),
+  };
+
+  async function handleUpdate(
+    data: InvoiceFormData,
+  ) {
+    if (!invoiceId) return;
+
+    await updateInvoice({
+      invoiceId,
+      data,
+    });
+
+    setIsEditing(false);
+  }
 
   return (
     <motion.div
@@ -116,9 +176,59 @@ export function InvoiceDetailPage() {
             {statusLabels[invoice.status]}
           </span>
 
+          <button
+            type="button"
+            className="btn btn-outline w-36"
+            onClick={() => setIsEditing((current) => !current)}
+          >
+            {isEditing ? "Abbrechen" : "Bearbeiten"}
+          </button>
+
           <InvoicePrintAction />
         </div>
       </div>
+
+      {isEditing && (
+        <div className="card border border-base-300 bg-base-100">
+          <div className="card-body">
+            <h2 className="card-title">
+              Rechnung bearbeiten
+            </h2>
+
+            {areOptionsLoading && (
+              <div className="flex justify-center py-8">
+                <span className="loading loading-spinner loading-lg" />
+              </div>
+            )}
+
+            {areOptionsError && (
+              <div role="alert" className="alert alert-error">
+                Formulardaten konnten nicht geladen werden.
+              </div>
+            )}
+
+            {updateError && (
+              <div role="alert" className="alert alert-error">
+                {updateError}
+              </div>
+            )}
+
+            {!areOptionsLoading && !areOptionsError && (
+              <InvoiceForm
+                key={invoice.updatedAt}
+                customers={customers}
+                events={events}
+                quotes={quotes}
+                products={products}
+                initialData={initialFormData}
+                loading={isUpdating}
+                submitLabel="Änderungen speichern"
+                onSubmit={handleUpdate}
+              />
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <div className="card border border-base-300 bg-base-100">

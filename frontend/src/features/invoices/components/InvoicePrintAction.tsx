@@ -7,7 +7,7 @@ export function InvoicePrintAction() {
   return (
     <button
       type="button"
-      className="btn btn-outline btn-sm"
+      className="btn btn-outline w-36"
       onClick={printInvoice}
     >
       Drucken / PDF

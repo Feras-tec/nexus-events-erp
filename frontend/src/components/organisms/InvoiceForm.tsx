@@ -23,6 +23,8 @@ type InvoiceFormProps = {
   quotes: QuoteOption[];
   products: ProductOption[];
   loading?: boolean;
+  initialData?: InvoiceFormData;
+  submitLabel?: string;
   onSubmit: (data: InvoiceFormData) => void;
 };
 
@@ -48,21 +50,26 @@ export function InvoiceForm({
   quotes,
   products,
   loading = false,
+  initialData,
+  submitLabel = "Rechnung speichern",
   onSubmit,
 }: InvoiceFormProps) {
-  const [formData, setFormData] = useState<InvoiceFormData>({
-    invoiceNo: "",
-    status: "DRAFT",
-    issueDate: "",
-    dueDate: "",
-    notes: "",
-    customerId: "",
-    eventId: "",
-    quoteId: "",
-    tax: 19,
-    discount: 0,
-    items: [{ ...emptyItem }],
-  });
+  const [formData, setFormData] = useState<InvoiceFormData>(
+    () =>
+      initialData ?? {
+        invoiceNo: "",
+        status: "DRAFT",
+        issueDate: "",
+        dueDate: "",
+        notes: "",
+        customerId: "",
+        eventId: "",
+        quoteId: "",
+        tax: 19,
+        discount: 0,
+        items: [{ ...emptyItem }],
+      },
+  );
 
   function updateField<K extends keyof InvoiceFormData>(
     field: K,
@@ -259,7 +266,7 @@ export function InvoiceForm({
 
       <div className="flex justify-end">
         <Button type="submit" loading={loading}>
-          Rechnung speichern
+          {submitLabel}
         </Button>
       </div>
     </form>

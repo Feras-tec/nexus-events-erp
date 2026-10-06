@@ -325,7 +325,10 @@ export async function updateInvoice(req: Request, res: Response) {
     }
 
     // Angebot prüfen, falls geändert
-    if (data.quoteId) {
+    if (
+      data.quoteId &&
+      data.quoteId !== existingInvoice.quoteId
+    ) {
       const quote = await prisma.quote.findUnique({
         where: { id: data.quoteId },
       });
