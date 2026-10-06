@@ -24,6 +24,8 @@ import { ReservationsPage } from "./pages/ReservationsPage";
 import { ReservationDetailPage } from "./pages/ReservationDetailPage";
 import { QuotesPage } from "./pages/QuotesPage";
 import { QuoteDetailPage } from "./pages/QuoteDetailPage";
+import { InvoicesPage } from "./pages/InvoicesPage";
+import { InvoiceDetailPage } from "./pages/InvoiceDetailPage";
 
 const rootRoute = createRootRoute({
   component: () => <Outlet />,
@@ -142,6 +144,18 @@ const quoteDetailRoute = createRoute({
   component: QuoteDetailPage,
 });
 
+const invoicesRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/invoices",
+  component: InvoicesPage,
+});
+
+const invoiceDetailRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/invoices/$invoiceId",
+  component: InvoiceDetailPage,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   signInRoute,
@@ -161,6 +175,8 @@ const routeTree = rootRoute.addChildren([
     reservationDetailRoute,
     quotesRoute,
     quoteDetailRoute,
+    invoicesRoute,
+    invoiceDetailRoute,
   ]),
 ]);
 

@@ -10,6 +10,7 @@ import type {
   EventOption,
   InvoiceFormData,
   InvoiceItem,
+  InvoiceStatus,
   ProductOption,
   QuoteOption,
 } from "../../features/invoices/types/invoice.types";
@@ -129,7 +130,7 @@ export function InvoiceForm({
               label: status,
             }))}
             onChange={(event) =>
-              updateField("status", event.target.value)
+              updateField("status", event.target.value as InvoiceStatus)
             }
           />
 

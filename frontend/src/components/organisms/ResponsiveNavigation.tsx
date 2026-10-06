@@ -9,7 +9,7 @@ const navigationItems = [
   { label: "Inventory", icon: "▤", to: "/equipment" },
   { label: "Reservations", icon: "◷", to: "/reservations" },
   { label: "Quotes", icon: "▧", to: "/quotes" },
-  { label: "Invoices", icon: "€" },
+  { label: "Invoices", icon: "€", to: "/invoices" },
 ];
 
 type NavigationContentProps = {

@@ -1,3 +1,17 @@
+export type InvoiceStatus =
+  | "DRAFT"
+  | "ISSUED"
+  | "PAID"
+  | "OVERDUE"
+  | "CANCELLED";
+
+export type InvoiceItemType =
+  | "EQUIPMENT"
+  | "SERVICE"
+  | "TRANSPORT"
+  | "PERSONNEL"
+  | "OTHER";
+
 export type CustomerOption = {
   id: string;
   customerNo: string;
@@ -24,17 +38,20 @@ export type ProductOption = {
 };
 
 export type InvoiceItem = {
-  type: string;
+  id?: string;
+  type: InvoiceItemType;
   description: string;
   quantity: number;
   unitPrice: number;
   discount: number;
-  productId?: string;
+  total?: number;
+  productId?: string | null;
+  product?: ProductOption | null;
 };
 
 export type InvoiceFormData = {
   invoiceNo: string;
-  status: string;
+  status: InvoiceStatus;
   issueDate: string;
   dueDate: string;
   notes: string;
@@ -44,4 +61,40 @@ export type InvoiceFormData = {
   tax: number;
   discount: number;
   items: InvoiceItem[];
+};
+
+
+export type InvoiceCustomer = CustomerOption & {
+  email?: string | null;
+};
+
+export type InvoiceEvent = EventOption;
+
+export type InvoiceQuote = QuoteOption;
+
+export type Invoice = {
+  id: string;
+  invoiceNo: string;
+  status: InvoiceStatus;
+
+  issueDate?: string | null;
+  dueDate?: string | null;
+  notes?: string | null;
+
+  subtotal: number;
+  discount: number;
+  tax: number;
+  total: number;
+
+  customerId: string;
+  eventId?: string | null;
+  quoteId?: string | null;
+
+  customer: InvoiceCustomer;
+  event?: InvoiceEvent | null;
+  quote?: InvoiceQuote | null;
+  items: InvoiceItem[];
+
+  createdAt: string;
+  updatedAt: string;
 };
