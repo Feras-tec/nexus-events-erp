@@ -8,7 +8,7 @@ const navigationItems = [
   { label: "Products", icon: "□", to: "/products" },
   { label: "Inventory", icon: "▤", to: "/equipment" },
   { label: "Reservations", icon: "◷", to: "/reservations" },
-  { label: "Quotes", icon: "▧" },
+  { label: "Quotes", icon: "▧", to: "/quotes" },
   { label: "Invoices", icon: "€" },
 ];
 

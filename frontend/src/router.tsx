@@ -22,6 +22,8 @@ import { CustomerDetailPage } from "./pages/CustomerDetailPage";
 import { SignInPage } from "./pages/SignInPage";
 import { ReservationsPage } from "./pages/ReservationsPage";
 import { ReservationDetailPage } from "./pages/ReservationDetailPage";
+import { QuotesPage } from "./pages/QuotesPage";
+import { QuoteDetailPage } from "./pages/QuoteDetailPage";
 
 const rootRoute = createRootRoute({
   component: () => <Outlet />,
@@ -128,6 +130,18 @@ const reservationDetailRoute = createRoute({
   component: ReservationDetailPage,
 });
 
+const quotesRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/quotes",
+  component: QuotesPage,
+});
+
+const quoteDetailRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/quotes/$quoteId",
+  component: QuoteDetailPage,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   signInRoute,
@@ -145,6 +159,8 @@ const routeTree = rootRoute.addChildren([
     equipmentDetailRoute,
     reservationsRoute,
     reservationDetailRoute,
+    quotesRoute,
+    quoteDetailRoute,
   ]),
 ]);
 

@@ -235,8 +235,13 @@ export async function updateQuote(req: Request, res: Response) {
       });
     }
 
+    const data = result.data;
+
     const existingQuote = await prisma.quote.findUnique({
       where: { id },
+      include: {
+        items: true,
+      },
     });
 
     if (!existingQuote) {
@@ -245,18 +250,186 @@ export async function updateQuote(req: Request, res: Response) {
       });
     }
 
-    const quote = await prisma.quote.update({
-      where: { id },
-      data: result.data,
-      include: {
-        customer: true,
-        event: true,
-        items: {
-          include: {
-            product: true,
+    // Kunde prüfen, falls geändert
+    if (data.customerId) {
+      const customer = await prisma.customer.findUnique({
+        where: { id: data.customerId },
+      });
+
+      if (!customer) {
+        return res.status(404).json({
+          error: "Customer not found",
+        });
+      }
+    }
+
+    // Event prüfen, falls geändert
+    if (data.eventId) {
+      const event = await prisma.event.findUnique({
+        where: { id: data.eventId },
+      });
+
+      if (!event) {
+        return res.status(404).json({
+          error: "Event not found",
+        });
+      }
+    }
+
+    // Produkt-IDs prüfen, falls Positionen geändert werden
+    if (data.items) {
+      const productIds = data.items
+        .map((item) => item.productId)
+        .filter((productId): productId is string =>
+          productId !== undefined,
+        );
+
+      if (productIds.length > 0) {
+        const uniqueProductIds = [...new Set(productIds)];
+
+        const products = await prisma.product.findMany({
+          where: {
+            id: {
+              in: uniqueProductIds,
+            },
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        if (products.length !== uniqueProductIds.length) {
+          return res.status(404).json({
+            error: "One or more products were not found",
+          });
+        }
+      }
+    }
+
+    const calculatedItems = data.items?.map((item) => {
+      const unitPriceCents = Math.round(item.unitPrice * 100);
+      const baseTotalCents = Math.round(
+        item.quantity * unitPriceCents,
+      );
+
+      const discountCents = Math.round(
+        baseTotalCents * (item.discount / 100),
+      );
+
+      const itemTotalCents =
+        baseTotalCents - discountCents;
+
+      return {
+        ...item,
+        total: itemTotalCents / 100,
+      };
+    });
+
+    // Für die Neuberechnung entweder neue oder bestehende Positionen verwenden
+    const itemsForTotals =
+      calculatedItems ??
+      existingQuote.items.map((item) => ({
+        total: item.total,
+      }));
+
+    const subtotalCents = itemsForTotals.reduce(
+      (sum, item) =>
+        sum + Math.round(Number(item.total) * 100),
+      0,
+    );
+
+    const discount =
+      data.discount ?? Number(existingQuote.discount);
+
+    const tax =
+      data.tax ?? Number(existingQuote.tax);
+
+    const quoteDiscountCents = Math.round(
+      subtotalCents * (discount / 100),
+    );
+
+    const netCents =
+      subtotalCents - quoteDiscountCents;
+
+    const taxCents = Math.round(
+      netCents * (tax / 100),
+    );
+
+    const totalCents = netCents + taxCents;
+
+    const quote = await prisma.$transaction(async (tx) => {
+      if (calculatedItems) {
+        await tx.quoteItem.deleteMany({
+          where: {
+            quoteId: id,
+          },
+        });
+      }
+
+      return tx.quote.update({
+        where: { id },
+
+        data: {
+          ...(data.quoteNo !== undefined && {
+            quoteNo: data.quoteNo,
+          }),
+
+          ...(data.status !== undefined && {
+            status: data.status,
+          }),
+
+          ...(data.validUntil !== undefined && {
+            validUntil: data.validUntil,
+          }),
+
+          ...(data.notes !== undefined && {
+            notes: data.notes,
+          }),
+
+          ...(data.customerId !== undefined && {
+            customerId: data.customerId,
+          }),
+
+          ...(data.eventId !== undefined && {
+            eventId: data.eventId,
+          }),
+
+          ...(data.discount !== undefined && {
+            discount: data.discount,
+          }),
+
+          ...(data.tax !== undefined && {
+            tax: data.tax,
+          }),
+
+          subtotal: subtotalCents / 100,
+          total: totalCents / 100,
+
+          ...(calculatedItems && {
+            items: {
+              create: calculatedItems.map((item) => ({
+                type: item.type,
+                description: item.description,
+                quantity: item.quantity,
+                unitPrice: item.unitPrice,
+                discount: item.discount,
+                total: item.total,
+                productId: item.productId,
+              })),
+            },
+          }),
+        },
+
+        include: {
+          customer: true,
+          event: true,
+          items: {
+            include: {
+              product: true,
+            },
           },
         },
-      },
+      });
     });
 
     return res.json(quote);
