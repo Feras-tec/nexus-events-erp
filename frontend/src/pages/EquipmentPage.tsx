@@ -1,152 +1,40 @@
 import { useState } from "react";
-import { useAuth } from "@clerk/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 
 import { Button } from "../components/atoms/Button";
 import {
   EquipmentForm,
-  type EquipmentFormValues,
-  type ProductOption,
-  type WarehouseOption,
 } from "../components/organisms/EquipmentForm";
 import { EquipmentTable } from "../components/organisms/EquipmentTable";
 import { ListLayout } from "../components/templates/ListLayout";
-import { apiFetch } from "../services/api";
-
-type InventoryItem = {
-  id: string;
-  assetNo: string;
-  manufacturerSerial?: string | null;
-  barcode?: string | null;
-  status: string;
-  location?: string | null;
-  product: {
-    id: string;
-    productNo: string;
-    name: string;
-    brand?: string | null;
-    model?: string | null;
-  };
-  warehouse: {
-    id: string;
-    name: string;
-    branch: {
-      id: string;
-      name: string;
-    };
-  };
-};
-
-type EquipmentResponse = {
-  data: InventoryItem[];
-};
-
-type ProductsResponse = {
-  data: ProductOption[];
-};
-
-type WarehousesResponse = {
-  data: WarehouseOption[];
-};
+import { useEquipment } from "../features/equipment/hooks/useEquipment";
+import { useEquipmentFormOptions } from "../features/equipment/hooks/useEquipmentFormOptions";
+import { useCreateEquipment } from "../features/equipment/hooks/useCreateEquipment";
 
 export function EquipmentPage() {
-  const { getToken } = useAuth();
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
 
   const {
-    data: equipment = [],
+    equipment,
     isLoading,
     isError,
-  } = useQuery({
-    queryKey: ["equipment"],
-    queryFn: async () => {
-      const token = await getToken();
-
-      const response = await apiFetch("/api/inventory-items", token);
-      const result = (await response.json()) as EquipmentResponse;
-
-      return result.data;
-    },
-  });
+  } = useEquipment();
 
   const {
-    data: products = [],
-    isLoading: productsLoading,
-    isError: productsError,
-  } = useQuery({
-    queryKey: ["products"],
-    queryFn: async () => {
-      const token = await getToken();
+    products,
+    productsLoading,
+    productsError,
+    warehouses,
+    warehousesLoading,
+    warehousesError,
+  } = useEquipmentFormOptions();
 
-      const response = await apiFetch("/api/products", token);
-      const result = (await response.json()) as ProductsResponse;
-
-      return result.data;
-    },
-  });
-
-  const {
-    data: warehouses = [],
-    isLoading: warehousesLoading,
-    isError: warehousesError,
-  } = useQuery({
-    queryKey: ["warehouses"],
-    queryFn: async () => {
-      const token = await getToken();
-
-      const response = await apiFetch("/api/warehouses", token);
-      const result = (await response.json()) as WarehousesResponse;
-
-      return result.data;
-    },
-  });
-
-  const createEquipmentMutation = useMutation({
-    mutationFn: async (data: EquipmentFormValues) => {
-      const token = await getToken();
-
-      const payload = {
-        assetNo: data.assetNo.trim(),
-        manufacturerSerial:
-          data.manufacturerSerial.trim() || undefined,
-        barcode: data.barcode.trim() || undefined,
-        status: data.status,
-        location: data.location.trim() || undefined,
-        purchaseDate: data.purchaseDate || undefined,
-        purchasePrice: data.purchasePrice
-          ? Number(data.purchasePrice)
-          : undefined,
-        notes: data.notes.trim() || undefined,
-        productId: data.productId,
-        warehouseId: data.warehouseId,
-      };
-
-      const response = await apiFetch("/api/inventory-items", token, {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: ["equipment"],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["products"],
-        }),
-      ]);
-
-      setShowCreateForm(false);
-    },
+  const { createEquipmentMutation } = useCreateEquipment({
+    onSuccess: () => setShowCreateForm(false),
   });
 
   const normalizedSearch = search.trim().toLowerCase();
