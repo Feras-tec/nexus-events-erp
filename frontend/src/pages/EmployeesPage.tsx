@@ -1,139 +1,40 @@
 import { useState } from "react";
-import { useAuth } from "@clerk/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
 import { useNavigate } from "@tanstack/react-router";
 
 import { Button } from "../components/atoms/Button";
 import {
   EmployeeForm,
-  type BranchOption,
-  type DepartmentOption,
-  type EmployeeFormValues,
 } from "../components/organisms/EmployeeForm";
 import { EmployeeTable } from "../components/organisms/EmployeeTable";
 import { ListLayout } from "../components/templates/ListLayout";
-import { apiFetch } from "../services/api";
-
-type Employee = {
-  id: string;
-  employeeNo: string;
-  firstName: string;
-  lastName: string;
-  email?: string | null;
-  phone?: string | null;
-  position?: string | null;
-  status: string;
-  branch: {
-    id: string;
-    name: string;
-  };
-  department?: {
-    id: string;
-    name: string;
-  } | null;
-};
-
-type EmployeesResponse = {
-  data: Employee[];
-};
-
-type BranchesResponse = {
-  data: BranchOption[];
-};
-
-type DepartmentsResponse = {
-  data: DepartmentOption[];
-};
+import { useEmployees } from "../features/employees/hooks/useEmployees";
+import { useEmployeeFormOptions } from "../features/employees/hooks/useEmployeeFormOptions";
+import { useCreateEmployee } from "../features/employees/hooks/useCreateEmployee";
 
 export function EmployeesPage() {
-  const { getToken } = useAuth();
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
 
   const {
-    data: employees = [],
+    employees,
     isLoading,
     isError,
-  } = useQuery({
-    queryKey: ["employees"],
-    queryFn: async () => {
-      const token = await getToken();
-
-      const response = await apiFetch("/api/employees", token);
-      const result = (await response.json()) as EmployeesResponse;
-
-      return result.data;
-    },
-  });
+  } = useEmployees();
 
   const {
-    data: branches = [],
-    isLoading: branchesLoading,
-    isError: branchesError,
-  } = useQuery({
-    queryKey: ["branches"],
-    queryFn: async () => {
-      const token = await getToken();
+    branches,
+    branchesLoading,
+    branchesError,
+    departments,
+    departmentsLoading,
+    departmentsError,
+  } = useEmployeeFormOptions();
 
-      const response = await apiFetch("/api/branches", token);
-      const result = (await response.json()) as BranchesResponse;
-
-      return result.data;
-    },
-  });
-
-  const {
-    data: departments = [],
-    isLoading: departmentsLoading,
-    isError: departmentsError,
-  } = useQuery({
-    queryKey: ["departments"],
-    queryFn: async () => {
-      const token = await getToken();
-
-      const response = await apiFetch("/api/departments", token);
-      const result = (await response.json()) as DepartmentsResponse;
-
-      return result.data;
-    },
-  });
-
-  const createEmployeeMutation = useMutation({
-    mutationFn: async (data: EmployeeFormValues) => {
-      const token = await getToken();
-
-      const payload = {
-        employeeNo: data.employeeNo.trim(),
-        firstName: data.firstName.trim(),
-        lastName: data.lastName.trim(),
-        email: data.email.trim() || undefined,
-        phone: data.phone.trim() || undefined,
-        birthDate: data.birthDate || undefined,
-        nationality: data.nationality.trim() || undefined,
-        position: data.position.trim() || undefined,
-        branchId: data.branchId,
-        departmentId: data.departmentId || undefined,
-      };
-
-      const response = await apiFetch("/api/employees", token, {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
-
-      return response.json();
-    },
-
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["employees"],
-      });
-
-      setShowCreateForm(false);
-    },
+  const { createEmployeeMutation } = useCreateEmployee({
+    onSuccess: () => setShowCreateForm(false),
   });
 
   const normalizedSearch = search.trim().toLowerCase();
