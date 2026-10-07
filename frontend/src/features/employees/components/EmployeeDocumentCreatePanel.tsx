@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 
 import { EmployeeDocumentForm } from "../../../components/organisms/EmployeeDocumentForm";
 import type { EmployeeDocumentFormData } from "../../../components/organisms/EmployeeDocumentForm";
@@ -16,6 +17,8 @@ export function EmployeeDocumentCreatePanel({
   error,
   onSubmit,
 }: EmployeeDocumentCreatePanelProps) {
+  const { t } = useTranslation();
+
   return (
     <AnimatePresence>
       {open && (
@@ -36,7 +39,9 @@ export function EmployeeDocumentCreatePanel({
               role="alert"
               className="alert alert-error mt-4"
             >
-              Dokument konnte nicht erstellt werden.
+              {t(
+                "employees.detail.documents.createError",
+              )}
             </div>
           )}
         </motion.div>

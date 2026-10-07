@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "../../../components/atoms/Button";
 import { EmployeeDocumentCreatePanel } from "./EmployeeDocumentCreatePanel";
@@ -10,17 +11,11 @@ type EmployeeDocumentsProps = {
   employee: EmployeeDetail;
 };
 
-const typeLabels = {
-  RESIDENCE_PERMIT: "Aufenthaltstitel",
-  WORK_PERMIT: "Arbeitserlaubnis",
-  PASSPORT: "Reisepass",
-  CONTRACT: "Vertrag",
-  OTHER: "Sonstiges",
-};
-
 export function EmployeeDocuments({
   employee,
 }: EmployeeDocumentsProps) {
+  const { t } = useTranslation();
+
   const [showDocumentForm, setShowDocumentForm] = useState(false);
   const [editingDocumentId, setEditingDocumentId] =
     useState<string | null>(null);
@@ -41,16 +36,36 @@ export function EmployeeDocuments({
     },
   });
 
+  const typeLabels = {
+    RESIDENCE_PERMIT: t(
+      "employees.documents.types.RESIDENCE_PERMIT",
+    ),
+    WORK_PERMIT: t(
+      "employees.documents.types.WORK_PERMIT",
+    ),
+    PASSPORT: t(
+      "employees.documents.types.PASSPORT",
+    ),
+    CONTRACT: t(
+      "employees.documents.types.CONTRACT",
+    ),
+    OTHER: t(
+      "employees.documents.types.OTHER",
+    ),
+  };
+
   return (
     <section className="rounded-box border border-base-300 bg-base-100 p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">
-            Dokumente
+            {t("employees.documents.title")}
           </h2>
 
           <p className="mt-1 text-sm text-base-content/60">
-            {employee.documents.length} Dokumente
+            {t("employees.documents.count", {
+              count: employee.documents.length,
+            })}
           </p>
         </div>
 
@@ -62,8 +77,8 @@ export function EmployeeDocuments({
           }
         >
           {showDocumentForm
-            ? "Abbrechen"
-            : "Dokument hinzufügen"}
+            ? t("common.cancel")
+            : t("employees.documents.add")}
         </Button>
       </div>
 
@@ -78,7 +93,7 @@ export function EmployeeDocuments({
 
       {employee.documents.length === 0 ? (
         <p className="mt-5 text-sm text-base-content/60">
-          Noch keine Dokumente vorhanden.
+          {t("employees.documents.empty")}
         </p>
       ) : (
         <div className="mt-5 space-y-3">

@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { StatusChip } from "../../../components/atoms/StatusChip";
 import type { EmployeeDetail } from "../types/employee.types";
 
@@ -8,11 +10,13 @@ type EmployeeOverviewProps = {
 export function EmployeeOverview({
   employee,
 }: EmployeeOverviewProps) {
+  const { t, i18n } = useTranslation();
+
   return (
     <section className="rounded-box border border-base-300 bg-base-100 p-6">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-semibold">
-          Mitarbeiterdaten
+          {t("employees.detail.employeeData")}
         </h2>
 
         <StatusChip status={employee.status} />
@@ -21,7 +25,7 @@ export function EmployeeOverview({
       <dl className="grid gap-6 md:grid-cols-2">
         <div>
           <dt className="text-sm text-base-content/60">
-            Mitarbeiternr.
+            {t("employees.form.employeeNo")}
           </dt>
           <dd className="mt-1 font-medium">
             {employee.employeeNo}
@@ -30,7 +34,7 @@ export function EmployeeOverview({
 
         <div>
           <dt className="text-sm text-base-content/60">
-            Position
+            {t("employees.form.position")}
           </dt>
           <dd className="mt-1 font-medium">
             {employee.position || "—"}
@@ -39,7 +43,7 @@ export function EmployeeOverview({
 
         <div>
           <dt className="text-sm text-base-content/60">
-            E-Mail
+            {t("employees.form.email")}
           </dt>
           <dd className="mt-1 font-medium">
             {employee.email || "—"}
@@ -48,7 +52,7 @@ export function EmployeeOverview({
 
         <div>
           <dt className="text-sm text-base-content/60">
-            Telefon
+            {t("employees.form.phone")}
           </dt>
           <dd className="mt-1 font-medium">
             {employee.phone || "—"}
@@ -57,12 +61,16 @@ export function EmployeeOverview({
 
         <div>
           <dt className="text-sm text-base-content/60">
-            Geburtsdatum
+            {t("employees.form.birthDate")}
           </dt>
           <dd className="mt-1 font-medium">
             {employee.birthDate
               ? new Date(employee.birthDate).toLocaleDateString(
-                  "de-DE",
+                  i18n.language === "ar"
+                    ? "ar-SA"
+                    : i18n.language === "en"
+                      ? "en-US"
+                      : "de-DE",
                 )
               : "—"}
           </dd>
@@ -70,7 +78,7 @@ export function EmployeeOverview({
 
         <div>
           <dt className="text-sm text-base-content/60">
-            Nationalität
+            {t("employees.form.nationality")}
           </dt>
           <dd className="mt-1 font-medium">
             {employee.nationality || "—"}
@@ -79,7 +87,7 @@ export function EmployeeOverview({
 
         <div>
           <dt className="text-sm text-base-content/60">
-            Niederlassung
+            {t("employees.form.branch")}
           </dt>
           <dd className="mt-1 font-medium">
             {employee.branch.name}
@@ -91,7 +99,7 @@ export function EmployeeOverview({
 
         <div>
           <dt className="text-sm text-base-content/60">
-            Abteilung
+            {t("employees.form.department")}
           </dt>
           <dd className="mt-1 font-medium">
             {employee.department?.name || "—"}
@@ -100,7 +108,7 @@ export function EmployeeOverview({
 
         <div>
           <dt className="text-sm text-base-content/60">
-            Unternehmen
+            {t("employees.detail.company")}
           </dt>
           <dd className="mt-1 font-medium">
             {employee.branch.company?.name || "—"}

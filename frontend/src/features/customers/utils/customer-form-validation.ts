@@ -1,3 +1,5 @@
+import type { TFunction } from "i18next";
+
 import type {
   CustomerFormData,
   CustomerFormErrors,
@@ -5,35 +7,39 @@ import type {
 
 export function validateCustomerForm(
   formData: CustomerFormData,
+  t: TFunction,
 ): CustomerFormErrors {
   const errors: CustomerFormErrors = {};
 
   if (!formData.customerNo.trim()) {
-    errors.customerNo = "Kundennummer ist erforderlich.";
+    errors.customerNo = t("customers.validation.customerNoRequired");
   }
 
   if (
     formData.type === "COMPANY" &&
     !formData.companyName.trim()
   ) {
-    errors.companyName =
-      "Firmenname ist für Firmenkunden erforderlich.";
+    errors.companyName = t(
+      "customers.validation.companyNameRequired",
+    );
   }
 
   if (
     formData.type === "PRIVATE" &&
     !formData.firstName.trim()
   ) {
-    errors.firstName =
-      "Vorname ist für Privatkunden erforderlich.";
+    errors.firstName = t(
+      "customers.validation.firstNameRequired",
+    );
   }
 
   if (
     formData.type === "PRIVATE" &&
     !formData.lastName.trim()
   ) {
-    errors.lastName =
-      "Nachname ist für Privatkunden erforderlich.";
+    errors.lastName = t(
+      "customers.validation.lastNameRequired",
+    );
   }
 
   const discount = Number(formData.discount);
@@ -44,8 +50,9 @@ export function validateCustomerForm(
     discount < 0 ||
     discount > 100
   ) {
-    errors.discount =
-      "Rabatt muss zwischen 0 und 100 liegen.";
+    errors.discount = t(
+      "customers.validation.discountRange",
+    );
   }
 
   return errors;

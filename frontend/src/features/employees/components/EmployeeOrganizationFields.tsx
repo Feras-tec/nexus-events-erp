@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import type {
   BranchOption,
   DepartmentOption,
@@ -23,11 +25,13 @@ export function EmployeeOrganizationFields({
   onBranchChange,
   onDepartmentChange,
 }: EmployeeOrganizationFieldsProps) {
+  const { t } = useTranslation();
+
   return (
     <>
       <fieldset className="fieldset">
         <legend className="fieldset-legend">
-          Niederlassung
+          {t("employees.form.branch")}
         </legend>
 
         <select
@@ -40,7 +44,7 @@ export function EmployeeOrganizationFields({
           required
         >
           <option value="">
-            Niederlassung auswählen
+            {t("employees.form.selectBranch")}
           </option>
 
           {activeBranches.map((branch) => (
@@ -53,7 +57,7 @@ export function EmployeeOrganizationFields({
 
       <fieldset className="fieldset md:col-span-2">
         <legend className="fieldset-legend">
-          Abteilung
+          {t("employees.form.department")}
         </legend>
 
         <select
@@ -65,7 +69,7 @@ export function EmployeeOrganizationFields({
           disabled={!values.branchId || loading}
         >
           <option value="">
-            Keine Abteilung
+            {t("employees.form.noDepartment")}
           </option>
 
           {availableDepartments.map((department) => (

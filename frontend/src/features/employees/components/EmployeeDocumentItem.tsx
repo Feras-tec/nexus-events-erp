@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 
 import { EmployeeDocumentForm } from "../../../components/organisms/EmployeeDocumentForm";
 import type { EmployeeDocumentFormData } from "../../../components/organisms/EmployeeDocumentForm";
@@ -49,6 +50,14 @@ export function EmployeeDocumentItem({
   onUpdate,
   onDelete,
 }: EmployeeDocumentItemProps) {
+  const { t, i18n } = useTranslation();
+
+  function formatDate(value: string) {
+    return new Intl.DateTimeFormat(i18n.language).format(
+      new Date(value),
+    );
+  }
+
   return (
     <motion.div
       layout
@@ -60,7 +69,8 @@ export function EmployeeDocumentItem({
 
           {document.documentNumber && (
             <p className="mt-1 text-sm text-base-content/60">
-              Nr. {document.documentNumber}
+              {t("employees.detail.documents.number")}{" "}
+              {document.documentNumber}
             </p>
           )}
         </div>
@@ -73,7 +83,7 @@ export function EmployeeDocumentItem({
               rel="noreferrer"
               className="btn btn-ghost btn-xs"
             >
-              Datei öffnen
+              {t("employees.detail.documents.openFile")}
             </a>
           )}
 
@@ -82,7 +92,9 @@ export function EmployeeDocumentItem({
             className="btn btn-ghost btn-xs"
             onClick={onToggleEdit}
           >
-            {editing ? "Abbrechen" : "Bearbeiten"}
+            {editing
+              ? t("common.cancel")
+              : t("common.edit")}
           </button>
 
           <button
@@ -90,7 +102,7 @@ export function EmployeeDocumentItem({
             className="btn btn-error btn-outline btn-xs"
             onClick={onDeleteRequest}
           >
-            Löschen
+            {t("common.delete")}
           </button>
         </div>
       </div>
@@ -100,22 +112,20 @@ export function EmployeeDocumentItem({
           {document.issueDate && (
             <p>
               <span className="text-base-content/60">
-                Ausgestellt:
+                {t("employees.detail.documents.issued")}
               </span>{" "}
-              {new Date(
-                document.issueDate,
-              ).toLocaleDateString("de-DE")}
+              {formatDate(document.issueDate)}
             </p>
           )}
 
           {document.expiryDate && (
             <p>
               <span className="text-base-content/60">
-                Gültig bis:
+                {t(
+                  "employees.detail.documents.validUntil",
+                )}
               </span>{" "}
-              {new Date(
-                document.expiryDate,
-              ).toLocaleDateString("de-DE")}
+              {formatDate(document.expiryDate)}
             </p>
           )}
         </div>
@@ -161,7 +171,9 @@ export function EmployeeDocumentItem({
                 role="alert"
                 className="alert alert-error mt-4"
               >
-                Dokument konnte nicht aktualisiert werden.
+                {t(
+                  "employees.detail.documents.updateError",
+                )}
               </div>
             )}
           </motion.div>
@@ -171,11 +183,13 @@ export function EmployeeDocumentItem({
       {deleting && (
         <div className="mt-4 rounded-box border border-error/30 bg-error/5 p-4">
           <p className="text-sm font-medium">
-            Dokument wirklich löschen?
+            {t(
+              "employees.detail.documents.deleteConfirm",
+            )}
           </p>
 
           <p className="mt-1 text-sm text-base-content/60">
-            Dieser Vorgang kann nicht rückgängig gemacht werden.
+            {t("common.irreversible")}
           </p>
 
           <div className="mt-3 flex justify-end gap-2">
@@ -185,7 +199,7 @@ export function EmployeeDocumentItem({
               disabled={deleteLoading}
               onClick={onCancelDelete}
             >
-              Abbrechen
+              {t("common.cancel")}
             </button>
 
             <button
@@ -195,8 +209,10 @@ export function EmployeeDocumentItem({
               onClick={onDelete}
             >
               {deleteLoading
-                ? "Wird gelöscht..."
-                : "Endgültig löschen"}
+                ? t(
+                    "employees.detail.documents.deleteLoading",
+                  )
+                : t("common.deletePermanently")}
             </button>
           </div>
 
@@ -205,7 +221,9 @@ export function EmployeeDocumentItem({
               role="alert"
               className="alert alert-error mt-3"
             >
-              Dokument konnte nicht gelöscht werden.
+              {t(
+                "employees.detail.documents.deleteError",
+              )}
             </div>
           )}
         </div>

@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { StatusChip } from "../atoms/StatusChip";
 
 type Employee = {
@@ -28,11 +30,13 @@ export function EmployeeTable({
   employees,
   onView,
 }: EmployeeTableProps) {
+  const { t } = useTranslation();
+
   if (employees.length === 0) {
     return (
       <div className="rounded-box border border-base-300 bg-base-100 p-8 text-center">
         <p className="text-base-content/60">
-          Keine Mitarbeiter gefunden.
+          {t("employees.table.noEmployees")}
         </p>
       </div>
     );
@@ -43,13 +47,15 @@ export function EmployeeTable({
       <table className="table">
         <thead>
           <tr>
-            <th>Mitarbeiter</th>
-            <th>Position</th>
-            <th>Abteilung</th>
-            <th>Niederlassung</th>
-            <th>Status</th>
+            <th>{t("employees.table.employee")}</th>
+            <th>{t("employees.table.position")}</th>
+            <th>{t("employees.table.department")}</th>
+            <th>{t("employees.table.branch")}</th>
+            <th>{t("employees.table.status")}</th>
             <th>
-              <span className="sr-only">Aktionen</span>
+              <span className="sr-only">
+                {t("common.actions")}
+              </span>
             </th>
           </tr>
         </thead>
@@ -77,7 +83,9 @@ export function EmployeeTable({
 
               <td>{employee.position ?? "—"}</td>
 
-              <td>{employee.department?.name ?? "—"}</td>
+              <td>
+                {employee.department?.name ?? "—"}
+              </td>
 
               <td>{employee.branch.name}</td>
 
@@ -92,7 +100,7 @@ export function EmployeeTable({
                     className="btn btn-ghost btn-sm"
                     onClick={() => onView(employee.id)}
                   >
-                    Anzeigen
+                    {t("common.view")}
                   </button>
                 )}
               </td>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Badge } from "./Badge";
 
 type StatusChipProps = {
@@ -25,15 +26,20 @@ const statusVariants = {
 } as const;
 
 export function StatusChip({ status }: StatusChipProps) {
+  const { t } = useTranslation();
+
   const normalizedStatus = status.toUpperCase();
 
   const variant =
-    statusVariants[normalizedStatus as keyof typeof statusVariants] ??
-    "neutral";
+    statusVariants[
+      normalizedStatus as keyof typeof statusVariants
+    ] ?? "neutral";
 
   return (
     <Badge variant={variant}>
-      {normalizedStatus}
+      {t(`status.${normalizedStatus}`, {
+        defaultValue: normalizedStatus,
+      })}
     </Badge>
   );
 }

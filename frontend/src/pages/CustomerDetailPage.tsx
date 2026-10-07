@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "../components/atoms/Button";
 import { ConfirmDeleteDialog } from "../components/molecules/ConfirmDeleteDialog";
@@ -17,6 +18,7 @@ import { useActivateCustomer } from "../features/customers/hooks/useActivateCust
 import { getCustomerName } from "../features/customers/utils/customer-formatters";
 
 export function CustomerDetailPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -40,23 +42,25 @@ export function CustomerDetailPage() {
     },
   });
 
-  const { deactivateCustomerMutation } = useDeactivateCustomer({
-    customerId,
-    onSuccess: () => {
-      setShowDeactivateDialog(false);
-    },
-  });
+  const { deactivateCustomerMutation } =
+    useDeactivateCustomer({
+      customerId,
+      onSuccess: () => {
+        setShowDeactivateDialog(false);
+      },
+    });
 
-  const { activateCustomerMutation } = useActivateCustomer({
-    customerId,
-  });
+  const { activateCustomerMutation } =
+    useActivateCustomer({
+      customerId,
+    });
 
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
         <span
           className="loading loading-spinner loading-lg"
-          aria-label="Kunde wird geladen"
+          aria-label={t("customers.detail.loading")}
         />
       </div>
     );
@@ -65,7 +69,7 @@ export function CustomerDetailPage() {
   if (isError || !customer) {
     return (
       <div role="alert" className="alert alert-error">
-        Kunde konnte nicht geladen werden.
+        {t("customers.detail.loadError")}
       </div>
     );
   }
@@ -102,7 +106,7 @@ export function CustomerDetailPage() {
                 navigate({ to: "/customers" })
               }
             >
-              ← Zurück
+              ← {t("common.back")}
             </Button>
 
             <Button
@@ -111,7 +115,9 @@ export function CustomerDetailPage() {
                 setIsEditing((current) => !current)
               }
             >
-              {isEditing ? "Abbrechen" : "Bearbeiten"}
+              {isEditing
+                ? t("common.cancel")
+                : t("common.edit")}
             </Button>
 
             {customer.isActive && !isEditing && (
@@ -122,7 +128,7 @@ export function CustomerDetailPage() {
                   setShowDeactivateDialog(true)
                 }
               >
-                Deaktivieren
+                {t("customers.detail.deactivate")}
               </Button>
             )}
 
@@ -132,11 +138,13 @@ export function CustomerDetailPage() {
                 onClick={() =>
                   activateCustomerMutation.mutate()
                 }
-                disabled={activateCustomerMutation.isPending}
+                disabled={
+                  activateCustomerMutation.isPending
+                }
               >
                 {activateCustomerMutation.isPending
-                  ? "Wird aktiviert..."
-                  : "Aktivieren"}
+                  ? t("customers.detail.activating")
+                  : t("customers.detail.activate")}
               </Button>
             )}
           </>
@@ -154,7 +162,9 @@ export function CustomerDetailPage() {
               <CustomerForm
                 mode="edit"
                 initialValues={initialValues}
-                loading={updateCustomerMutation.isPending}
+                loading={
+                  updateCustomerMutation.isPending
+                }
                 onSubmit={(data) =>
                   updateCustomerMutation.mutate(data)
                 }
@@ -165,7 +175,7 @@ export function CustomerDetailPage() {
                   role="alert"
                   className="alert alert-error mt-4"
                 >
-                  Kunde konnte nicht aktualisiert werden.
+                  {t("customers.detail.updateError")}
                 </div>
               )}
             </motion.div>
@@ -177,14 +187,18 @@ export function CustomerDetailPage() {
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.2 }}
             >
-              <CustomerOverview customer={customer} />
+              <CustomerOverview
+                customer={customer}
+              />
 
               {deactivateCustomerMutation.isError && (
                 <div
                   role="alert"
                   className="alert alert-error mt-6"
                 >
-                  Kunde konnte nicht deaktiviert werden.
+                  {t(
+                    "customers.detail.deactivateError",
+                  )}
                 </div>
               )}
 
@@ -193,7 +207,9 @@ export function CustomerDetailPage() {
                   role="alert"
                   className="alert alert-error mt-6"
                 >
-                  Kunde konnte nicht aktiviert werden.
+                  {t(
+                    "customers.detail.activateError",
+                  )}
                 </div>
               )}
             </motion.div>
@@ -203,12 +219,17 @@ export function CustomerDetailPage() {
 
       <ConfirmDeleteDialog
         open={showDeactivateDialog}
-        title="Kunde deaktivieren"
-        message={`Möchten Sie ${getCustomerName(
-          customer,
-        )} wirklich deaktivieren? Der Kunde wird nicht gelöscht.`}
-        confirmLabel="Deaktivieren"
-        cancelLabel="Abbrechen"
+        title={t("customers.detail.deactivateTitle")}
+        message={t(
+          "customers.detail.deactivateMessage",
+          {
+            name: getCustomerName(customer),
+          },
+        )}
+        confirmLabel={t(
+          "customers.detail.deactivate",
+        )}
+        cancelLabel={t("common.cancel")}
         loading={deactivateCustomerMutation.isPending}
         onConfirm={() =>
           deactivateCustomerMutation.mutate()

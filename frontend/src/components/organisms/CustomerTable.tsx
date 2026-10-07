@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { StatusChip } from "../atoms/StatusChip";
 
 export type Customer = {
@@ -37,11 +38,13 @@ export function CustomerTable({
   customers,
   onView,
 }: CustomerTableProps) {
+  const { t } = useTranslation();
+
   if (customers.length === 0) {
     return (
       <div className="rounded-box border border-base-300 bg-base-100 p-8 text-center">
         <p className="text-base-content/70">
-          Keine Kunden gefunden.
+          {t("customers.noCustomers")}
         </p>
       </div>
     );
@@ -52,12 +55,12 @@ export function CustomerTable({
       <table className="table">
         <thead>
           <tr>
-            <th>Kunde</th>
-            <th>Kundennr.</th>
-            <th>Typ</th>
-            <th>Kontakt</th>
-            <th>Rabatt</th>
-            <th>Status</th>
+            <th>{t("customers.table.customer")}</th>
+            <th>{t("customers.table.customerNo")}</th>
+            <th>{t("customers.table.type")}</th>
+            <th>{t("customers.table.contact")}</th>
+            <th>{t("customers.table.discount")}</th>
+            <th>{t("customers.table.status")}</th>
             {onView && <th />}
           </tr>
         </thead>
@@ -79,7 +82,11 @@ export function CustomerTable({
 
               <td>{customer.customerNo}</td>
 
-              <td>{customer.type}</td>
+              <td>
+                {t(`customers.types.${customer.type}`, {
+                  defaultValue: customer.type,
+                })}
+              </td>
 
               <td>
                 <div>{customer.email || "—"}</div>
@@ -92,7 +99,11 @@ export function CustomerTable({
 
               <td>
                 <StatusChip
-                  status={customer.isActive ? "ACTIVE" : "INACTIVE"}
+                  status={
+                    customer.isActive
+                      ? "ACTIVE"
+                      : "INACTIVE"
+                  }
                 />
               </td>
 
@@ -103,7 +114,7 @@ export function CustomerTable({
                     className="btn btn-ghost btn-sm"
                     onClick={() => onView(customer)}
                   >
-                    Anzeigen
+                    {t("common.view")}
                   </button>
                 </td>
               )}

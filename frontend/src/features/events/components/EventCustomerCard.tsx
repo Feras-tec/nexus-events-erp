@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
 
 import type { EventDetail } from "../types/event.types";
@@ -10,6 +11,8 @@ type EventCustomerCardProps = {
 export function EventCustomerCard({
   customer,
 }: EventCustomerCardProps) {
+  const { t } = useTranslation();
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 12 }}
@@ -18,13 +21,13 @@ export function EventCustomerCard({
       className="rounded-box border border-base-300 bg-base-100 p-6"
     >
       <h2 className="mb-4 text-lg font-semibold">
-        Kunde
+        {t("events.customerCard.title")}
       </h2>
 
       <div className="space-y-3">
         <div>
           <div className="text-sm text-base-content/60">
-            Name
+            {t("events.customerCard.name")}
           </div>
           <div className="font-medium">
             {getCustomerName(customer)}
@@ -33,21 +36,21 @@ export function EventCustomerCard({
 
         <div>
           <div className="text-sm text-base-content/60">
-            Kundennr.
+            {t("events.customerCard.customerNo")}
           </div>
           <div>{customer.customerNo}</div>
         </div>
 
         <div>
           <div className="text-sm text-base-content/60">
-            E-Mail
+            {t("events.customerCard.email")}
           </div>
           <div>{customer.email || "—"}</div>
         </div>
 
         <div>
           <div className="text-sm text-base-content/60">
-            Telefon
+            {t("events.customerCard.phone")}
           </div>
           <div>{customer.phone || "—"}</div>
         </div>

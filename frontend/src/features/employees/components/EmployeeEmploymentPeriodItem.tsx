@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 
 import {
   EmploymentPeriodForm,
@@ -44,6 +45,14 @@ export function EmployeeEmploymentPeriodItem({
   onUpdate,
   onDelete,
 }: EmployeeEmploymentPeriodItemProps) {
+  const { t, i18n } = useTranslation();
+
+  function formatDate(value: string) {
+    return new Intl.DateTimeFormat(i18n.language).format(
+      new Date(value),
+    );
+  }
+
   return (
     <motion.div
       layout
@@ -54,7 +63,9 @@ export function EmployeeEmploymentPeriodItem({
           <p className="font-medium">
             {period.position ||
               employeePosition ||
-              "Beschäftigung"}
+              t(
+                "employees.detail.employmentPeriod.defaultPosition",
+              )}
           </p>
 
           {period.reason && (
@@ -67,7 +78,9 @@ export function EmployeeEmploymentPeriodItem({
         <div className="flex flex-wrap items-center gap-2">
           {!period.endDate && (
             <span className="badge badge-success">
-              Aktuell
+              {t(
+                "employees.detail.employmentPeriod.current",
+              )}
             </span>
           )}
 
@@ -76,7 +89,9 @@ export function EmployeeEmploymentPeriodItem({
             className="btn btn-ghost btn-xs"
             onClick={onToggleEdit}
           >
-            {editing ? "Abbrechen" : "Bearbeiten"}
+            {editing
+              ? t("common.cancel")
+              : t("common.edit")}
           </button>
 
           <button
@@ -84,25 +99,23 @@ export function EmployeeEmploymentPeriodItem({
             className="btn btn-error btn-outline btn-xs"
             onClick={onDeleteRequest}
           >
-            Löschen
+            {t("common.delete")}
           </button>
         </div>
       </div>
 
       <div className="mt-3 text-sm">
         <span className="text-base-content/60">
-          Zeitraum:
+          {t(
+            "employees.detail.employmentPeriod.period",
+          )}
         </span>{" "}
         <span className="font-medium">
-          {new Date(period.startDate).toLocaleDateString(
-            "de-DE",
-          )}
+          {formatDate(period.startDate)}
           {" – "}
           {period.endDate
-            ? new Date(period.endDate).toLocaleDateString(
-                "de-DE",
-              )
-            : "heute"}
+            ? formatDate(period.endDate)
+            : t("common.today")}
         </span>
       </div>
 
@@ -135,7 +148,9 @@ export function EmployeeEmploymentPeriodItem({
                 role="alert"
                 className="alert alert-error mt-4"
               >
-                Beschäftigungszeitraum konnte nicht aktualisiert werden.
+                {t(
+                  "employees.detail.employmentPeriod.updateError",
+                )}
               </div>
             )}
           </motion.div>
@@ -145,11 +160,13 @@ export function EmployeeEmploymentPeriodItem({
       {deleting && (
         <div className="mt-4 rounded-box border border-error/30 bg-error/5 p-4">
           <p className="text-sm font-medium">
-            Beschäftigungszeitraum wirklich löschen?
+            {t(
+              "employees.detail.employmentPeriod.deleteConfirm",
+            )}
           </p>
 
           <p className="mt-1 text-sm text-base-content/60">
-            Dieser Vorgang kann nicht rückgängig gemacht werden.
+            {t("common.irreversible")}
           </p>
 
           <div className="mt-3 flex justify-end gap-2">
@@ -159,7 +176,7 @@ export function EmployeeEmploymentPeriodItem({
               disabled={deleteLoading}
               onClick={onCancelDelete}
             >
-              Abbrechen
+              {t("common.cancel")}
             </button>
 
             <button
@@ -169,8 +186,10 @@ export function EmployeeEmploymentPeriodItem({
               onClick={onDelete}
             >
               {deleteLoading
-                ? "Wird gelöscht..."
-                : "Endgültig löschen"}
+                ? t(
+                    "employees.detail.employmentPeriod.deleteLoading",
+                  )
+                : t("common.deletePermanently")}
             </button>
           </div>
 
@@ -179,7 +198,9 @@ export function EmployeeEmploymentPeriodItem({
               role="alert"
               className="alert alert-error mt-3"
             >
-              Beschäftigungszeitraum konnte nicht gelöscht werden.
+              {t(
+                "employees.detail.employmentPeriod.deleteError",
+              )}
             </div>
           )}
         </div>

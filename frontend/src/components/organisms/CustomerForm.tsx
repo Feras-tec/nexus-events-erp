@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "../atoms/Button";
 import type {
@@ -39,6 +40,8 @@ export function CustomerForm({
   mode = "create",
   onSubmit,
 }: CustomerFormProps) {
+  const { t } = useTranslation();
+
   const [formData, setFormData] = useState<CustomerFormData>({
     ...defaultValues,
     ...initialValues,
@@ -65,7 +68,7 @@ export function CustomerForm({
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const nextErrors = validateCustomerForm(formData);
+    const nextErrors = validateCustomerForm(formData, t);
 
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
@@ -93,10 +96,10 @@ export function CustomerForm({
           {loading ? (
             <>
               <span className="loading loading-spinner loading-sm" />
-              Speichern...
+              {t("common.saving")}
             </>
           ) : (
-            "Speichern"
+            t("common.save")
           )}
         </Button>
       </div>

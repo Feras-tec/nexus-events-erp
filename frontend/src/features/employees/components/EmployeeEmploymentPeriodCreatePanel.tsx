@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 
 import {
   EmploymentPeriodForm,
@@ -18,6 +19,8 @@ export function EmployeeEmploymentPeriodCreatePanel({
   error,
   onSubmit,
 }: EmployeeEmploymentPeriodCreatePanelProps) {
+  const { t } = useTranslation();
+
   return (
     <AnimatePresence>
       {open && (
@@ -38,7 +41,9 @@ export function EmployeeEmploymentPeriodCreatePanel({
               role="alert"
               className="alert alert-error mt-4"
             >
-              Beschäftigungszeitraum konnte nicht erstellt werden.
+              {t(
+                "employees.detail.employmentPeriod.createError",
+              )}
             </div>
           )}
         </motion.div>

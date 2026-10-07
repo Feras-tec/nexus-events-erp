@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "../atoms/Button";
 import { Input } from "../atoms/Input";
@@ -63,12 +64,17 @@ export function EventForm({
   mode = "create",
   onSubmit,
 }: EventFormProps) {
+  const { t } = useTranslation();
+
   const [formData, setFormData] = useState<EventFormData>({
     ...emptyForm,
     ...initialValues,
   });
 
-  function updateField(field: keyof EventFormData, value: string) {
+  function updateField(
+    field: keyof EventFormData,
+    value: string,
+  ) {
     setFormData((current) => ({
       ...current,
       [field]: value,
@@ -95,17 +101,26 @@ export function EventForm({
     const name =
       customer.type === "COMPANY"
         ? customer.companyName
-        : [customer.firstName, customer.lastName].filter(Boolean).join(" ");
+        : [
+            customer.firstName,
+            customer.lastName,
+          ]
+            .filter(Boolean)
+            .join(" ");
 
     return {
       value: customer.id,
-      label: `${customer.customerNo} – ${name || "Ohne Name"}`,
+      label: `${customer.customerNo} – ${
+        name || t("events.form.noName")
+      }`,
     };
   });
 
   const statusOptions = eventStatuses.map((status) => ({
     value: status,
-    label: status.replaceAll("_", " "),
+    label: t(`status.${status}`, {
+      defaultValue: status.replaceAll("_", " "),
+    }),
   }));
 
   return (
@@ -115,70 +130,86 @@ export function EventForm({
     >
       <div className="grid gap-4 md:grid-cols-2">
         <Input
-          label="Event-Nr."
+          label={t("events.form.eventNo")}
           value={formData.eventNo}
           minLength={2}
           maxLength={30}
           required
           disabled={mode === "edit"}
-          onChange={(event) => updateField("eventNo", event.target.value)}
+          onChange={(event) =>
+            updateField("eventNo", event.target.value)
+          }
         />
 
         <Input
-          label="Name"
+          label={t("events.form.name")}
           value={formData.name}
           minLength={2}
           maxLength={150}
           required
-          onChange={(event) => updateField("name", event.target.value)}
+          onChange={(event) =>
+            updateField("name", event.target.value)
+          }
         />
 
         <Select
-          label="Kunde"
+          label={t("events.form.customer")}
           value={formData.customerId}
           options={customerOptions}
-          placeholder="Kunde auswählen"
+          placeholder={t("events.form.selectCustomer")}
           required
           disabled={mode === "edit"}
-          onChange={(event) => updateField("customerId", event.target.value)}
+          onChange={(event) =>
+            updateField("customerId", event.target.value)
+          }
         />
 
         <Select
-          label="Status"
+          label={t("events.form.status")}
           value={formData.status}
           options={statusOptions}
-          onChange={(event) => updateField("status", event.target.value)}
+          onChange={(event) =>
+            updateField("status", event.target.value)
+          }
         />
 
         <Input
-          label="Typ"
+          label={t("events.form.type")}
           value={formData.type}
           maxLength={100}
-          onChange={(event) => updateField("type", event.target.value)}
+          onChange={(event) =>
+            updateField("type", event.target.value)
+          }
         />
 
         <Input
-          label="Ort"
+          label={t("events.form.location")}
           value={formData.location}
           maxLength={255}
-          onChange={(event) => updateField("location", event.target.value)}
+          onChange={(event) =>
+            updateField("location", event.target.value)
+          }
         />
 
         <Input
           type="datetime-local"
-          label="Start"
+          label={t("events.form.start")}
           value={formData.startDate}
           required
-          onChange={(event) => updateField("startDate", event.target.value)}
+          onChange={(event) =>
+            updateField("startDate", event.target.value)
+          }
         />
 
         <Input
           type="datetime-local"
-          label="Ende"
+          label={t("events.form.end")}
           value={formData.endDate}
           min={formData.startDate}
           required
-          onChange={(event) => updateField("endDate", event.target.value)}
+          onChange={(event) =>
+            updateField("endDate", event.target.value)
+          }
         />
       </div>
 
@@ -187,7 +218,7 @@ export function EventForm({
           htmlFor="event-description"
           className="mb-2 block text-sm font-medium"
         >
-          Beschreibung
+          {t("events.form.description")}
         </label>
 
         <textarea
@@ -196,13 +227,18 @@ export function EventForm({
           rows={4}
           maxLength={1000}
           value={formData.description}
-          onChange={(event) => updateField("description", event.target.value)}
+          onChange={(event) =>
+            updateField(
+              "description",
+              event.target.value,
+            )
+          }
         />
       </div>
 
       <div className="flex justify-end">
         <Button type="submit" loading={loading}>
-          Speichern
+          {t("common.save")}
         </Button>
       </div>
     </form>

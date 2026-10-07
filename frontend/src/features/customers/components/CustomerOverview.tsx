@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { StatusChip } from "../../../components/atoms/StatusChip";
 import type { CustomerDetail } from "../types/customer.types";
 
@@ -8,10 +10,14 @@ type CustomerOverviewProps = {
 export function CustomerOverview({
   customer,
 }: CustomerOverviewProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="rounded-box border border-base-300 bg-base-100 p-6">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-lg font-semibold">Kundendaten</h2>
+        <h2 className="text-lg font-semibold">
+          {t("customers.overview.title")}
+        </h2>
 
         <StatusChip
           status={customer.isActive ? "ACTIVE" : "INACTIVE"}
@@ -21,7 +27,7 @@ export function CustomerOverview({
       <dl className="grid gap-6 md:grid-cols-2">
         <div>
           <dt className="text-sm text-base-content/60">
-            Kundennr.
+            {t("customers.form.customerNo")}
           </dt>
           <dd className="mt-1 font-medium">
             {customer.customerNo}
@@ -30,19 +36,19 @@ export function CustomerOverview({
 
         <div>
           <dt className="text-sm text-base-content/60">
-            Kundentyp
+            {t("customers.form.type")}
           </dt>
           <dd className="mt-1 font-medium">
-            {customer.type === "COMPANY"
-              ? "Unternehmen"
-              : "Privatkunde"}
+            {t(`customers.types.${customer.type}`, {
+              defaultValue: customer.type,
+            })}
           </dd>
         </div>
 
         {customer.companyName && (
           <div>
             <dt className="text-sm text-base-content/60">
-              Firmenname
+              {t("customers.form.companyName")}
             </dt>
             <dd className="mt-1 font-medium">
               {customer.companyName}
@@ -53,7 +59,7 @@ export function CustomerOverview({
         {customer.firstName && (
           <div>
             <dt className="text-sm text-base-content/60">
-              Vorname
+              {t("customers.form.firstName")}
             </dt>
             <dd className="mt-1 font-medium">
               {customer.firstName}
@@ -64,7 +70,7 @@ export function CustomerOverview({
         {customer.lastName && (
           <div>
             <dt className="text-sm text-base-content/60">
-              Nachname
+              {t("customers.form.lastName")}
             </dt>
             <dd className="mt-1 font-medium">
               {customer.lastName}
@@ -74,7 +80,7 @@ export function CustomerOverview({
 
         <div>
           <dt className="text-sm text-base-content/60">
-            Ansprechpartner
+            {t("customers.form.contactName")}
           </dt>
           <dd className="mt-1 font-medium">
             {customer.contactName || "—"}
@@ -83,7 +89,7 @@ export function CustomerOverview({
 
         <div>
           <dt className="text-sm text-base-content/60">
-            E-Mail
+            {t("customers.form.email")}
           </dt>
           <dd className="mt-1 font-medium">
             {customer.email || "—"}
@@ -92,7 +98,7 @@ export function CustomerOverview({
 
         <div>
           <dt className="text-sm text-base-content/60">
-            Telefon
+            {t("customers.form.phone")}
           </dt>
           <dd className="mt-1 font-medium">
             {customer.phone || "—"}
@@ -101,7 +107,7 @@ export function CustomerOverview({
 
         <div>
           <dt className="text-sm text-base-content/60">
-            Adresse
+            {t("customers.form.address")}
           </dt>
           <dd className="mt-1 font-medium">
             {customer.address || "—"}
@@ -110,7 +116,7 @@ export function CustomerOverview({
 
         <div>
           <dt className="text-sm text-base-content/60">
-            USt-IdNr.
+            {t("customers.form.vatId")}
           </dt>
           <dd className="mt-1 font-medium">
             {customer.vatId || "—"}
@@ -119,7 +125,7 @@ export function CustomerOverview({
 
         <div>
           <dt className="text-sm text-base-content/60">
-            Rabatt
+            {t("customers.form.discount")}
           </dt>
           <dd className="mt-1 font-medium">
             {customer.discount}%

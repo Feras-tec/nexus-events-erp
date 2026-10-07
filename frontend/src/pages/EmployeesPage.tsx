@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useNavigate } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "../components/atoms/Button";
 import {
@@ -13,6 +14,7 @@ import { useEmployeeFormOptions } from "../features/employees/hooks/useEmployeeF
 import { useCreateEmployee } from "../features/employees/hooks/useCreateEmployee";
 
 export function EmployeesPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
@@ -70,17 +72,21 @@ export function EmployeesPage() {
       transition={{ duration: 0.25 }}
     >
       <ListLayout
-        title="Mitarbeiter"
-        description="Mitarbeiter und ihre Zuordnung verwalten."
+        title={t("employees.title")}
+        description={t("employees.description")}
         searchValue={search}
-        searchPlaceholder="Mitarbeiter suchen..."
+        searchPlaceholder={t("employees.searchPlaceholder")}
         onSearchChange={setSearch}
         actions={
           <Button
             type="button"
-            onClick={() => setShowCreateForm((current) => !current)}
+            onClick={() =>
+              setShowCreateForm((current) => !current)
+            }
           >
-            {showCreateForm ? "Abbrechen" : "Neuer Mitarbeiter"}
+            {showCreateForm
+              ? t("common.cancel")
+              : t("employees.newEmployee")}
           </Button>
         }
       >
@@ -97,14 +103,14 @@ export function EmployeesPage() {
                 <div className="flex justify-center py-8">
                   <span
                     className="loading loading-spinner loading-lg"
-                    aria-label="Formulardaten werden geladen"
+                    aria-label={t("employees.formDataLoading")}
                   />
                 </div>
               )}
 
               {formDataError && (
                 <div role="alert" className="alert alert-error">
-                  Niederlassungen oder Abteilungen konnten nicht geladen werden.
+                  {t("employees.formDataError")}
                 </div>
               )}
 
@@ -113,13 +119,18 @@ export function EmployeesPage() {
                   branches={branches}
                   departments={departments}
                   loading={createEmployeeMutation.isPending}
-                  onSubmit={(data) => createEmployeeMutation.mutate(data)}
+                  onSubmit={(data) =>
+                    createEmployeeMutation.mutate(data)
+                  }
                 />
               )}
 
               {createEmployeeMutation.isError && (
-                <div role="alert" className="alert alert-error mt-4">
-                  Mitarbeiter konnte nicht erstellt werden.
+                <div
+                  role="alert"
+                  className="alert alert-error mt-4"
+                >
+                  {t("employees.createError")}
                 </div>
               )}
             </motion.div>
@@ -130,14 +141,14 @@ export function EmployeesPage() {
           <div className="flex justify-center py-12">
             <span
               className="loading loading-spinner loading-lg"
-              aria-label="Mitarbeiter werden geladen"
+              aria-label={t("employees.loading")}
             />
           </div>
         )}
 
         {isError && (
           <div role="alert" className="alert alert-error">
-            Mitarbeiter konnten nicht geladen werden.
+            {t("employees.loadError")}
           </div>
         )}
 

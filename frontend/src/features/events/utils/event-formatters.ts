@@ -1,7 +1,8 @@
+import i18n from "../../../i18n/config";
 import type { EventDetail } from "../types/event.types";
 
 export function formatDateTime(date: string) {
-  return new Intl.DateTimeFormat("de-DE", {
+  return new Intl.DateTimeFormat(i18n.language, {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",

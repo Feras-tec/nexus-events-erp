@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { StatusChip } from "../../../components/atoms/StatusChip";
 import type { EventDetail } from "../types/event.types";
 import { formatDateTime } from "../utils/event-formatters";
@@ -9,12 +11,14 @@ type EventOverviewProps = {
 export function EventOverview({
   event,
 }: EventOverviewProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="rounded-box border border-base-300 bg-base-100 p-6">
       <div className="grid gap-6 md:grid-cols-2">
         <div>
           <div className="text-sm text-base-content/60">
-            Status
+            {t("events.overview.status")}
           </div>
 
           <div className="mt-1">
@@ -24,7 +28,7 @@ export function EventOverview({
 
         <div>
           <div className="text-sm text-base-content/60">
-            Typ
+            {t("events.overview.type")}
           </div>
 
           <div className="mt-1">
@@ -34,7 +38,7 @@ export function EventOverview({
 
         <div>
           <div className="text-sm text-base-content/60">
-            Start
+            {t("events.overview.start")}
           </div>
 
           <div className="mt-1">
@@ -44,7 +48,7 @@ export function EventOverview({
 
         <div>
           <div className="text-sm text-base-content/60">
-            Ende
+            {t("events.overview.end")}
           </div>
 
           <div className="mt-1">
@@ -54,7 +58,7 @@ export function EventOverview({
 
         <div>
           <div className="text-sm text-base-content/60">
-            Ort
+            {t("events.overview.location")}
           </div>
 
           <div className="mt-1">
@@ -67,11 +71,12 @@ export function EventOverview({
 
       <div>
         <div className="text-sm text-base-content/60">
-          Beschreibung
+          {t("events.overview.description")}
         </div>
 
         <p className="mt-2 whitespace-pre-wrap">
-          {event.description || "Keine Beschreibung vorhanden."}
+          {event.description ||
+            t("events.overview.noDescription")}
         </p>
       </div>
     </div>

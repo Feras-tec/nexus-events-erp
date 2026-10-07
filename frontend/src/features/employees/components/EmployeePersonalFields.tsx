@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import type { EmployeeFormValues } from "../types/employee-form.types";
 
 type EmployeePersonalFieldsProps = {
@@ -14,11 +16,13 @@ export function EmployeePersonalFields({
   loading,
   onUpdate,
 }: EmployeePersonalFieldsProps) {
+  const { t } = useTranslation();
+
   return (
     <>
       <fieldset className="fieldset">
         <legend className="fieldset-legend">
-          Vorname
+          {t("employees.form.firstName")}
         </legend>
 
         <input
@@ -37,7 +41,7 @@ export function EmployeePersonalFields({
 
       <fieldset className="fieldset">
         <legend className="fieldset-legend">
-          Nachname
+          {t("employees.form.lastName")}
         </legend>
 
         <input
@@ -56,7 +60,7 @@ export function EmployeePersonalFields({
 
       <fieldset className="fieldset">
         <legend className="fieldset-legend">
-          E-Mail
+          {t("employees.form.email")}
         </legend>
 
         <input
@@ -73,7 +77,7 @@ export function EmployeePersonalFields({
 
       <fieldset className="fieldset">
         <legend className="fieldset-legend">
-          Telefon
+          {t("employees.form.phone")}
         </legend>
 
         <input
@@ -90,7 +94,7 @@ export function EmployeePersonalFields({
 
       <fieldset className="fieldset">
         <legend className="fieldset-legend">
-          Geburtsdatum
+          {t("employees.form.birthDate")}
         </legend>
 
         <input
@@ -106,7 +110,7 @@ export function EmployeePersonalFields({
 
       <fieldset className="fieldset">
         <legend className="fieldset-legend">
-          Nationalität
+          {t("employees.form.nationality")}
         </legend>
 
         <input
@@ -123,7 +127,7 @@ export function EmployeePersonalFields({
 
       <fieldset className="fieldset">
         <legend className="fieldset-legend">
-          Position
+          {t("employees.form.position")}
         </legend>
 
         <input

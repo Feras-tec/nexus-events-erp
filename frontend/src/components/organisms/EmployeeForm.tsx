@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 
 import type {
   BranchOption,
@@ -45,6 +46,8 @@ export function EmployeeForm({
   loading = false,
   onSubmit,
 }: EmployeeFormProps) {
+  const { t } = useTranslation();
+
   const [values, setValues] = useState<EmployeeFormValues>({
     ...emptyValues,
     ...initialValues,
@@ -112,8 +115,9 @@ export function EmployeeForm({
       <div className="grid gap-4 md:grid-cols-2">
         <fieldset className="fieldset">
           <legend className="fieldset-legend">
-            Mitarbeiternummer
+            {t("employees.form.employeeNo")}
           </legend>
+
           <input
             type="text"
             className="input w-full"
@@ -129,7 +133,10 @@ export function EmployeeForm({
         </fieldset>
 
         <fieldset className="fieldset">
-          <legend className="fieldset-legend">Status</legend>
+          <legend className="fieldset-legend">
+            {t("employees.form.status")}
+          </legend>
+
           <select
             className="select w-full"
             value={values.status}
@@ -141,10 +148,18 @@ export function EmployeeForm({
             }
             disabled={mode === "create" || loading}
           >
-            <option value="ACTIVE">Aktiv</option>
-            <option value="INACTIVE">Inaktiv</option>
-            <option value="ON_LEAVE">Beurlaubt</option>
-            <option value="SUSPENDED">Suspendiert</option>
+            <option value="ACTIVE">
+              {t("status.ACTIVE")}
+            </option>
+            <option value="INACTIVE">
+              {t("status.INACTIVE")}
+            </option>
+            <option value="ON_LEAVE">
+              {t("status.ON_LEAVE")}
+            </option>
+            <option value="SUSPENDED">
+              {t("status.SUSPENDED")}
+            </option>
           </select>
         </fieldset>
 
@@ -174,10 +189,10 @@ export function EmployeeForm({
           disabled={loading}
         >
           {loading
-            ? "Wird gespeichert..."
+            ? t("employees.form.saving")
             : mode === "edit"
-              ? "Änderungen speichern"
-              : "Mitarbeiter erstellen"}
+              ? t("employees.form.saveChanges")
+              : t("employees.form.create")}
         </button>
       </div>
     </form>

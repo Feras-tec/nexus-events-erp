@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useNavigate } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "../components/atoms/Button";
 import { CustomerForm } from "../components/organisms/CustomerForm";
@@ -10,6 +11,7 @@ import { useCustomers } from "../features/customers/hooks/useCustomers";
 import { useCreateCustomer } from "../features/customers/hooks/useCreateCustomer";
 
 export function CustomersPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
@@ -56,17 +58,21 @@ export function CustomersPage() {
       transition={{ duration: 0.25 }}
     >
       <ListLayout
-        title="Customers"
-        description="Kunden und Kontaktdaten verwalten."
+        title={t("navigation.customers")}
+        description={t("customers.description")}
         searchValue={search}
-        searchPlaceholder="Kunden suchen..."
+        searchPlaceholder={t("customers.searchPlaceholder")}
         onSearchChange={setSearch}
         actions={
           <Button
             type="button"
-            onClick={() => setShowCreateForm((current) => !current)}
+            onClick={() =>
+              setShowCreateForm((current) => !current)
+            }
           >
-            {showCreateForm ? "Abbrechen" : "Neuer Kunde"}
+            {showCreateForm
+              ? t("common.cancel")
+              : t("customers.newCustomer")}
           </Button>
         }
       >
@@ -81,12 +87,17 @@ export function CustomersPage() {
             >
               <CustomerForm
                 loading={createCustomerMutation.isPending}
-                onSubmit={(data) => createCustomerMutation.mutate(data)}
+                onSubmit={(data) =>
+                  createCustomerMutation.mutate(data)
+                }
               />
 
               {createCustomerMutation.isError && (
-                <div role="alert" className="alert alert-error mt-4">
-                  Kunde konnte nicht erstellt werden.
+                <div
+                  role="alert"
+                  className="alert alert-error mt-4"
+                >
+                  {t("customers.createError")}
                 </div>
               )}
             </motion.div>
@@ -97,14 +108,14 @@ export function CustomersPage() {
           <div className="flex justify-center py-12">
             <span
               className="loading loading-spinner loading-lg"
-              aria-label="Kunden werden geladen"
+              aria-label={t("customers.loading")}
             />
           </div>
         )}
 
         {isError && (
           <div role="alert" className="alert alert-error">
-            Kunden konnten nicht geladen werden.
+            {t("customers.loadError")}
           </div>
         )}
 

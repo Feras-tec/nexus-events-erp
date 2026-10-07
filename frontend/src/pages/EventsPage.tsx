@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
+
 import { Button } from "../components/atoms/Button";
 import { EventForm } from "../components/organisms/EventForm";
 import { EventTable } from "../components/organisms/EventTable";
@@ -9,6 +11,7 @@ import { useEventFormCustomers } from "../features/events/hooks/useEventFormCust
 import { useCreateEvent } from "../features/events/hooks/useCreateEvent";
 
 export function EventsPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
@@ -59,14 +62,20 @@ export function EventsPage() {
 
   return (
     <ListLayout
-      title="Events"
-      description="Veranstaltungen und Projekte verwalten."
+      title={t("navigation.events")}
+      description={t("events.description")}
       searchValue={search}
-      searchPlaceholder="Events suchen..."
+      searchPlaceholder={t("events.searchPlaceholder")}
       onSearchChange={setSearch}
       actions={
-        <Button onClick={() => setShowEventForm((current) => !current)}>
-          {showEventForm ? "Abbrechen" : "Neues Event"}
+        <Button
+          onClick={() =>
+            setShowEventForm((current) => !current)
+          }
+        >
+          {showEventForm
+            ? t("common.cancel")
+            : t("events.newEvent")}
         </Button>
       }
     >
@@ -74,7 +83,10 @@ export function EventsPage() {
         <div className="space-y-4">
           <EventForm
             customers={customers}
-            loading={customersLoading || createEventMutation.isPending}
+            loading={
+              customersLoading ||
+              createEventMutation.isPending
+            }
             onSubmit={(data) => {
               createEventMutation.mutate(data);
             }}
@@ -82,7 +94,7 @@ export function EventsPage() {
 
           {createEventMutation.isError && (
             <div role="alert" className="alert alert-error">
-              Event konnte nicht gespeichert werden.
+              {t("events.createError")}
             </div>
           )}
         </div>
@@ -92,14 +104,14 @@ export function EventsPage() {
         <div className="flex justify-center py-12">
           <span
             className="loading loading-spinner loading-lg"
-            aria-label="Events werden geladen"
+            aria-label={t("events.loading")}
           />
         </div>
       )}
 
       {isError && (
         <div role="alert" className="alert alert-error">
-          Events konnten nicht geladen werden.
+          {t("events.loadError")}
         </div>
       )}
 

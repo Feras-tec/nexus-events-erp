@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "../components/atoms/Button";
 import { ConfirmDeleteDialog } from "../components/molecules/ConfirmDeleteDialog";
@@ -18,6 +19,7 @@ import { EventCustomerCard } from "../features/events/components/EventCustomerCa
 import { toDateTimeLocal } from "../features/events/utils/event-formatters";
 
 export function EventDetailPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -58,7 +60,7 @@ export function EventDetailPage() {
       <div className="flex justify-center py-12">
         <span
           className="loading loading-spinner loading-lg"
-          aria-label="Event wird geladen"
+          aria-label={t("events.detail.loading")}
         />
       </div>
     );
@@ -67,7 +69,7 @@ export function EventDetailPage() {
   if (isError || !event) {
     return (
       <div role="alert" className="alert alert-error">
-        Event konnte nicht geladen werden.
+        {t("events.detail.loadError")}
       </div>
     );
   }
@@ -102,7 +104,7 @@ export function EventDetailPage() {
                 navigate({ to: "/events" });
               }}
             >
-              ← Zurück
+              ← {t("common.back")}
             </Button>
 
             {event.status !== "CANCELLED" && (
@@ -113,7 +115,7 @@ export function EventDetailPage() {
                   setShowCancelDialog(true);
                 }}
               >
-                Stornieren
+                {t("events.detail.cancel")}
               </Button>
             )}
 
@@ -123,7 +125,9 @@ export function EventDetailPage() {
                 setIsEditing((current) => !current);
               }}
             >
-              {isEditing ? "Abbrechen" : "Bearbeiten"}
+              {isEditing
+                ? t("common.cancel")
+                : t("common.edit")}
             </Button>
           </>
         }
@@ -145,15 +149,21 @@ export function EventDetailPage() {
                 mode="edit"
                 customers={customers}
                 initialValues={initialValues}
-                loading={customersLoading || updateEventMutation.isPending}
+                loading={
+                  customersLoading ||
+                  updateEventMutation.isPending
+                }
                 onSubmit={(data) => {
                   updateEventMutation.mutate(data);
                 }}
               />
 
               {updateEventMutation.isError && (
-                <div role="alert" className="alert alert-error mt-4">
-                  Event konnte nicht aktualisiert werden.
+                <div
+                  role="alert"
+                  className="alert alert-error mt-4"
+                >
+                  {t("events.detail.updateError")}
                 </div>
               )}
             </motion.div>
@@ -172,17 +182,22 @@ export function EventDetailPage() {
       </DetailLayout>
 
       {cancelEventMutation.isError && (
-        <div role="alert" className="alert alert-error mt-4">
-          Event konnte nicht storniert werden.
+        <div
+          role="alert"
+          className="alert alert-error mt-4"
+        >
+          {t("events.detail.cancelError")}
         </div>
       )}
 
       <ConfirmDeleteDialog
         open={showCancelDialog}
-        title="Event stornieren"
-        message={`Möchten Sie das Event "${event.name}" wirklich stornieren? Das Event wird nicht gelöscht.`}
-        confirmLabel="Event stornieren"
-        cancelLabel="Abbrechen"
+        title={t("events.detail.cancelTitle")}
+        message={t("events.detail.cancelMessage", {
+          name: event.name,
+        })}
+        confirmLabel={t("events.detail.confirmCancel")}
+        cancelLabel={t("common.cancel")}
         loading={cancelEventMutation.isPending}
         onConfirm={() => {
           cancelEventMutation.mutate();

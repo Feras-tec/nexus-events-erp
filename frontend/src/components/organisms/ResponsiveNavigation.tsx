@@ -1,50 +1,48 @@
 import { Link } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 
 const navigationItems = [
-  { label: "Dashboard", icon: "▦", to: "/dashboard" },
-  { label: "Events", icon: "◫", to: "/events" },
-  { label: "Customers", icon: "♙", to: "/customers" },
-  { label: "Employees", icon: "♟", to: "/employees" },
-  { label: "Products", icon: "□", to: "/products" },
-  { label: "Inventory", icon: "▤", to: "/equipment" },
-  { label: "Reservations", icon: "◷", to: "/reservations" },
-  { label: "Quotes", icon: "▧", to: "/quotes" },
-  { label: "Invoices", icon: "€", to: "/invoices" },
-];
+  { key: "dashboard", icon: "▦", to: "/dashboard" },
+  { key: "events", icon: "◫", to: "/events" },
+  { key: "customers", icon: "♙", to: "/customers" },
+  { key: "employees", icon: "♟", to: "/employees" },
+  { key: "products", icon: "□", to: "/products" },
+  { key: "inventory", icon: "▤", to: "/equipment" },
+  { key: "reservations", icon: "◷", to: "/reservations" },
+  { key: "quotes", icon: "▧", to: "/quotes" },
+  { key: "invoices", icon: "€", to: "/invoices" },
+] as const;
 
 type NavigationContentProps = {
   onNavigate?: () => void;
 };
 
 function NavigationContent({ onNavigate }: NavigationContentProps) {
+  const { t } = useTranslation();
+
   return (
     <>
       <div className="border-b border-base-300 p-6">
         <h1 className="text-xl font-bold">Nexus Events</h1>
-        <p className="text-sm text-base-content/60">ERP Management</p>
+        <p className="text-sm text-base-content/60">
+          {t("app.erpManagement")}
+        </p>
       </div>
 
       <nav className="p-4">
         <ul className="menu gap-1">
           {navigationItems.map((item) => (
-            <li key={item.label}>
-              {item.to ? (
-                <Link
-                  to={item.to}
-                  activeProps={{
-                    className: "menu-active",
-                  }}
-                  onClick={onNavigate}
-                >
-                  <span className="w-5 text-center">{item.icon}</span>
-                  {item.label}
-                </Link>
-              ) : (
-                <button type="button">
-                  <span className="w-5 text-center">{item.icon}</span>
-                  {item.label}
-                </button>
-              )}
+            <li key={item.key}>
+              <Link
+                to={item.to}
+                activeProps={{
+                  className: "menu-active",
+                }}
+                onClick={onNavigate}
+              >
+                <span className="w-5 text-center">{item.icon}</span>
+                {t(`navigation.${item.key}`)}
+              </Link>
             </li>
           ))}
         </ul>
@@ -66,7 +64,12 @@ type MobileNavigationProps = {
   onClose: () => void;
 };
 
-export function MobileNavigation({ open, onClose }: MobileNavigationProps) {
+export function MobileNavigation({
+  open,
+  onClose,
+}: MobileNavigationProps) {
+  const { t } = useTranslation();
+
   if (!open) {
     return null;
   }
@@ -76,7 +79,7 @@ export function MobileNavigation({ open, onClose }: MobileNavigationProps) {
       <button
         type="button"
         className="absolute inset-0 bg-black/40"
-        aria-label="Navigation schließen"
+        aria-label={t("common.closeNavigation")}
         onClick={onClose}
       />
 
@@ -85,7 +88,7 @@ export function MobileNavigation({ open, onClose }: MobileNavigationProps) {
           <button
             type="button"
             className="btn btn-ghost btn-sm btn-square"
-            aria-label="Navigation schließen"
+            aria-label={t("common.closeNavigation")}
             onClick={onClose}
           >
             ✕

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "../components/atoms/Button";
 import { ConfirmDeleteDialog } from "../components/molecules/ConfirmDeleteDialog";
@@ -17,8 +18,8 @@ import { EmployeeOverview } from "../features/employees/components/EmployeeOverv
 import { EmployeeEmploymentPeriods } from "../features/employees/components/EmployeeEmploymentPeriods";
 import { EmployeeDocuments } from "../features/employees/components/EmployeeDocuments";
 
-
 export function EmployeeDetailPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -58,7 +59,7 @@ export function EmployeeDetailPage() {
       <div className="flex justify-center py-12">
         <span
           className="loading loading-spinner loading-lg"
-          aria-label="Mitarbeiter wird geladen"
+          aria-label={t("employees.detail.loading")}
         />
       </div>
     );
@@ -67,7 +68,7 @@ export function EmployeeDetailPage() {
   if (isError || !employee) {
     return (
       <div role="alert" className="alert alert-error">
-        Mitarbeiter konnte nicht geladen werden.
+        {t("employees.detail.loadError")}
       </div>
     );
   }
@@ -107,7 +108,7 @@ export function EmployeeDetailPage() {
               className="btn-outline"
               onClick={() => navigate({ to: "/employees" })}
             >
-              ← Zurück
+              ← {t("common.back")}
             </Button>
 
             <Button
@@ -116,7 +117,9 @@ export function EmployeeDetailPage() {
                 setIsEditing((current) => !current)
               }
             >
-              {isEditing ? "Abbrechen" : "Bearbeiten"}
+              {isEditing
+                ? t("common.cancel")
+                : t("common.edit")}
             </Button>
 
             {employee.status !== "INACTIVE" && !isEditing && (
@@ -127,7 +130,7 @@ export function EmployeeDetailPage() {
                   setShowDeactivateDialog(true)
                 }
               >
-                Deaktivieren
+                {t("employees.detail.deactivate")}
               </Button>
             )}
 
@@ -140,8 +143,8 @@ export function EmployeeDetailPage() {
                 disabled={activateEmployeeMutation.isPending}
               >
                 {activateEmployeeMutation.isPending
-                  ? "Wird aktiviert..."
-                  : "Aktivieren"}
+                  ? t("employees.detail.activating")
+                  : t("employees.detail.activate")}
               </Button>
             )}
           </>
@@ -172,7 +175,7 @@ export function EmployeeDetailPage() {
                   role="alert"
                   className="alert alert-error mt-4"
                 >
-                  Mitarbeiter konnte nicht aktualisiert werden.
+                  {t("employees.detail.updateError")}
                 </div>
               )}
             </motion.div>
@@ -189,7 +192,6 @@ export function EmployeeDetailPage() {
 
               <div className="grid gap-6 lg:grid-cols-2">
                 <EmployeeEmploymentPeriods employee={employee} />
-
                 <EmployeeDocuments employee={employee} />
               </div>
             </motion.div>
@@ -198,15 +200,18 @@ export function EmployeeDetailPage() {
 
         {activateEmployeeMutation.isError && (
           <div role="alert" className="alert alert-error mt-4">
-            Mitarbeiter konnte nicht aktiviert werden.
+            {t("employees.detail.activateError")}
           </div>
         )}
 
         <ConfirmDeleteDialog
           open={showDeactivateDialog}
-          title="Mitarbeiter deaktivieren?"
-          message={`${fullName} wird deaktiviert, aber nicht endgültig gelöscht.`}
-          confirmLabel="Deaktivieren"
+          title={t("employees.detail.deactivateTitle")}
+          message={t("employees.detail.deactivateMessage", {
+            name: fullName,
+          })}
+          confirmLabel={t("employees.detail.deactivate")}
+          cancelLabel={t("common.cancel")}
           loading={deactivateEmployeeMutation.isPending}
           onCancel={() => setShowDeactivateDialog(false)}
           onConfirm={() => deactivateEmployeeMutation.mutate()}

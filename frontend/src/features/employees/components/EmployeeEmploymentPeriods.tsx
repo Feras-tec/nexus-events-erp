@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "../../../components/atoms/Button";
 import { EmployeeEmploymentPeriodCreatePanel } from "./EmployeeEmploymentPeriodCreatePanel";
@@ -13,6 +14,8 @@ type EmployeeEmploymentPeriodsProps = {
 export function EmployeeEmploymentPeriods({
   employee,
 }: EmployeeEmploymentPeriodsProps) {
+  const { t } = useTranslation();
+
   const [showEmploymentPeriodForm, setShowEmploymentPeriodForm] =
     useState(false);
 
@@ -45,11 +48,13 @@ export function EmployeeEmploymentPeriods({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">
-            Beschäftigungszeiträume
+            {t("employees.employment.title")}
           </h2>
 
           <p className="mt-1 text-sm text-base-content/60">
-            {employee.employmentPeriods.length} Einträge
+            {t("employees.employment.entries", {
+              count: employee.employmentPeriods.length,
+            })}
           </p>
         </div>
 
@@ -61,8 +66,8 @@ export function EmployeeEmploymentPeriods({
           }
         >
           {showEmploymentPeriodForm
-            ? "Abbrechen"
-            : "Zeitraum hinzufügen"}
+            ? t("common.cancel")
+            : t("employees.employment.add")}
         </Button>
       </div>
 
@@ -77,7 +82,7 @@ export function EmployeeEmploymentPeriods({
 
       {employee.employmentPeriods.length === 0 ? (
         <p className="mt-5 text-sm text-base-content/60">
-          Noch keine Beschäftigungszeiträume vorhanden.
+          {t("employees.employment.empty")}
         </p>
       ) : (
         <div className="mt-5 space-y-3">
