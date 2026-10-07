@@ -352,7 +352,7 @@ export async function generateInvoicePdf(
   metaY -= 18;
 
   drawText(
-    "Erstellt am:",
+    "PDF erstellt am:",
     metaX,
     metaY,
     9,
@@ -363,7 +363,8 @@ export async function generateInvoicePdf(
     new Intl.DateTimeFormat("de-DE", {
       dateStyle: "short",
       timeStyle: "short",
-    }).format(invoice.createdAt),
+      timeZone: "Europe/Berlin",
+    }).format(new Date()),
     metaValueX,
     metaY,
     9,
