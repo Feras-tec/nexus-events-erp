@@ -2,10 +2,13 @@ import {
   PDFDocument,
   StandardFonts,
   rgb,
+  type PDFFont,
+  type PDFPage,
 } from "pdf-lib";
 
 type InvoicePdfInput = {
   invoiceNo: string;
+  createdAt: Date;
   issueDate: Date | null;
   dueDate: Date | null;
   notes: string | null;
@@ -75,6 +78,84 @@ function safeText(value: string) {
     .replace(/[^\x20-\x7E\xA0-\xFF]/g, "");
 }
 
+function wrapText(
+  text: string,
+  font: PDFFont,
+  fontSize: number,
+  maxWidth: number,
+) {
+  const words = safeText(text).split(/\s+/);
+  const lines: string[] = [];
+  let currentLine = "";
+
+  for (const word of words) {
+    const testLine = currentLine
+      ? `${currentLine} ${word}`
+      : word;
+
+    const width = font.widthOfTextAtSize(
+      testLine,
+      fontSize,
+    );
+
+    if (width <= maxWidth) {
+      currentLine = testLine;
+      continue;
+    }
+
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+
+    currentLine = word;
+  }
+
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+
+  return lines;
+}
+
+function drawWrappedText({
+  page,
+  text,
+  x,
+  y,
+  font,
+  fontSize,
+  maxWidth,
+  lineHeight,
+}: {
+  page: PDFPage;
+  text: string;
+  x: number;
+  y: number;
+  font: PDFFont;
+  fontSize: number;
+  maxWidth: number;
+  lineHeight: number;
+}) {
+  const lines = wrapText(
+    text,
+    font,
+    fontSize,
+    maxWidth,
+  );
+
+  lines.forEach((line, index) => {
+    page.drawText(line, {
+      x,
+      y: y - index * lineHeight,
+      size: fontSize,
+      font,
+      color: rgb(0.12, 0.12, 0.12),
+    });
+  });
+
+  return y - lines.length * lineHeight;
+}
+
 export async function generateInvoicePdf(
   invoice: InvoicePdfInput,
 ) {
@@ -93,153 +174,324 @@ export async function generateInvoicePdf(
   const { width, height } = page.getSize();
 
   const margin = 48;
-  let y = height - 52;
+  const rightEdge = width - margin;
 
   const drawText = (
     text: string,
     x: number,
-    currentY: number,
+    y: number,
     size = 10,
     font = regular,
   ) => {
     page.drawText(safeText(text), {
       x,
-      y: currentY,
+      y,
       size,
       font,
       color: rgb(0.12, 0.12, 0.12),
     });
   };
 
-  drawText("NEXUS EVENTS", margin, y, 18, bold);
-  drawText(
-    "Event Production & Management",
-    margin,
-    y - 18,
-    9,
-  );
+  const drawRightText = (
+    text: string,
+    rightX: number,
+    y: number,
+    size = 10,
+    font = regular,
+  ) => {
+    const normalized = safeText(text);
+    const textWidth = font.widthOfTextAtSize(
+      normalized,
+      size,
+    );
 
+    drawText(
+      normalized,
+      rightX - textWidth,
+      y,
+      size,
+      font,
+    );
+  };
+
+  // Header
   drawText(
-    "RECHNUNG",
-    width - margin - 120,
-    y,
-    18,
+    "NEXUS EVENTS",
+    margin,
+    height - 55,
+    19,
     bold,
   );
 
   drawText(
+    "Event Production & Management",
+    margin,
+    height - 75,
+    9,
+  );
+
+  drawRightText(
+    "RECHNUNG",
+    rightEdge,
+    height - 55,
+    19,
+    bold,
+  );
+
+  drawRightText(
     invoice.invoiceNo,
-    width - margin - 120,
-    y - 18,
+    rightEdge,
+    height - 75,
     10,
     bold,
   );
 
-  y -= 70;
-
-  drawText("Rechnung an", margin, y, 9, bold);
-  y -= 18;
+  // Customer block
+  const customerTop = height - 125;
 
   drawText(
-    customerName(invoice.customer),
+    "Rechnung an",
     margin,
-    y,
-    11,
+    customerTop,
+    9,
     bold,
   );
 
-  y -= 16;
+  let customerY = customerTop - 20;
+
+  customerY = drawWrappedText({
+    page,
+    text: customerName(invoice.customer),
+    x: margin,
+    y: customerY,
+    font: bold,
+    fontSize: 11,
+    maxWidth: 220,
+    lineHeight: 14,
+  });
 
   drawText(
     `Kundennummer: ${invoice.customer.customerNo}`,
     margin,
-    y,
+    customerY - 2,
+    9,
   );
 
+  customerY -= 17;
+
   if (invoice.customer.email) {
-    y -= 14;
-    drawText(invoice.customer.email, margin, y);
+    drawText(
+      invoice.customer.email,
+      margin,
+      customerY,
+      9,
+    );
+
+    customerY -= 17;
   }
 
   if (invoice.customer.address) {
-    y -= 14;
-    drawText(invoice.customer.address, margin, y);
+    customerY = drawWrappedText({
+      page,
+      text: invoice.customer.address,
+      x: margin,
+      y: customerY,
+      font: regular,
+      fontSize: 9,
+      maxWidth: 220,
+      lineHeight: 13,
+    });
   }
 
-  const metaX = width - margin - 190;
-  let metaY = height - 122;
+  if (invoice.customer.vatId) {
+    drawText(
+      `USt-IdNr.: ${invoice.customer.vatId}`,
+      margin,
+      customerY - 2,
+      9,
+    );
+  }
 
-  drawText("Rechnungsdatum:", metaX, metaY, 9, bold);
+  // Metadata block
+  const metaX = 340;
+  const metaValueX = 435;
+  let metaY = customerTop;
+
   drawText(
-    formatDate(invoice.issueDate),
-    metaX + 95,
+    "Rechnungsdatum:",
+    metaX,
     metaY,
+    9,
+    bold,
   );
 
-  metaY -= 17;
+  drawText(
+    formatDate(invoice.issueDate),
+    metaValueX,
+    metaY,
+    9,
+  );
 
-  drawText("Fällig am:", metaX, metaY, 9, bold);
+  metaY -= 18;
+
+  drawText(
+    "Fällig am:",
+    metaX,
+    metaY,
+    9,
+    bold,
+  );
+
   drawText(
     formatDate(invoice.dueDate),
-    metaX + 95,
+    metaValueX,
     metaY,
+    9,
+  );
+
+  metaY -= 18;
+
+  drawText(
+    "Erstellt am:",
+    metaX,
+    metaY,
+    9,
+    bold,
+  );
+
+  drawText(
+    new Intl.DateTimeFormat("de-DE", {
+      dateStyle: "short",
+      timeStyle: "short",
+    }).format(invoice.createdAt),
+    metaValueX,
+    metaY,
+    9,
   );
 
   if (invoice.event) {
-    metaY -= 17;
-    drawText("Event:", metaX, metaY, 9, bold);
+    metaY -= 18;
+
     drawText(
-      `${invoice.event.eventNo} - ${invoice.event.name}`,
-      metaX + 95,
+      "Event:",
+      metaX,
       metaY,
-      8,
+      9,
+      bold,
     );
+
+    metaY = drawWrappedText({
+      page,
+      text: `${invoice.event.eventNo} - ${invoice.event.name}`,
+      x: metaValueX,
+      y: metaY,
+      font: regular,
+      fontSize: 8,
+      maxWidth: rightEdge - metaValueX,
+      lineHeight: 11,
+    });
   }
 
   if (invoice.quote) {
-    metaY -= 17;
-    drawText("Angebot:", metaX, metaY, 9, bold);
+    metaY -= 5;
+
+    drawText(
+      "Angebot:",
+      metaX,
+      metaY,
+      9,
+      bold,
+    );
+
     drawText(
       invoice.quote.quoteNo,
-      metaX + 95,
+      metaValueX,
       metaY,
+      9,
     );
   }
 
-  y -= 45;
+  // Items table
+  let y = Math.min(
+    customerY,
+    metaY,
+  ) - 45;
 
   page.drawLine({
     start: { x: margin, y },
-    end: { x: width - margin, y },
+    end: { x: rightEdge, y },
     thickness: 1,
     color: rgb(0.75, 0.75, 0.75),
   });
 
-  y -= 22;
+  y -= 24;
 
-  drawText("Beschreibung", margin, y, 9, bold);
-  drawText("Menge", 330, y, 9, bold);
-  drawText("Preis", 390, y, 9, bold);
-  drawText("Gesamt", 475, y, 9, bold);
+  drawText(
+    "Beschreibung",
+    margin,
+    y,
+    9,
+    bold,
+  );
 
-  y -= 14;
+  drawText(
+    "Menge",
+    330,
+    y,
+    9,
+    bold,
+  );
+
+  drawText(
+    "Preis",
+    390,
+    y,
+    9,
+    bold,
+  );
+
+  drawRightText(
+    "Gesamt",
+    rightEdge,
+    y,
+    9,
+    bold,
+  );
+
+  y -= 15;
 
   page.drawLine({
     start: { x: margin, y },
-    end: { x: width - margin, y },
+    end: { x: rightEdge, y },
     thickness: 0.5,
-    color: rgb(0.8, 0.8, 0.8),
+    color: rgb(0.82, 0.82, 0.82),
   });
 
-  y -= 18;
+  y -= 20;
 
   for (const item of invoice.items) {
-    const description =
-      item.description.length > 42
-        ? `${item.description.slice(0, 39)}...`
-        : item.description;
+    const descriptionLines = wrapText(
+      item.description,
+      regular,
+      9,
+      240,
+    );
 
-    drawText(description, margin, y, 9);
+    const rowHeight = Math.max(
+      24,
+      descriptionLines.length * 13 + 7,
+    );
+
+    descriptionLines.forEach(
+      (line, index) => {
+        drawText(
+          line,
+          margin,
+          y - index * 13,
+          9,
+        );
+      },
+    );
 
     drawText(
       String(Number(item.quantity)),
@@ -248,39 +500,46 @@ export async function generateInvoicePdf(
       9,
     );
 
-    drawText(
+    drawRightText(
       formatCurrency(item.unitPrice),
-      390,
+      455,
       y,
       9,
     );
 
-    drawText(
+    drawRightText(
       formatCurrency(item.total),
-      475,
+      rightEdge,
       y,
       9,
       bold,
     );
 
-    y -= 22;
+    y -= rowHeight;
   }
 
-  y -= 10;
+  y -= 4;
 
   page.drawLine({
     start: { x: 330, y },
-    end: { x: width - margin, y },
+    end: { x: rightEdge, y },
     thickness: 0.5,
     color: rgb(0.75, 0.75, 0.75),
   });
 
-  y -= 22;
+  // Totals
+  y -= 24;
 
-  drawText("Zwischensumme", 330, y, 9);
   drawText(
+    "Zwischensumme",
+    330,
+    y,
+    9,
+  );
+
+  drawRightText(
     formatCurrency(invoice.subtotal),
-    475,
+    rightEdge,
     y,
     9,
   );
@@ -303,36 +562,69 @@ export async function generateInvoicePdf(
     9,
   );
 
-  y -= 22;
+  y -= 24;
 
-  drawText("Gesamt", 330, y, 11, bold);
+  page.drawLine({
+    start: { x: 330, y: y + 10 },
+    end: { x: rightEdge, y: y + 10 },
+    thickness: 0.5,
+    color: rgb(0.82, 0.82, 0.82),
+  });
+
   drawText(
-    formatCurrency(invoice.total),
-    475,
+    "Gesamt",
+    330,
     y,
-    11,
+    12,
     bold,
   );
 
+  drawRightText(
+    formatCurrency(invoice.total),
+    rightEdge,
+    y,
+    12,
+    bold,
+  );
+
+  // Notes
   if (invoice.notes) {
     y -= 50;
 
-    drawText("Notizen", margin, y, 10, bold);
+    drawText(
+      "Notizen",
+      margin,
+      y,
+      10,
+      bold,
+    );
 
-    y -= 18;
+    y -= 20;
 
-    const notes =
-      invoice.notes.length > 100
-        ? `${invoice.notes.slice(0, 97)}...`
-        : invoice.notes;
-
-    drawText(notes, margin, y, 9);
+    drawWrappedText({
+      page,
+      text: invoice.notes,
+      x: margin,
+      y,
+      font: regular,
+      fontSize: 9,
+      maxWidth: rightEdge - margin,
+      lineHeight: 13,
+    });
   }
+
+  // Footer
+  page.drawLine({
+    start: { x: margin, y: 70 },
+    end: { x: rightEdge, y: 70 },
+    thickness: 0.5,
+    color: rgb(0.85, 0.85, 0.85),
+  });
 
   drawText(
     "Vielen Dank für Ihren Auftrag.",
     margin,
-    48,
+    50,
     9,
     bold,
   );
@@ -340,7 +632,7 @@ export async function generateInvoicePdf(
   drawText(
     "Nexus Events · Event Production & Management",
     margin,
-    32,
+    34,
     8,
   );
 
