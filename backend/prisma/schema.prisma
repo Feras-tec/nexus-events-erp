@@ -549,12 +549,29 @@ model Invoice {
   quoteId String?
   quote   Quote?  @relation(fields: [quoteId], references: [id])
 
-  items InvoiceItem[]
+  items         InvoiceItem[]
+  statusHistory InvoiceStatusHistory[]
 
   @@index([customerId])
   @@index([eventId])
   @@index([quoteId])
   @@index([status])
+}
+
+// Verlauf der Statusänderungen einer Rechnung
+model InvoiceStatusHistory {
+  id String @id @default(uuid())
+
+  fromStatus InvoiceStatus
+  toStatus   InvoiceStatus
+
+  createdAt DateTime @default(now())
+
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@index([createdAt])
 }
 
 // Einzelne Position innerhalb einer Rechnung

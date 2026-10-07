@@ -7,6 +7,23 @@ import {
 import { sendEmail } from "../services/email.service.js";
 import { generateInvoicePdf } from "../services/invoice-pdf.service.js";
 
+function isValidInvoiceStatusTransition(
+  from: string,
+  to: string,
+) {
+  if (from === to) return true;
+
+  const allowedTransitions: Record<string, string[]> = {
+    DRAFT: ["ISSUED", "CANCELLED"],
+    ISSUED: ["PAID", "OVERDUE", "CANCELLED"],
+    OVERDUE: ["PAID", "CANCELLED"],
+    PAID: [],
+    CANCELLED: [],
+  };
+
+  return allowedTransitions[from]?.includes(to) ?? false;
+}
+
 // Neue Rechnung erstellen
 export async function createInvoice(req: Request, res: Response) {
   const result = createInvoiceSchema.safeParse(req.body);
@@ -291,6 +308,18 @@ export async function updateInvoice(req: Request, res: Response) {
       });
     }
 
+    if (
+      data.status !== undefined &&
+      !isValidInvoiceStatusTransition(
+        existingInvoice.status,
+        data.status,
+      )
+    ) {
+      return res.status(409).json({
+        error: `Invalid invoice status transition: ${existingInvoice.status} → ${data.status}`,
+      });
+    }
+
     const customerId =
       data.customerId ?? existingInvoice.customerId;
 
@@ -461,6 +490,19 @@ export async function updateInvoice(req: Request, res: Response) {
         await tx.invoiceItem.deleteMany({
           where: {
             invoiceId: id,
+          },
+        });
+      }
+
+      if (
+        data.status !== undefined &&
+        data.status !== existingInvoice.status
+      ) {
+        await tx.invoiceStatusHistory.create({
+          data: {
+            invoiceId: id,
+            fromStatus: existingInvoice.status,
+            toStatus: data.status,
           },
         });
       }
