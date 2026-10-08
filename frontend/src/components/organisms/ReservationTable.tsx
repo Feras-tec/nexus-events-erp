@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { StatusChip } from "../atoms/StatusChip";
+import { ReservationMobileCards } from "../../features/reservations/components/ReservationMobileCards";
 
 export type ReservationItem = {
   id: string;
@@ -75,8 +76,14 @@ export function ReservationTable({
   }
 
   return (
-    <div className="overflow-x-auto rounded-box border border-base-300 bg-base-100">
-      <table className="table">
+    <>
+      <ReservationMobileCards
+        reservations={reservations}
+        onView={onView}
+      />
+
+      <div className="hidden overflow-x-auto rounded-box border border-base-300 bg-base-100 md:block">
+        <table className="table">
         <thead>
           <tr>
             <th>{t("reservations.table.event")}</th>
@@ -144,7 +151,8 @@ export function ReservationTable({
             </tr>
           ))}
         </tbody>
-      </table>
-    </div>
+        </table>
+      </div>
+    </>
   );
 }

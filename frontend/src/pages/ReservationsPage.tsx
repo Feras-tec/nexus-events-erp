@@ -6,6 +6,11 @@ import { motion } from "motion/react";
 import { Button } from "../components/atoms/Button";
 import { ReservationForm } from "../components/organisms/ReservationForm";
 import { ReservationTable } from "../components/organisms/ReservationTable";
+import { ReservationStats } from "../features/reservations/components/ReservationStats";
+import {
+  ReservationFilters,
+  type ReservationStatusFilter,
+} from "../features/reservations/components/ReservationFilters";
 import { ListLayout } from "../components/templates/ListLayout";
 import { useReservations } from "../features/reservations/hooks/useReservations";
 import { useReservationFormOptions } from "../features/reservations/hooks/useReservationFormOptions";
@@ -17,6 +22,10 @@ export function ReservationsPage() {
   const { t } = useTranslation();
 
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] =
+    useState<ReservationStatusFilter>("ALL");
+  const [eventFilter, setEventFilter] = useState("ALL");
+  const [warehouseFilter, setWarehouseFilter] = useState("ALL");
   const [showForm, setShowForm] = useState(false);
   const [createError, setCreateError] = useState("");
 
@@ -41,9 +50,54 @@ export function ReservationsPage() {
     onError: setCreateError,
   });
 
+  const filterEvents = Array.from(
+    new Map(
+      reservations.map((reservation) => [
+        reservation.event.id,
+        {
+          id: reservation.event.id,
+          name: reservation.event.name,
+        },
+      ])
+    ).values()
+  ).sort((a, b) => a.name.localeCompare(b.name));
+
+  const warehouses = Array.from(
+    new Map(
+      reservations.map((reservation) => [
+        reservation.inventoryItem.warehouse.id,
+        {
+          id: reservation.inventoryItem.warehouse.id,
+          name: reservation.inventoryItem.warehouse.name,
+        },
+      ])
+    ).values()
+  ).sort((a, b) => a.name.localeCompare(b.name));
+
   const normalizedSearch = search.trim().toLowerCase();
 
   const filteredReservations = reservations.filter((reservation) => {
+    if (
+      statusFilter !== "ALL" &&
+      reservation.status !== statusFilter
+    ) {
+      return false;
+    }
+
+    if (
+      eventFilter !== "ALL" &&
+      reservation.event.id !== eventFilter
+    ) {
+      return false;
+    }
+
+    if (
+      warehouseFilter !== "ALL" &&
+      reservation.inventoryItem.warehouse.id !== warehouseFilter
+    ) {
+      return false;
+    }
+
     if (!normalizedSearch) {
       return true;
     }
@@ -127,6 +181,28 @@ export function ReservationsPage() {
         <div role="alert" className="alert alert-error">
           {t("reservations.loadError")}
         </div>
+      )}
+
+      {!isLoading && !isError && (
+        <ReservationStats reservations={reservations} />
+      )}
+
+      {!isLoading && !isError && (
+        <ReservationFilters
+          status={statusFilter}
+          eventId={eventFilter}
+          warehouseId={warehouseFilter}
+          events={filterEvents}
+          warehouses={warehouses}
+          onStatusChange={setStatusFilter}
+          onEventChange={setEventFilter}
+          onWarehouseChange={setWarehouseFilter}
+          onReset={() => {
+            setStatusFilter("ALL");
+            setEventFilter("ALL");
+            setWarehouseFilter("ALL");
+          }}
+        />
       )}
 
       {!isLoading && !isError && (
