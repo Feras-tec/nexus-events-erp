@@ -6,6 +6,11 @@ import { motion } from "motion/react";
 import { InvoiceForm } from "../components/organisms/InvoiceForm";
 import { ListLayout } from "../components/templates/ListLayout";
 import { InvoiceTable } from "../features/invoices/components/InvoiceTable";
+import { InvoiceStats } from "../features/invoices/components/InvoiceStats";
+import {
+  InvoiceFilters,
+  type InvoiceStatusFilter,
+} from "../features/invoices/components/InvoiceFilters";
 import { useCreateInvoice } from "../features/invoices/hooks/useCreateInvoice";
 import { useInvoiceFormOptions } from "../features/invoices/hooks/useInvoiceFormOptions";
 import { useInvoices } from "../features/invoices/hooks/useInvoices";
@@ -16,6 +21,10 @@ export function InvoicesPage() {
   const { t } = useTranslation();
 
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] =
+    useState<InvoiceStatusFilter>("ALL");
+  const [customerFilter, setCustomerFilter] = useState("ALL");
+  const [eventFilter, setEventFilter] = useState("ALL");
   const [showForm, setShowForm] = useState(false);
 
   const {
@@ -39,9 +48,64 @@ export function InvoicesPage() {
     createError,
   } = useCreateInvoice();
 
+  const filterCustomers = Array.from(
+    new Map(
+      invoices.map((invoice) => {
+        const customer = invoice.customer;
+        const name =
+          customer.companyName ||
+          [customer.firstName, customer.lastName]
+            .filter(Boolean)
+            .join(" ") ||
+          customer.customerNo;
+
+        return [
+          customer.id,
+          { id: customer.id, name },
+        ] as const;
+      })
+    ).values()
+  ).sort((a, b) => a.name.localeCompare(b.name));
+
+  const filterEvents = Array.from(
+    new Map(
+      invoices
+        .filter((invoice) => invoice.event != null)
+        .map((invoice) => {
+          const event = invoice.event!;
+
+          return [
+            event.id,
+            { id: event.id, name: event.name },
+          ] as const;
+        })
+    ).values()
+  ).sort((a, b) => a.name.localeCompare(b.name));
+
   const normalizedSearch = search.trim().toLowerCase();
 
   const filteredInvoices = invoices.filter((invoice) => {
+    if (
+      statusFilter !== "ALL" &&
+      invoice.status !== statusFilter
+    ) {
+      return false;
+    }
+
+    if (
+      customerFilter !== "ALL" &&
+      invoice.customer.id !== customerFilter
+    ) {
+      return false;
+    }
+
+    if (
+      eventFilter !== "ALL" &&
+      invoice.event?.id !== eventFilter
+    ) {
+      return false;
+    }
+
     if (!normalizedSearch) return true;
 
     const customerName = invoice.customer.companyName
@@ -160,6 +224,28 @@ export function InvoicesPage() {
             <div role="alert" className="alert alert-error">
               {t("invoices.loadError")}
             </div>
+          )}
+
+          {!isLoading && !isError && (
+            <InvoiceStats invoices={invoices} />
+          )}
+
+          {!isLoading && !isError && (
+            <InvoiceFilters
+              status={statusFilter}
+              customerId={customerFilter}
+              eventId={eventFilter}
+              customers={filterCustomers}
+              events={filterEvents}
+              onStatusChange={setStatusFilter}
+              onCustomerChange={setCustomerFilter}
+              onEventChange={setEventFilter}
+              onReset={() => {
+                setStatusFilter("ALL");
+                setCustomerFilter("ALL");
+                setEventFilter("ALL");
+              }}
+            />
           )}
 
           {!isLoading && !isError && (

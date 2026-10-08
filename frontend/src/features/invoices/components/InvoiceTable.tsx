@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { InvoiceMobileCards } from "./InvoiceMobileCards";
 
 import type {
   Invoice,
@@ -58,8 +59,14 @@ export function InvoiceTable({
   }
 
   return (
-    <div className="overflow-x-auto rounded-box border border-base-300 bg-base-100">
-      <table className="table">
+    <>
+      <InvoiceMobileCards
+        invoices={invoices}
+        onView={onView}
+      />
+
+      <div className="hidden overflow-x-auto rounded-box border border-base-300 bg-base-100 md:block">
+        <table className="table">
         <thead>
           <tr>
             <th>{t("invoices.table.invoiceNo")}</th>
@@ -116,7 +123,8 @@ export function InvoiceTable({
             </tr>
           ))}
         </tbody>
-      </table>
-    </div>
+        </table>
+      </div>
+    </>
   );
 }

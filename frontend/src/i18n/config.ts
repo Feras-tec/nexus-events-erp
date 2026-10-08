@@ -77,6 +77,22 @@ const resources = {
         SUSPENDED: "Suspendiert",
       },
       invoices: {
+        filters: {
+          title: "Filter",
+          status: "Status",
+          allStatuses: "Alle Status",
+          customer: "Kunde",
+          allCustomers: "Alle Kunden",
+          event: "Event",
+          allEvents: "Alle Events",
+          reset: "Zurücksetzen",
+        },
+        stats: {
+          total: "Gesamtrechnungen",
+          draft: "Entwürfe",
+          paid: "Bezahlt",
+          overdue: "Überfällig",
+        },
         form: {
           invoiceNo: "Rechnungsnummer",
           selectCustomer: "Kunde auswählen",
@@ -986,6 +1002,22 @@ const resources = {
         SUSPENDED: "Suspended",
       },
       invoices: {
+        filters: {
+          title: "Filters",
+          status: "Status",
+          allStatuses: "All statuses",
+          customer: "Customer",
+          allCustomers: "All customers",
+          event: "Event",
+          allEvents: "All events",
+          reset: "Reset",
+        },
+        stats: {
+          total: "Total invoices",
+          draft: "Drafts",
+          paid: "Paid",
+          overdue: "Overdue",
+        },
         form: {
           invoiceNo: "Invoice number",
           selectCustomer: "Select customer",
@@ -1895,6 +1927,22 @@ const resources = {
         SUSPENDED: "موقوف",
       },
       invoices: {
+        filters: {
+          title: "الفلاتر",
+          status: "الحالة",
+          allStatuses: "جميع الحالات",
+          customer: "العميل",
+          allCustomers: "جميع العملاء",
+          event: "الفعالية",
+          allEvents: "جميع الفعاليات",
+          reset: "إعادة تعيين",
+        },
+        stats: {
+          total: "إجمالي الفواتير",
+          draft: "المسودات",
+          paid: "المدفوعة",
+          overdue: "المتأخرة",
+        },
         form: {
           invoiceNo: "رقم الفاتورة",
           selectCustomer: "اختر العميل",
