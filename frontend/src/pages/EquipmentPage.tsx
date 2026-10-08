@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -14,6 +15,7 @@ import { useCreateEquipment } from "../features/equipment/hooks/useCreateEquipme
 
 export function EquipmentPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [search, setSearch] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -72,17 +74,17 @@ export function EquipmentPage() {
       transition={{ duration: 0.25 }}
     >
       <ListLayout
-        title="Equipment"
-        description="Equipment und Lagerbestand verwalten."
+        title={t("equipment.title")}
+        description={t("equipment.description")}
         searchValue={search}
-        searchPlaceholder="Equipment suchen..."
+        searchPlaceholder={t("equipment.search")}
         onSearchChange={setSearch}
         actions={
           <Button
             type="button"
             onClick={() => setShowCreateForm((current) => !current)}
           >
-            {showCreateForm ? "Abbrechen" : "Neues Gerät"}
+            {showCreateForm ? t("equipment.cancel") : t("equipment.new")}
           </Button>
         }
       >
@@ -99,14 +101,14 @@ export function EquipmentPage() {
                 <div className="flex justify-center py-8">
                   <span
                     className="loading loading-spinner loading-lg"
-                    aria-label="Formulardaten werden geladen"
+                    aria-label={t("equipment.formLoading")}
                   />
                 </div>
               )}
 
               {formDataError && (
                 <div role="alert" className="alert alert-error">
-                  Produkte oder Lager konnten nicht geladen werden.
+                  {t("equipment.formDataError")}
                 </div>
               )}
 
@@ -123,7 +125,7 @@ export function EquipmentPage() {
 
               {createEquipmentMutation.isError && (
                 <div role="alert" className="alert alert-error mt-4">
-                  Gerät konnte nicht erstellt werden.
+                  {t("equipment.createError")}
                 </div>
               )}
             </motion.div>
@@ -134,14 +136,14 @@ export function EquipmentPage() {
           <div className="flex justify-center py-12">
             <span
               className="loading loading-spinner loading-lg"
-              aria-label="Equipment wird geladen"
+              aria-label={t("equipment.loading")}
             />
           </div>
         )}
 
         {isError && (
           <div role="alert" className="alert alert-error">
-            Equipment konnte nicht geladen werden.
+            {t("equipment.loadError")}
           </div>
         )}
 

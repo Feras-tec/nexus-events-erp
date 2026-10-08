@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 
 import { EquipmentFormFields } from "../../features/equipment/components/EquipmentFormFields";
 import { EquipmentSelectionFields } from "../../features/equipment/components/EquipmentSelectionFields";
@@ -44,6 +45,7 @@ export function EquipmentForm({
   loading = false,
   onSubmit,
 }: EquipmentFormProps) {
+  const { t } = useTranslation();
   const [values, setValues] = useState<EquipmentFormValues>({
     ...emptyValues,
     ...initialValues,
@@ -99,7 +101,7 @@ export function EquipmentForm({
           {loading && (
             <span className="loading loading-spinner loading-sm" />
           )}
-          {mode === "edit" ? "Änderungen speichern" : "Gerät anlegen"}
+          {mode === "edit" ? t("equipment.form.save") : t("equipment.form.create")}
         </button>
       </div>
     </form>

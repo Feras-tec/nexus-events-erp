@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { motion } from "motion/react";
 
@@ -24,6 +25,7 @@ import { EquipmentEditPanel } from "../features/equipment/components/EquipmentEd
 
 export function EquipmentDetailPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -70,7 +72,7 @@ export function EquipmentDetailPage() {
       <div className="flex justify-center py-16">
         <span
           className="loading loading-spinner loading-lg"
-          aria-label="Gerät wird geladen"
+          aria-label={t("equipment.detail.loading")}
         />
       </div>
     );
@@ -79,7 +81,7 @@ export function EquipmentDetailPage() {
   if (isError || !equipment) {
     return (
       <div role="alert" className="alert alert-error">
-        Gerät konnte nicht geladen werden.
+        {t("equipment.detail.loadError")}
       </div>
     );
   }
@@ -113,7 +115,7 @@ export function EquipmentDetailPage() {
     >
       <DetailLayout
         title={equipment.product.name}
-        description={`Asset-Nr. ${equipment.assetNo}`}
+        description={`${t("products.equipment.assetNo")} ${equipment.assetNo}`}
         actions={
           <>
             <Button
@@ -125,14 +127,14 @@ export function EquipmentDetailPage() {
                 });
               }}
             >
-              Zurück
+              {t("equipment.detail.back")}
             </Button>
 
             <Button
               type="button"
               onClick={() => setIsEditing((current) => !current)}
             >
-              {isEditing ? "Abbrechen" : "Bearbeiten"}
+              {isEditing ? t("equipment.cancel") : t("equipment.detail.edit")}
             </Button>
           </>
         }
@@ -203,10 +205,10 @@ export function EquipmentDetailPage() {
           />
 
           <section className="rounded-box border border-base-300 bg-base-100 p-6 lg:col-span-2">
-            <h2 className="mb-3 text-lg font-semibold">Notizen</h2>
+            <h2 className="mb-3 text-lg font-semibold">{t("equipment.form.notes")}</h2>
 
             <p className="whitespace-pre-wrap text-base-content/80">
-              {equipment.notes || "Keine Notizen vorhanden."}
+              {equipment.notes || t("equipment.detail.noNotes")}
             </p>
           </section>
         </div>

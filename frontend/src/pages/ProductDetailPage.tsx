@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -18,6 +19,7 @@ import { useActivateProduct } from "../features/products/hooks/useActivateProduc
 
 export function ProductDetailPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [isEditing, setIsEditing] = useState(false);
   const [showDeactivateDialog, setShowDeactivateDialog] =
@@ -57,7 +59,7 @@ export function ProductDetailPage() {
       <div className="flex justify-center py-16">
         <span
           className="loading loading-spinner loading-lg"
-          aria-label="Produkt wird geladen"
+          aria-label={t("products.detail.loading")}
         />
       </div>
     );
@@ -66,7 +68,7 @@ export function ProductDetailPage() {
   if (isError || !product) {
     return (
       <div role="alert" className="alert alert-error">
-        Produkt konnte nicht geladen werden.
+        {t("products.detail.loadError")}
       </div>
     );
   }
@@ -90,7 +92,7 @@ export function ProductDetailPage() {
     >
       <DetailLayout
         title={product.name}
-        description={`Produktnr. ${product.productNo}`}
+        description={`${t("products.table.productNo")} ${product.productNo}`}
         actions={
           <>
             <Button
@@ -102,7 +104,7 @@ export function ProductDetailPage() {
                 });
               }}
             >
-              Zurück
+              {t("products.detail.back")}
             </Button>
 
             <Button
@@ -111,7 +113,7 @@ export function ProductDetailPage() {
                 setIsEditing((current) => !current)
               }
             >
-              {isEditing ? "Abbrechen" : "Bearbeiten"}
+              {isEditing ? t("products.cancel") : t("products.detail.edit")}
             </Button>
 
             {product.isActive ? (
@@ -120,7 +122,7 @@ export function ProductDetailPage() {
                 className="btn btn-error"
                 onClick={() => setShowDeactivateDialog(true)}
               >
-                Deaktivieren
+                {t("products.detail.deactivate")}
               </button>
             ) : (
               <button
@@ -129,7 +131,7 @@ export function ProductDetailPage() {
                 disabled={activateProductMutation.isPending}
                 onClick={() => activateProductMutation.mutate()}
               >
-                Aktivieren
+                {t("products.detail.activate")}
               </button>
             )}
           </>
@@ -158,7 +160,7 @@ export function ProductDetailPage() {
                   role="alert"
                   className="alert alert-error mt-4"
                 >
-                  Änderungen konnten nicht gespeichert werden.
+                  {t("products.detail.updateError")}
                 </div>
               )}
             </motion.div>
@@ -175,9 +177,9 @@ export function ProductDetailPage() {
 
         <ConfirmDeleteDialog
           open={showDeactivateDialog}
-          title="Produkt deaktivieren"
-          message={`Möchten Sie das Produkt "${product.name}" wirklich deaktivieren? Vorhandene Geräte bleiben erhalten.`}
-          confirmLabel="Produkt deaktivieren"
+          title={t("products.detail.deactivateTitle")}
+          message={t("products.detail.deactivateMessage", { name: product.name })}
+          confirmLabel={t("products.detail.deactivateTitle")}
           loading={deactivateProductMutation.isPending}
           onCancel={() => setShowDeactivateDialog(false)}
           onConfirm={() => deactivateProductMutation.mutate()}

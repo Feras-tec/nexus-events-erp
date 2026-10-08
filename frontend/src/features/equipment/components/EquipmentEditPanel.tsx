@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 
 import {
   EquipmentForm,
@@ -36,6 +37,7 @@ export function EquipmentEditPanel({
   isEditing,
   onSubmit,
 }: EquipmentEditPanelProps) {
+  const { t } = useTranslation();
   return (
     <AnimatePresence>
       {isEditing && (
@@ -54,7 +56,7 @@ export function EquipmentEditPanel({
 
           {dataError && (
             <div role="alert" className="alert alert-error">
-              Produkte oder Lager konnten nicht geladen werden.
+              {t("equipment.editPanel.dataError")}
             </div>
           )}
 
@@ -71,7 +73,7 @@ export function EquipmentEditPanel({
 
           {updateError && (
             <div role="alert" className="alert alert-error mt-4">
-              Änderungen konnten nicht gespeichert werden.
+              {t("equipment.editPanel.updateError")}
             </div>
           )}
         </motion.div>

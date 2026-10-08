@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 
 export type ProductFormValues = {
   productNo: string;
@@ -35,6 +36,8 @@ export function ProductForm({
   loading = false,
   onSubmit,
 }: ProductFormProps) {
+  const { t } = useTranslation();
+
   const [values, setValues] = useState<ProductFormValues>({
     ...emptyValues,
     ...initialValues,
@@ -66,7 +69,7 @@ export function ProductForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2">
         <fieldset className="fieldset">
-          <legend className="fieldset-legend">Produktnummer</legend>
+          <legend className="fieldset-legend">{t("products.form.productNo")}</legend>
           <input
             type="text"
             className="input w-full"
@@ -78,12 +81,12 @@ export function ProductForm({
             required
             minLength={2}
             maxLength={30}
-            placeholder="z. B. PRD-0002"
+            placeholder={t("products.form.productNoPlaceholder")}
           />
         </fieldset>
 
         <fieldset className="fieldset">
-          <legend className="fieldset-legend">Produktname</legend>
+          <legend className="fieldset-legend">{t("products.form.name")}</legend>
           <input
             type="text"
             className="input w-full"
@@ -95,12 +98,12 @@ export function ProductForm({
             required
             minLength={2}
             maxLength={150}
-            placeholder="z. B. Shure SM58"
+            placeholder={t("products.form.namePlaceholder")}
           />
         </fieldset>
 
         <fieldset className="fieldset">
-          <legend className="fieldset-legend">Marke</legend>
+          <legend className="fieldset-legend">{t("products.form.brand")}</legend>
           <input
             type="text"
             className="input w-full"
@@ -110,12 +113,12 @@ export function ProductForm({
             }
             disabled={loading}
             maxLength={100}
-            placeholder="z. B. Shure"
+            placeholder={t("products.form.brandPlaceholder")}
           />
         </fieldset>
 
         <fieldset className="fieldset">
-          <legend className="fieldset-legend">Modell</legend>
+          <legend className="fieldset-legend">{t("products.form.model")}</legend>
           <input
             type="text"
             className="input w-full"
@@ -125,12 +128,12 @@ export function ProductForm({
             }
             disabled={loading}
             maxLength={100}
-            placeholder="z. B. SM58"
+            placeholder={t("products.form.modelPlaceholder")}
           />
         </fieldset>
 
         <fieldset className="fieldset">
-          <legend className="fieldset-legend">Kategorie</legend>
+          <legend className="fieldset-legend">{t("products.form.category")}</legend>
           <input
             type="text"
             className="input w-full"
@@ -140,12 +143,12 @@ export function ProductForm({
             }
             disabled={loading}
             maxLength={100}
-            placeholder="z. B. Audio"
+            placeholder={t("products.form.categoryPlaceholder")}
           />
         </fieldset>
 
         <fieldset className="fieldset">
-          <legend className="fieldset-legend">Tracking</legend>
+          <legend className="fieldset-legend">{t("products.table.tracking")}</legend>
           <select
             className="select w-full"
             value={values.trackingType}
@@ -157,13 +160,13 @@ export function ProductForm({
             }
             disabled={loading}
           >
-            <option value="SERIALIZED">Einzelgerät / Seriennummer</option>
-            <option value="QUANTITY">Mengenartikel</option>
+            <option value="SERIALIZED">{t("products.form.serialized")}</option>
+            <option value="QUANTITY">{t("products.form.quantity")}</option>
           </select>
         </fieldset>
 
         <fieldset className="fieldset">
-          <legend className="fieldset-legend">Verwendung</legend>
+          <legend className="fieldset-legend">{t("products.table.usage")}</legend>
           <select
             className="select w-full"
             value={values.usageType}
@@ -175,14 +178,14 @@ export function ProductForm({
             }
             disabled={loading}
           >
-            <option value="RENTAL">Vermietung</option>
-            <option value="SALE">Verkauf</option>
-            <option value="BOTH">Vermietung & Verkauf</option>
+            <option value="RENTAL">{t("products.usage.RENTAL")}</option>
+            <option value="SALE">{t("products.usage.SALE")}</option>
+            <option value="BOTH">{t("products.form.both")}</option>
           </select>
         </fieldset>
 
         <fieldset className="fieldset md:col-span-2">
-          <legend className="fieldset-legend">Beschreibung</legend>
+          <legend className="fieldset-legend">{t("products.form.description")}</legend>
           <textarea
             className="textarea min-h-28 w-full"
             value={values.description}
@@ -191,7 +194,7 @@ export function ProductForm({
             }
             disabled={loading}
             maxLength={1000}
-            placeholder="Beschreibung des Produkts..."
+            placeholder={t("products.form.descriptionPlaceholder")}
           />
         </fieldset>
       </div>
@@ -207,8 +210,8 @@ export function ProductForm({
           )}
 
           {mode === "edit"
-            ? "Änderungen speichern"
-            : "Produkt anlegen"}
+            ? t("products.form.save")
+            : t("products.form.create")}
         </button>
       </div>
     </form>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "../../../components/atoms/Button";
 import { useEquipmentTransfer } from "../hooks/useEquipmentTransfer";
@@ -14,6 +15,7 @@ export function EquipmentTransfer({
   equipmentId,
   equipment,
 }: EquipmentTransferProps) {
+  const { t } = useTranslation();
   const [transferWarehouseId, setTransferWarehouseId] = useState("");
 
   const {
@@ -34,16 +36,16 @@ export function EquipmentTransfer({
   return (
     <section className="mb-6 rounded-box border border-base-300 bg-base-100 p-6">
       <div className="mb-4">
-        <h2 className="text-lg font-semibold">Lagertransfer</h2>
+        <h2 className="text-lg font-semibold">{t("equipment.transfer.title")}</h2>
 
         <p className="text-sm text-base-content/60">
-          Gerät von {equipment.warehouse.name} in ein anderes Lager umlagern
+          {t("equipment.transfer.description", { warehouse: equipment.warehouse.name })}
         </p>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <label className="form-control w-full sm:max-w-md">
-          <span className="label-text mb-2">Ziellager</span>
+          <span className="label-text mb-2">{t("equipment.transfer.destination")}</span>
 
           <select
             className="select select-bordered w-full"
@@ -57,8 +59,8 @@ export function EquipmentTransfer({
           >
             <option value="">
               {warehousesLoading
-                ? "Lager werden geladen..."
-                : "Lager auswählen"}
+                ? t("equipment.transfer.loadingWarehouses")
+                : t("equipment.transfer.selectWarehouse")}
             </option>
 
             {warehouses
@@ -87,14 +89,14 @@ export function EquipmentTransfer({
           }
         >
           {transferWarehouseMutation.isPending
-            ? "Wird umgelagert..."
-            : "Umlagern"}
+            ? t("equipment.transfer.transferring")
+            : t("equipment.transfer.submit")}
         </Button>
       </div>
 
       {warehousesError && (
         <div role="alert" className="alert alert-error mt-4">
-          Lager konnten nicht geladen werden.
+          {t("equipment.transfer.warehousesError")}
         </div>
       )}
 
@@ -102,13 +104,13 @@ export function EquipmentTransfer({
         <div role="alert" className="alert alert-error mt-4">
           {transferWarehouseMutation.error instanceof Error
             ? transferWarehouseMutation.error.message
-            : "Lagertransfer fehlgeschlagen."}
+            : t("equipment.transfer.transferError")}
         </div>
       )}
 
       {transferWarehouseMutation.isSuccess && (
         <div role="alert" className="alert alert-success mt-4">
-          Gerät wurde erfolgreich umgelagert.
+          {t("equipment.transfer.success")}
         </div>
       )}
     </section>

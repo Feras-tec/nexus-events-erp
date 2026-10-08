@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 
 import type { EquipmentMovement } from "../types/equipment.types";
 
@@ -13,6 +14,27 @@ export function EquipmentMovementHistory({
   isLoading,
   isError,
 }: EquipmentMovementHistoryProps) {
+  const { t, i18n } = useTranslation();
+
+  const locale =
+    i18n.resolvedLanguage === "ar"
+      ? "ar"
+      : i18n.resolvedLanguage === "en"
+        ? "en-GB"
+        : "de-DE";
+
+  const translateStatus = (status: string | null | undefined) =>
+    status
+      ? t(`status.${status}`, {
+          defaultValue: status.replaceAll("_", " "),
+        })
+      : "—";
+
+  const translateMovement = (type: string) =>
+    t(`equipment.movements.types.${type}`, {
+      defaultValue: type.replaceAll("_", " "),
+    });
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 12 }}
@@ -20,9 +42,9 @@ export function EquipmentMovementHistory({
       className="rounded-box border border-base-300 bg-base-100 p-6 lg:col-span-2"
     >
       <div className="mb-5">
-        <h2 className="text-lg font-semibold">Bewegungshistorie</h2>
+        <h2 className="text-lg font-semibold">{t("equipment.movements.title")}</h2>
         <p className="text-sm text-base-content/60">
-          Status- und Gerätebewegungen
+          {t("equipment.movements.subtitle")}
         </p>
       </div>
 
@@ -34,13 +56,13 @@ export function EquipmentMovementHistory({
 
       {isError && (
         <div role="alert" className="alert alert-error">
-          Bewegungshistorie konnte nicht geladen werden.
+          {t("equipment.movements.loadError")}
         </div>
       )}
 
       {!isLoading && !isError && movements.length === 0 && (
         <div className="rounded-box bg-base-200 p-5 text-sm text-base-content/60">
-          Noch keine Gerätebewegungen vorhanden.
+          {t("equipment.movements.empty")}
         </div>
       )}
 
@@ -53,15 +75,15 @@ export function EquipmentMovementHistory({
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <div className="font-semibold">{movement.type}</div>
+                  <div className="font-semibold">{translateMovement(movement.type)}</div>
 
                   <div className="mt-1 text-sm text-base-content/60">
-                    {movement.fromStatus ?? "—"} → {movement.toStatus}
+                    {translateStatus(movement.fromStatus)} → {translateStatus(movement.toStatus)}
                   </div>
                 </div>
 
                 <div className="text-sm text-base-content/60">
-                  {new Intl.DateTimeFormat("de-DE", {
+                  {new Intl.DateTimeFormat(locale, {
                     dateStyle: "medium",
                     timeStyle: "short",
                   }).format(new Date(movement.createdAt))}
@@ -70,14 +92,14 @@ export function EquipmentMovementHistory({
 
               {(movement.fromLocation || movement.toLocation) && (
                 <div className="mt-3 text-sm">
-                  Standort: {movement.fromLocation ?? "—"} →{" "}
+                  {t("equipment.movements.location")}: {movement.fromLocation ?? "—"} →{" "}
                   {movement.toLocation ?? "—"}
                 </div>
               )}
 
               {(movement.fromWarehouse || movement.toWarehouse) && (
                 <div className="mt-2 text-sm">
-                  Lager:{" "}
+                  {t("equipment.movements.warehouse")}:{" "}
                   <span className="font-medium">
                     {movement.fromWarehouse?.name ?? "—"} →{" "}
                     {movement.toWarehouse?.name ?? "—"}
@@ -87,7 +109,7 @@ export function EquipmentMovementHistory({
 
               {movement.reservation?.event && (
                 <div className="mt-3 rounded-box bg-base-200 p-3 text-sm">
-                  Event:{" "}
+                  {t("equipment.movements.event")}:{" "}
                   <span className="font-medium">
                     {movement.reservation.event.eventNo} ·{" "}
                     {movement.reservation.event.name}
@@ -97,7 +119,7 @@ export function EquipmentMovementHistory({
 
               {movement.responsibleEmployee && (
                 <div className="mt-2 text-sm">
-                  Verantwortlich:{" "}
+                  {t("equipment.movements.responsible")}:{" "}
                   <span className="font-medium">
                     {movement.responsibleEmployee.firstName}{" "}
                     {movement.responsibleEmployee.lastName}

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { StatusChip } from "../atoms/StatusChip";
 
 type EquipmentItem = {
@@ -35,11 +36,12 @@ export function EquipmentTable({
   equipment,
   onView,
 }: EquipmentTableProps) {
+  const { t } = useTranslation();
   if (equipment.length === 0) {
     return (
       <div className="rounded-box border border-base-300 bg-base-100 p-8 text-center">
         <p className="text-base-content/60">
-          Keine Geräte gefunden.
+          {t("equipment.table.empty")}
         </p>
       </div>
     );
@@ -50,14 +52,14 @@ export function EquipmentTable({
       <table className="table">
         <thead>
           <tr>
-            <th>Gerät</th>
-            <th>Asset-Nr.</th>
-            <th>Seriennummer</th>
-            <th>Lager</th>
-            <th>Standort</th>
-            <th>Status</th>
+            <th>{t("equipment.table.item")}</th>
+            <th>{t("products.equipment.assetNo")}</th>
+            <th>{t("products.equipment.serialNo")}</th>
+            <th>{t("products.equipment.warehouse")}</th>
+            <th>{t("products.equipment.location")}</th>
+            <th>{t("products.table.status")}</th>
             <th>
-              <span className="sr-only">Aktionen</span>
+              <span className="sr-only">{t("products.table.actions")}</span>
             </th>
           </tr>
         </thead>
@@ -103,7 +105,7 @@ export function EquipmentTable({
                     className="btn btn-ghost btn-sm"
                     onClick={() => onView(item.id)}
                   >
-                    Anzeigen
+                    {t("products.table.view")}
                   </button>
                 )}
               </td>

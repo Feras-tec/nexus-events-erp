@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { EquipmentFormValues } from "../types/equipment-form.types";
 
 type EquipmentFormFieldsProps = {
@@ -14,11 +15,12 @@ export function EquipmentFormFields({
   loading,
   onUpdate,
 }: EquipmentFormFieldsProps) {
+  const { t } = useTranslation();
   return (
     <>
       <fieldset className="fieldset">
         <legend className="fieldset-legend">
-          Asset-Nr.
+          {t("products.equipment.assetNo")}
         </legend>
 
         <input
@@ -37,7 +39,7 @@ export function EquipmentFormFields({
 
       <fieldset className="fieldset">
         <legend className="fieldset-legend">
-          Seriennummer
+          {t("products.equipment.serialNo")}
         </legend>
 
         <input
@@ -57,7 +59,7 @@ export function EquipmentFormFields({
 
       <fieldset className="fieldset">
         <legend className="fieldset-legend">
-          Barcode
+          {t("equipment.form.barcode")}
         </legend>
 
         <input
@@ -74,7 +76,7 @@ export function EquipmentFormFields({
 
       <fieldset className="fieldset">
         <legend className="fieldset-legend">
-          Standort
+          {t("products.equipment.location")}
         </legend>
 
         <input
@@ -91,7 +93,7 @@ export function EquipmentFormFields({
 
       <fieldset className="fieldset">
         <legend className="fieldset-legend">
-          Kaufdatum
+          {t("equipment.form.purchaseDate")}
         </legend>
 
         <input
@@ -107,7 +109,7 @@ export function EquipmentFormFields({
 
       <fieldset className="fieldset">
         <legend className="fieldset-legend">
-          Kaufpreis
+          {t("equipment.form.purchasePrice")}
         </legend>
 
         <input
@@ -126,7 +128,7 @@ export function EquipmentFormFields({
 
       <fieldset className="fieldset md:col-span-2">
         <legend className="fieldset-legend">
-          Notizen
+          {t("equipment.form.notes")}
         </legend>
 
         <textarea

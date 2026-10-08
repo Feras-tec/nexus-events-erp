@@ -1,9 +1,6 @@
+import { useTranslation } from "react-i18next";
 import { StatusChip } from "../../../components/atoms/StatusChip";
 import type { ProductDetail } from "../types/product.types";
-import {
-  trackingLabel,
-  usageLabel,
-} from "../utils/product-formatters";
 
 type ProductOverviewProps = {
   product: ProductDetail;
@@ -12,12 +9,14 @@ type ProductOverviewProps = {
 export function ProductOverview({
   product,
 }: ProductOverviewProps) {
+  const { t } = useTranslation();
+
   return (
     <>
       <section className="rounded-box border border-base-300 bg-base-100 p-6">
         <div className="mb-5 flex items-start justify-between gap-4">
           <h2 className="text-lg font-semibold">
-            Produktdaten
+            {t("products.overview.title")}
           </h2>
 
           <StatusChip
@@ -28,7 +27,7 @@ export function ProductOverview({
         <dl className="grid gap-4 sm:grid-cols-2">
           <div>
             <dt className="text-sm text-base-content/60">
-              Produktnummer
+              {t("products.form.productNo")}
             </dt>
             <dd className="font-medium">
               {product.productNo}
@@ -37,48 +36,48 @@ export function ProductOverview({
 
           <div>
             <dt className="text-sm text-base-content/60">
-              Kategorie
+              {t("products.form.category")}
             </dt>
             <dd>{product.category ?? "—"}</dd>
           </div>
 
           <div>
             <dt className="text-sm text-base-content/60">
-              Marke
+              {t("products.form.brand")}
             </dt>
             <dd>{product.brand ?? "—"}</dd>
           </div>
 
           <div>
             <dt className="text-sm text-base-content/60">
-              Modell
+              {t("products.form.model")}
             </dt>
             <dd>{product.model ?? "—"}</dd>
           </div>
 
           <div>
             <dt className="text-sm text-base-content/60">
-              Tracking
+              {t("products.table.tracking")}
             </dt>
-            <dd>{trackingLabel(product.trackingType)}</dd>
+            <dd>{t(`products.tracking.${product.trackingType}`)}</dd>
           </div>
 
           <div>
             <dt className="text-sm text-base-content/60">
-              Verwendung
+              {t("products.table.usage")}
             </dt>
-            <dd>{usageLabel(product.usageType)}</dd>
+            <dd>{t(`products.usage.${product.usageType}`)}</dd>
           </div>
         </dl>
       </section>
 
       <section className="rounded-box border border-base-300 bg-base-100 p-6">
         <h2 className="mb-3 text-lg font-semibold">
-          Beschreibung
+          {t("products.form.description")}
         </h2>
 
         <p className="whitespace-pre-wrap text-base-content/80">
-          {product.description || "Keine Beschreibung vorhanden."}
+          {product.description || t("products.overview.noDescription")}
         </p>
       </section>
     </>

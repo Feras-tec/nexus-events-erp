@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "../../../components/atoms/Button";
 import { useEquipmentLifecycle } from "../hooks/useEquipmentLifecycle";
@@ -15,6 +16,7 @@ export function EquipmentLifecycle({
   equipment,
   activeReservation,
 }: EquipmentLifecycleProps) {
+  const { t } = useTranslation();
   const {
     reportLostMutation,
     recoverLostMutation,
@@ -36,11 +38,10 @@ export function EquipmentLifecycle({
         animate={{ opacity: 1, y: 0 }}
         className="rounded-box border border-error/30 bg-base-100 p-6 lg:col-span-2"
       >
-        <h2 className="text-lg font-semibold">Verlust melden</h2>
+        <h2 className="text-lg font-semibold">{t("equipment.lifecycle.reportLostTitle")}</h2>
 
         <p className="mt-1 text-sm text-base-content/60">
-          Wenn das Gerät nicht mehr auffindbar ist, kann es als verloren
-          gemeldet werden.
+          {t("equipment.lifecycle.reportLostDescription")}
         </p>
 
         <div className="mt-5">
@@ -48,14 +49,14 @@ export function EquipmentLifecycle({
             type="button"
             disabled={reportLostMutation.isPending}
             onClick={() => {
-              if (window.confirm("Gerät wirklich als verloren melden?")) {
+              if (window.confirm(t("equipment.lifecycle.confirmLost"))) {
                 reportLostMutation.mutate();
               }
             }}
           >
             {reportLostMutation.isPending
-              ? "Wird gemeldet..."
-              : "Als verloren melden"}
+              ? t("equipment.lifecycle.reporting")
+              : t("equipment.lifecycle.reportLost")}
           </Button>
         </div>
 
@@ -63,7 +64,7 @@ export function EquipmentLifecycle({
           <div className="alert alert-error mt-4">
             {reportLostMutation.error instanceof Error
               ? reportLostMutation.error.message
-              : "Gerät konnte nicht als verloren gemeldet werden."}
+              : t("equipment.lifecycle.reportLostError")}
           </div>
         )}
       </motion.section>
@@ -78,12 +79,11 @@ export function EquipmentLifecycle({
         className="rounded-box border border-error/40 bg-base-100 p-6 lg:col-span-2"
       >
         <h2 className="text-lg font-semibold">
-          Gerät als verloren gemeldet
+          {t("equipment.lifecycle.lostTitle")}
         </h2>
 
         <p className="mt-1 text-sm text-base-content/60">
-          Das Gerät ist derzeit als verloren registriert. Es kann als
-          wiedergefunden markiert oder dauerhaft ausgemustert werden.
+          {t("equipment.lifecycle.lostDescription")}
         </p>
 
         <div className="mt-5 flex flex-wrap gap-3">
@@ -96,8 +96,8 @@ export function EquipmentLifecycle({
             onClick={() => recoverLostMutation.mutate()}
           >
             {recoverLostMutation.isPending
-              ? "Wird zurückgeführt..."
-              : "Wiedergefunden"}
+              ? t("equipment.lifecycle.recovering")
+              : t("equipment.lifecycle.recovered")}
           </Button>
 
           <Button
@@ -109,7 +109,7 @@ export function EquipmentLifecycle({
             onClick={() => {
               if (
                 window.confirm(
-                  "Gerät wirklich dauerhaft ausmustern? Dieser Status kann nicht rückgängig gemacht werden.",
+                  t("equipment.lifecycle.confirmRetire"),
                 )
               ) {
                 retireEquipmentMutation.mutate();
@@ -117,8 +117,8 @@ export function EquipmentLifecycle({
             }}
           >
             {retireEquipmentMutation.isPending
-              ? "Wird ausgemustert..."
-              : "Ausmustern"}
+              ? t("equipment.lifecycle.retiring")
+              : t("equipment.lifecycle.retire")}
           </Button>
         </div>
 
@@ -126,7 +126,7 @@ export function EquipmentLifecycle({
           <div className="alert alert-error mt-4">
             {recoverLostMutation.error instanceof Error
               ? recoverLostMutation.error.message
-              : "Gerät konnte nicht zurückgeführt werden."}
+              : t("equipment.lifecycle.recoverError")}
           </div>
         )}
 
@@ -134,7 +134,7 @@ export function EquipmentLifecycle({
           <div className="alert alert-error mt-4">
             {retireEquipmentMutation.error instanceof Error
               ? retireEquipmentMutation.error.message
-              : "Gerät konnte nicht ausgemustert werden."}
+              : t("equipment.lifecycle.retireError")}
           </div>
         )}
       </motion.section>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "../../../components/atoms/Button";
 
 import type { EquipmentMovement } from "../types/equipment.types";
@@ -35,14 +36,16 @@ export function EquipmentPackedAction({
   onEmployeeChange,
   onMarkLoaded,
 }: EquipmentPackedActionProps) {
+  const { t } = useTranslation();
+
   return (
     <section className="rounded-box border border-base-300 bg-base-100 p-6 lg:col-span-2">
       <h2 className="text-lg font-semibold">
-        Neue Bewegung
+        {t("equipment.actions.newMovement")}
       </h2>
 
       <p className="mt-1 text-sm text-base-content/60">
-        Gepacktes Gerät für den Transport zum Event verladen.
+        {t("equipment.actions.packedDescription")}
       </p>
 
       {activeReservation ? (
@@ -57,7 +60,7 @@ export function EquipmentPackedAction({
               className="label"
               htmlFor="responsibleEmployee"
             >
-              Verantwortlicher Mitarbeiter
+              {t("equipment.actions.responsibleEmployee")}
             </label>
 
             <select
@@ -72,7 +75,7 @@ export function EquipmentPackedAction({
               }
             >
               <option value="">
-                Mitarbeiter auswählen
+                {t("equipment.actions.selectEmployee")}
               </option>
 
               {employees.map((employee) => (
@@ -92,7 +95,7 @@ export function EquipmentPackedAction({
 
             {employeesError && (
               <div className="alert alert-error mt-3">
-                Mitarbeiter konnten nicht geladen werden.
+                {t("equipment.actions.employeesError")}
               </div>
             )}
           </div>
@@ -108,18 +111,18 @@ export function EquipmentPackedAction({
             }
             onClick={onMarkLoaded}
           >
-            Als verladen markieren
+            {t("equipment.actions.markLoaded")}
           </Button>
         </div>
       ) : (
         <div className="alert alert-warning mt-5">
-          Keine verknüpfte Reservierung gefunden.
+          {t("equipment.actions.noReservation")}
         </div>
       )}
 
       {markLoadedError && (
         <div className="alert alert-error mt-4">
-          Gerät konnte nicht als verladen markiert werden.
+          {t("equipment.actions.loadError")}
         </div>
       )}
     </section>

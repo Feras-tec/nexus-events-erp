@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 import { Button } from "../../../components/atoms/Button";
 import type { EquipmentMovement } from "../types/equipment.types";
 import { useEquipmentReservations } from "../hooks/useEquipmentReservations";
@@ -13,6 +14,20 @@ export function EquipmentReservationStart({
   equipmentId,
   movements,
 }: EquipmentReservationStartProps) {
+  const { t, i18n } = useTranslation();
+
+  const locale =
+    i18n.resolvedLanguage === "ar"
+      ? "ar"
+      : i18n.resolvedLanguage === "en"
+        ? "en-GB"
+        : "de-DE";
+
+  const formatDateTime = (value: string) =>
+    new Intl.DateTimeFormat(locale, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(new Date(value));
   const {
     data: reservations = [],
     isLoading: reservationsLoading,
@@ -39,10 +54,10 @@ export function EquipmentReservationStart({
       animate={{ opacity: 1, y: 0 }}
       className="rounded-box border border-base-300 bg-base-100 p-6 lg:col-span-2"
     >
-      <h2 className="text-lg font-semibold">Neue Bewegung</h2>
+      <h2 className="text-lg font-semibold">{t("equipment.actions.newMovement")}</h2>
 
       <p className="mt-1 text-sm text-base-content/60">
-        Gerät für eine bestehende Event-Reservierung vormerken.
+        {t("equipment.reservationStart.description")}
       </p>
 
       {reservationsLoading ? (
@@ -51,7 +66,7 @@ export function EquipmentReservationStart({
         </div>
       ) : equipmentReservations.length === 0 ? (
         <div className="alert mt-5">
-          Keine aktive Reservierung für dieses Gerät vorhanden.
+          {t("equipment.reservationStart.empty")}
         </div>
       ) : (
         <div className="mt-5 space-y-3">
@@ -66,19 +81,16 @@ export function EquipmentReservationStart({
                 </div>
 
                 <div className="mt-1 text-sm text-base-content/60">
-                  {new Intl.DateTimeFormat("de-DE", {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  }).format(new Date(reservation.startDate))}
+                  {formatDateTime(reservation.startDate)}
                   {" – "}
-                  {new Intl.DateTimeFormat("de-DE", {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  }).format(new Date(reservation.endDate))}
+                  {formatDateTime(reservation.endDate)}
                 </div>
 
                 <div className="mt-1 text-sm">
-                  Status: {reservation.status}
+                  {t("equipment.reservationStart.status")}:{" "}
+                  {t(`status.${reservation.status}`, {
+                    defaultValue: reservation.status.replaceAll("_", " "),
+                  })}
                 </div>
               </div>
 
@@ -93,7 +105,7 @@ export function EquipmentReservationStart({
                   createMovementMutation.mutate(reservation.id)
                 }
               >
-                Reservieren
+                {t("equipment.reservationStart.reserve")}
               </Button>
             </div>
           ))}
@@ -102,7 +114,7 @@ export function EquipmentReservationStart({
 
       {createMovementMutation.isError && (
         <div role="alert" className="alert alert-error mt-4">
-          Gerätebewegung konnte nicht gespeichert werden.
+          {t("equipment.reservationStart.saveError")}
         </div>
       )}
     </motion.section>

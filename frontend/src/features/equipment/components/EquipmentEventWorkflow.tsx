@@ -8,6 +8,7 @@ import { useEquipmentEmployees } from "../hooks/useEquipmentEmployees";
 import { EquipmentMovementAction } from "./EquipmentMovementAction";
 import { EquipmentPackedAction } from "./EquipmentPackedAction";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 
 type ActiveReservation = NonNullable<EquipmentMovement["reservation"]>;
@@ -23,6 +24,7 @@ export function EquipmentEventWorkflow({
   equipment,
   activeReservation,
 }: EquipmentEventWorkflowProps) {
+  const { t } = useTranslation();
   const [responsibleEmployeeId, setResponsibleEmployeeId] = useState("");
 
   const {
@@ -52,13 +54,13 @@ export function EquipmentEventWorkflow({
   if (equipment.status === "RETURNING") {
     return (
       <EquipmentMovementAction
-        description="Zurückgekehrtes Gerät zur Prüfung übergeben."
+        description={t("equipment.eventWorkflow.inspectionDescription")}
         activeReservation={activeReservation}
-        buttonLabel="Prüfung starten"
+        buttonLabel={t("equipment.eventWorkflow.startInspection")}
         buttonLoading={startInspectionMutation.isPending}
         onAction={() => startInspectionMutation.mutate()}
         error={startInspectionMutation.isError}
-        errorMessage="Geräteprüfung konnte nicht gestartet werden."
+        errorMessage={t("equipment.eventWorkflow.inspectionError")}
       />
     );
   }
@@ -66,13 +68,13 @@ export function EquipmentEventWorkflow({
   if (equipment.status === "AT_EVENT") {
     return (
       <EquipmentMovementAction
-        description="Rücktransport des Geräts vom Event starten."
+        description={t("equipment.eventWorkflow.returnDescription")}
         activeReservation={activeReservation}
-        buttonLabel="Rücktransport starten"
+        buttonLabel={t("equipment.eventWorkflow.startReturn")}
         buttonLoading={startReturnMutation.isPending}
         onAction={() => startReturnMutation.mutate()}
         error={startReturnMutation.isError}
-        errorMessage="Rücktransport konnte nicht gestartet werden."
+        errorMessage={t("equipment.eventWorkflow.returnError")}
       />
     );
   }
@@ -80,13 +82,13 @@ export function EquipmentEventWorkflow({
   if (equipment.status === "IN_TRANSIT") {
     return (
       <EquipmentMovementAction
-        description="Ankunft des Geräts am Event bestätigen."
+        description={t("equipment.eventWorkflow.deliveryDescription")}
         activeReservation={activeReservation}
-        buttonLabel="Am Event angekommen"
+        buttonLabel={t("equipment.eventWorkflow.confirmArrival")}
         buttonLoading={markDeliveredMutation.isPending}
         onAction={() => markDeliveredMutation.mutate()}
         error={markDeliveredMutation.isError}
-        errorMessage="Ankunft am Event konnte nicht gespeichert werden."
+        errorMessage={t("equipment.eventWorkflow.deliveryError")}
       />
     );
   }

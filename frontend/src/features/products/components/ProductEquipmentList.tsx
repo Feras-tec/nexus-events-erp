@@ -1,4 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 
 import { StatusChip } from "../../../components/atoms/StatusChip";
 import type { ProductDetail } from "../types/product.types";
@@ -11,33 +12,34 @@ export function ProductEquipmentList({
   inventoryItems,
 }: ProductEquipmentListProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <section className="rounded-box border border-base-300 bg-base-100 p-6 lg:col-span-2">
       <div className="mb-5">
         <h2 className="text-lg font-semibold">
-          Zugeordnete Geräte
+          {t("products.equipment.title")}
         </h2>
 
         <p className="text-sm text-base-content/60">
-          {inventoryItems.length} Gerät(e)
+          {t("products.equipment.count", { count: inventoryItems.length })}
         </p>
       </div>
 
       {inventoryItems.length === 0 ? (
         <p className="text-base-content/60">
-          Noch keine Geräte diesem Produkt zugeordnet.
+          {t("products.equipment.empty")}
         </p>
       ) : (
         <div className="overflow-x-auto">
           <table className="table">
             <thead>
               <tr>
-                <th>Asset-Nr.</th>
-                <th>Seriennummer</th>
-                <th>Lager</th>
-                <th>Standort</th>
-                <th>Status</th>
+                <th>{t("products.equipment.assetNo")}</th>
+                <th>{t("products.equipment.serialNo")}</th>
+                <th>{t("products.equipment.warehouse")}</th>
+                <th>{t("products.equipment.location")}</th>
+                <th>{t("products.table.status")}</th>
                 <th />
               </tr>
             </thead>
@@ -72,7 +74,7 @@ export function ProductEquipmentList({
                         });
                       }}
                     >
-                      Anzeigen
+                      {t("products.table.view")}
                     </button>
                   </td>
                 </tr>

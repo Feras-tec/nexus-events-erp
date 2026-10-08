@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { StatusChip } from "../atoms/StatusChip";
 
 export type ProductTableItem = {
@@ -20,25 +21,16 @@ type ProductTableProps = {
   onView?: (productId: string) => void;
 };
 
-function trackingLabel(value: ProductTableItem["trackingType"]) {
-  return value === "SERIALIZED" ? "Einzelgerät" : "Menge";
-}
-
-function usageLabel(value: ProductTableItem["usageType"]) {
-  if (value === "RENTAL") return "Vermietung";
-  if (value === "SALE") return "Verkauf";
-
-  return "Beides";
-}
-
 export function ProductTable({
   products,
   onView,
 }: ProductTableProps) {
+  const { t } = useTranslation();
+
   if (products.length === 0) {
     return (
       <div className="rounded-box border border-base-300 bg-base-100 p-8 text-center text-base-content/60">
-        Keine Produkte gefunden.
+        {t("products.table.empty")}
       </div>
     );
   }
@@ -48,15 +40,15 @@ export function ProductTable({
       <table className="table">
         <thead>
           <tr>
-            <th>Produkt</th>
-            <th>Produktnr.</th>
-            <th>Kategorie</th>
-            <th>Tracking</th>
-            <th>Verwendung</th>
-            <th>Geräte</th>
-            <th>Status</th>
+            <th>{t("products.table.product")}</th>
+            <th>{t("products.table.productNo")}</th>
+            <th>{t("products.table.category")}</th>
+            <th>{t("products.table.tracking")}</th>
+            <th>{t("products.table.usage")}</th>
+            <th>{t("products.table.devices")}</th>
+            <th>{t("products.table.status")}</th>
             <th>
-              <span className="sr-only">Aktionen</span>
+              <span className="sr-only">{t("products.table.actions")}</span>
             </th>
           </tr>
         </thead>
@@ -80,9 +72,9 @@ export function ProductTable({
 
               <td>{product.category ?? "—"}</td>
 
-              <td>{trackingLabel(product.trackingType)}</td>
+              <td>{t(`products.tracking.${product.trackingType}`)}</td>
 
-              <td>{usageLabel(product.usageType)}</td>
+              <td>{t(`products.usage.${product.usageType}`)}</td>
 
               <td>{product.inventoryItems?.length ?? 0}</td>
 
@@ -99,7 +91,7 @@ export function ProductTable({
                     className="btn btn-ghost btn-sm"
                     onClick={() => onView(product.id)}
                   >
-                    Anzeigen
+                    {t("products.table.view")}
                   </button>
                 )}
               </td>

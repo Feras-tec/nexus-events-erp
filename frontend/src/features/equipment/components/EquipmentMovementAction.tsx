@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { motion } from "motion/react";
 
+import { useTranslation } from "react-i18next";
 import { Button } from "../../../components/atoms/Button";
 import type { EquipmentMovement } from "../types/equipment.types";
 
@@ -29,6 +30,8 @@ export function EquipmentMovementAction({
   errorMessage,
   children,
 }: EquipmentMovementActionProps) {
+  const { t } = useTranslation();
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 12 }}
@@ -36,7 +39,7 @@ export function EquipmentMovementAction({
       className="rounded-box border border-base-300 bg-base-100 p-6 lg:col-span-2"
     >
       <h2 className="text-lg font-semibold">
-        Neue Bewegung
+        {t("equipment.actions.newMovement")}
       </h2>
 
       <p className="mt-1 text-sm text-base-content/60">
@@ -64,7 +67,7 @@ export function EquipmentMovementAction({
         </div>
       ) : (
         <div className="alert alert-warning mt-5">
-          Keine verknüpfte Reservierung gefunden.
+          {t("equipment.actions.noReservation")}
         </div>
       )}
 

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -11,6 +12,7 @@ import { useCreateProduct } from "../features/products/hooks/useCreateProduct";
 
 export function ProductsPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [search, setSearch] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -54,10 +56,10 @@ export function ProductsPage() {
       transition={{ duration: 0.25 }}
     >
       <ListLayout
-        title="Produkte"
-        description="Produkttypen für Equipment und Lagerbestand verwalten."
+        title={t("products.title")}
+        description={t("products.description")}
         searchValue={search}
-        searchPlaceholder="Produkte suchen..."
+        searchPlaceholder={t("products.search")}
         onSearchChange={setSearch}
         actions={
           <Button
@@ -66,7 +68,7 @@ export function ProductsPage() {
               setShowCreateForm((current) => !current)
             }
           >
-            {showCreateForm ? "Abbrechen" : "Neues Produkt"}
+            {showCreateForm ? t("products.cancel") : t("products.new")}
           </Button>
         }
       >
@@ -91,7 +93,7 @@ export function ProductsPage() {
                   role="alert"
                   className="alert alert-error mt-4"
                 >
-                  Produkt konnte nicht erstellt werden.
+                  {t("products.createError")}
                 </div>
               )}
             </motion.div>
@@ -102,14 +104,14 @@ export function ProductsPage() {
           <div className="flex justify-center py-12">
             <span
               className="loading loading-spinner loading-lg"
-              aria-label="Produkte werden geladen"
+              aria-label={t("products.loading")}
             />
           </div>
         )}
 
         {isError && (
           <div role="alert" className="alert alert-error">
-            Produkte konnten nicht geladen werden.
+            {t("products.loadError")}
           </div>
         )}
 

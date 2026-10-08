@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type {
   EquipmentFormValues,
   ProductOption,
@@ -24,6 +25,7 @@ export function EquipmentSelectionFields({
   warehouses,
   onUpdate,
 }: EquipmentSelectionFieldsProps) {
+  const { t } = useTranslation();
   const availableProducts = products.filter(
     (product) =>
       product.isActive ||
@@ -40,7 +42,7 @@ export function EquipmentSelectionFields({
     <>
       <fieldset className="fieldset">
         <legend className="fieldset-legend">
-          Produkt
+          {t("products.table.product")}
         </legend>
 
         <select
@@ -52,7 +54,7 @@ export function EquipmentSelectionFields({
           disabled={mode === "edit" || loading}
           required
         >
-          <option value="">Produkt auswählen</option>
+          <option value="">{t("equipment.form.selectProduct")}</option>
 
           {availableProducts.map((product) => (
             <option key={product.id} value={product.id}>
@@ -66,7 +68,7 @@ export function EquipmentSelectionFields({
 
       <fieldset className="fieldset">
         <legend className="fieldset-legend">
-          Lager
+          {t("products.equipment.warehouse")}
         </legend>
 
         <select
@@ -78,7 +80,7 @@ export function EquipmentSelectionFields({
           disabled={loading}
           required
         >
-          <option value="">Lager auswählen</option>
+          <option value="">{t("equipment.form.selectWarehouse")}</option>
 
           {availableWarehouses.map((warehouse) => (
             <option key={warehouse.id} value={warehouse.id}>

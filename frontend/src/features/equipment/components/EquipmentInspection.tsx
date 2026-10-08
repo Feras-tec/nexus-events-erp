@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "../../../components/atoms/Button";
 import { useEquipmentInspection } from "../hooks/useEquipmentInspection";
@@ -20,6 +21,7 @@ export function EquipmentInspection({
   equipment,
   activeReservation,
 }: EquipmentInspectionProps) {
+  const { t } = useTranslation();
   const { completeInspectionMutation } = useEquipmentInspection({
     equipmentId,
     equipment,
@@ -34,10 +36,10 @@ export function EquipmentInspection({
       animate={{ opacity: 1, y: 0 }}
       className="rounded-box border border-base-300 bg-base-100 p-6 lg:col-span-2"
     >
-      <h2 className="text-lg font-semibold">Prüfung abschließen</h2>
+      <h2 className="text-lg font-semibold">{t("equipment.inspection.title")}</h2>
 
       <p className="mt-1 text-sm text-base-content/60">
-        Ergebnis der Geräteprüfung auswählen.
+        {t("equipment.inspection.description")}
       </p>
 
       <div className="mt-5 flex flex-wrap gap-3">
@@ -46,7 +48,7 @@ export function EquipmentInspection({
           disabled={isPending}
           onClick={() => completeInspectionMutation.mutate("AVAILABLE")}
         >
-          Einsatzbereit
+          {t("equipment.inspection.available")}
         </Button>
 
         <Button
@@ -54,7 +56,7 @@ export function EquipmentInspection({
           disabled={isPending}
           onClick={() => completeInspectionMutation.mutate("DAMAGED")}
         >
-          Beschädigt
+          {t("equipment.inspection.damaged")}
         </Button>
 
         <Button
@@ -62,13 +64,13 @@ export function EquipmentInspection({
           disabled={isPending}
           onClick={() => completeInspectionMutation.mutate("MAINTENANCE")}
         >
-          Wartung erforderlich
+          {t("equipment.inspection.maintenance")}
         </Button>
       </div>
 
       {completeInspectionMutation.isError && (
         <div className="alert alert-error mt-4">
-          Prüfergebnis konnte nicht gespeichert werden.
+          {t("equipment.inspection.saveError")}
         </div>
       )}
     </motion.section>
