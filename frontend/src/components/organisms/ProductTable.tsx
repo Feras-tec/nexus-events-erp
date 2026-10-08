@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { StatusChip } from "../atoms/StatusChip";
+import { ProductMobileCards } from "../../features/products/components/ProductMobileCards";
 
 export type ProductTableItem = {
   id: string;
@@ -36,7 +37,9 @@ export function ProductTable({
   }
 
   return (
-    <div className="overflow-x-auto rounded-box border border-base-300 bg-base-100">
+    <>
+      <ProductMobileCards products={products} onView={onView} />
+      <div className="hidden overflow-x-auto rounded-box border border-base-300 bg-base-100 md:block">
       <table className="table">
         <thead>
           <tr>
@@ -99,6 +102,7 @@ export function ProductTable({
           ))}
         </tbody>
       </table>
-    </div>
+      </div>
+    </>
   );
 }

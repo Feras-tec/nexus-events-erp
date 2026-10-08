@@ -9,12 +9,22 @@ import { ProductTable } from "../components/organisms/ProductTable";
 import { ListLayout } from "../components/templates/ListLayout";
 import { useProducts } from "../features/products/hooks/useProducts";
 import { useCreateProduct } from "../features/products/hooks/useCreateProduct";
+import { ProductStats } from "../features/products/components/ProductStats";
+import {
+  ProductFilters,
+  type ProductStatusFilter,
+  type ProductTrackingFilter,
+  type ProductUsageFilter,
+} from "../features/products/components/ProductFilters";
 
 export function ProductsPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<ProductStatusFilter>("ALL");
+  const [trackingFilter, setTrackingFilter] = useState<ProductTrackingFilter>("ALL");
+  const [usageFilter, setUsageFilter] = useState<ProductUsageFilter>("ALL");
   const [showCreateForm, setShowCreateForm] = useState(false);
 
   const {
@@ -30,6 +40,19 @@ export function ProductsPage() {
   const normalizedSearch = search.trim().toLowerCase();
 
   const filteredProducts = products.filter((product) => {
+    if (
+      statusFilter === "ACTIVE" && !product.isActive ||
+      statusFilter === "INACTIVE" && product.isActive
+    ) return false;
+
+    if (trackingFilter !== "ALL" && product.trackingType !== trackingFilter) {
+      return false;
+    }
+
+    if (usageFilter !== "ALL" && product.usageType !== usageFilter) {
+      return false;
+    }
+
     if (!normalizedSearch) return true;
 
     const searchableText = [
@@ -72,7 +95,29 @@ export function ProductsPage() {
           </Button>
         }
       >
-        <AnimatePresence>
+        {!isLoading && !isError && (
+        <div className="mb-6">
+          <ProductStats products={products} />
+        </div>
+      )}
+      <div className="mb-6">
+        <ProductFilters
+          status={statusFilter}
+          tracking={trackingFilter}
+          usage={usageFilter}
+          onStatusChange={setStatusFilter}
+          onTrackingChange={setTrackingFilter}
+          onUsageChange={setUsageFilter}
+          onReset={() => {
+            setSearch("");
+            setStatusFilter("ALL");
+            setTrackingFilter("ALL");
+            setUsageFilter("ALL");
+          }}
+        />
+      </div>
+
+      <AnimatePresence>
           {showCreateForm && (
             <motion.div
               initial={{ opacity: 0, y: -12 }}
