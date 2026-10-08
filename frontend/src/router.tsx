@@ -1,3 +1,5 @@
+import { lazy, Suspense } from "react";
+
 import {
   createRootRoute,
   createRoute,
@@ -7,29 +9,33 @@ import {
 } from "@tanstack/react-router";
 
 import { ProtectedDashboardLayout } from "./components/templates/ProtectedDashboardLayout";
-import { DashboardPage } from "./pages/DashboardPage";
-import { NotFoundPage } from "./pages/NotFoundPage";
-import { EventsPage } from "./pages/EventsPage";
-import { EventDetailPage } from "./pages/EventDetailPage";
-import { EmployeesPage } from "./pages/EmployeesPage";
-import { EmployeeDetailPage } from "./pages/EmployeeDetailPage";
-import { EquipmentPage } from "./pages/EquipmentPage";
-import { EquipmentDetailPage } from "./pages/EquipmentDetailPage";
-import { ProductsPage } from "./pages/ProductsPage";
-import { ProductDetailPage } from "./pages/ProductDetailPage";
-import { CustomersPage } from "./pages/CustomersPage";
-import { CustomerDetailPage } from "./pages/CustomerDetailPage";
-import { SignInPage } from "./pages/SignInPage";
-import { ReservationsPage } from "./pages/ReservationsPage";
-import { ReservationDetailPage } from "./pages/ReservationDetailPage";
-import { QuotesPage } from "./pages/QuotesPage";
-import { QuoteDetailPage } from "./pages/QuoteDetailPage";
-import { InvoicesPage } from "./pages/InvoicesPage";
-import { InvoiceDetailPage } from "./pages/InvoiceDetailPage";
+const DashboardPage = lazy(() => import("./pages/DashboardPage").then((module) => ({ default: module.DashboardPage })));
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage").then((module) => ({ default: module.NotFoundPage })));
+const EventsPage = lazy(() => import("./pages/EventsPage").then((module) => ({ default: module.EventsPage })));
+const EventDetailPage = lazy(() => import("./pages/EventDetailPage").then((module) => ({ default: module.EventDetailPage })));
+const EmployeesPage = lazy(() => import("./pages/EmployeesPage").then((module) => ({ default: module.EmployeesPage })));
+const EmployeeDetailPage = lazy(() => import("./pages/EmployeeDetailPage").then((module) => ({ default: module.EmployeeDetailPage })));
+const EquipmentPage = lazy(() => import("./pages/EquipmentPage").then((module) => ({ default: module.EquipmentPage })));
+const EquipmentDetailPage = lazy(() => import("./pages/EquipmentDetailPage").then((module) => ({ default: module.EquipmentDetailPage })));
+const ProductsPage = lazy(() => import("./pages/ProductsPage").then((module) => ({ default: module.ProductsPage })));
+const ProductDetailPage = lazy(() => import("./pages/ProductDetailPage").then((module) => ({ default: module.ProductDetailPage })));
+const CustomersPage = lazy(() => import("./pages/CustomersPage").then((module) => ({ default: module.CustomersPage })));
+const CustomerDetailPage = lazy(() => import("./pages/CustomerDetailPage").then((module) => ({ default: module.CustomerDetailPage })));
+const SignInPage = lazy(() => import("./pages/SignInPage").then((module) => ({ default: module.SignInPage })));
+const ReservationsPage = lazy(() => import("./pages/ReservationsPage").then((module) => ({ default: module.ReservationsPage })));
+const ReservationDetailPage = lazy(() => import("./pages/ReservationDetailPage").then((module) => ({ default: module.ReservationDetailPage })));
+const QuotesPage = lazy(() => import("./pages/QuotesPage").then((module) => ({ default: module.QuotesPage })));
+const QuoteDetailPage = lazy(() => import("./pages/QuoteDetailPage").then((module) => ({ default: module.QuoteDetailPage })));
+const InvoicesPage = lazy(() => import("./pages/InvoicesPage").then((module) => ({ default: module.InvoicesPage })));
+const InvoiceDetailPage = lazy(() => import("./pages/InvoiceDetailPage").then((module) => ({ default: module.InvoiceDetailPage })));
 
 const rootRoute = createRootRoute({
   component: () => <Outlet />,
-  notFoundComponent: NotFoundPage,
+  notFoundComponent: () => (
+    <Suspense fallback={null}>
+      <NotFoundPage />
+    </Suspense>
+  ),
 });
 
 const indexRoute = createRoute({
@@ -41,7 +47,11 @@ const indexRoute = createRoute({
 const signInRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/sign-in",
-  component: SignInPage,
+  component: () => (
+    <Suspense fallback={null}>
+      <SignInPage />
+    </Suspense>
+  ),
 });
 
 const appRoute = createRoute({
@@ -49,7 +59,19 @@ const appRoute = createRoute({
   id: "app",
   component: () => (
     <ProtectedDashboardLayout>
-      <Outlet />
+      <Suspense
+        fallback={
+          <div
+            className="flex min-h-64 items-center justify-center"
+            role="status"
+            aria-label="Loading page"
+          >
+            <span className="loading loading-spinner loading-lg text-primary" />
+          </div>
+        }
+      >
+        <Outlet />
+      </Suspense>
     </ProtectedDashboardLayout>
   ),
 });

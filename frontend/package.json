@@ -16,6 +16,7 @@
     "@tanstack/react-router": "^1.170.41",
     "daisyui": "^5.7.47",
     "i18next": "^26.4.2",
+    "lucide-react": "^1.53.0",
     "motion": "^14.0.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
