@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { StatusChip } from "../atoms/StatusChip";
 
 export type ReservationItem = {
@@ -40,8 +41,8 @@ type ReservationTableProps = {
   onView?: (reservationId: string) => void;
 };
 
-function formatDateTime(value: string) {
-  return new Intl.DateTimeFormat("de-DE", {
+function formatDateTime(value: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -50,34 +51,24 @@ function formatDateTime(value: string) {
   }).format(new Date(value));
 }
 
-function getStatusLabel(status: string) {
-  switch (status) {
-    case "PENDING":
-      return "Ausstehend";
-
-    case "CONFIRMED":
-      return "Bestätigt";
-
-    case "CANCELLED":
-      return "Storniert";
-
-    case "COMPLETED":
-      return "Abgeschlossen";
-
-    default:
-      return status;
-  }
-}
-
 export function ReservationTable({
   reservations,
   onView,
 }: ReservationTableProps) {
+  const { t, i18n } = useTranslation();
+
+  const locale =
+    i18n.resolvedLanguage === "ar"
+      ? "ar"
+      : i18n.resolvedLanguage === "en"
+        ? "en-GB"
+        : "de-DE";
+
   if (reservations.length === 0) {
     return (
       <div className="rounded-box border border-base-300 bg-base-100 p-8 text-center">
         <p className="text-base-content/60">
-          Keine Reservierungen gefunden.
+          {t("reservations.table.empty")}
         </p>
       </div>
     );
@@ -88,13 +79,13 @@ export function ReservationTable({
       <table className="table">
         <thead>
           <tr>
-            <th>Event</th>
-            <th>Gerät</th>
-            <th>Zeitraum</th>
-            <th>Lager</th>
-            <th>Status</th>
+            <th>{t("reservations.table.event")}</th>
+            <th>{t("reservations.table.equipment")}</th>
+            <th>{t("reservations.table.period")}</th>
+            <th>{t("reservations.table.warehouse")}</th>
+            <th>{t("reservations.table.status")}</th>
             <th>
-              <span className="sr-only">Aktionen</span>
+              <span className="sr-only">{t("reservations.table.actions")}</span>
             </th>
           </tr>
         </thead>
@@ -126,23 +117,17 @@ export function ReservationTable({
               </td>
 
               <td>
-                <div>{formatDateTime(reservation.startDate)}</div>
+                <div>{formatDateTime(reservation.startDate, locale)}</div>
 
                 <div className="text-xs text-base-content/60">
-                  bis {formatDateTime(reservation.endDate)}
+                  {t("reservations.table.until")} {formatDateTime(reservation.endDate, locale)}
                 </div>
               </td>
 
               <td>{reservation.inventoryItem.warehouse.name}</td>
 
               <td>
-                <div className="flex flex-col items-start gap-1">
-                  <StatusChip status={reservation.status} />
-
-                  <span className="text-xs text-base-content/60">
-                    {getStatusLabel(reservation.status)}
-                  </span>
-                </div>
+                <StatusChip status={reservation.status} />
               </td>
 
               <td className="text-right">
@@ -152,7 +137,7 @@ export function ReservationTable({
                     className="btn btn-ghost btn-sm"
                     onClick={() => onView(reservation.id)}
                   >
-                    Anzeigen
+                    {t("reservations.table.view")}
                   </button>
                 )}
               </td>

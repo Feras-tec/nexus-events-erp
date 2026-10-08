@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -17,6 +18,7 @@ import { useReactivateReservation } from "../features/reservations/hooks/useReac
 
 export function ReservationDetailPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [isEditing, setIsEditing] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
@@ -67,7 +69,7 @@ export function ReservationDetailPage() {
       <div className="flex justify-center py-16">
         <span
           className="loading loading-spinner loading-lg"
-          aria-label="Reservierung wird geladen"
+          aria-label={t("reservations.detail.loading")}
         />
       </div>
     );
@@ -76,7 +78,7 @@ export function ReservationDetailPage() {
   if (isError || !reservation) {
     return (
       <div role="alert" className="alert alert-error">
-        Reservierung konnte nicht geladen werden.
+        {t("reservations.detail.loadError")}
       </div>
     );
   }
@@ -98,7 +100,7 @@ export function ReservationDetailPage() {
         transition={{ duration: 0.25 }}
       >
         <DetailLayout
-          title="Reservierung"
+          title={t("reservations.detail.title")}
           description={`${reservation.event.eventNo} · ${reservation.inventoryItem.assetNo}`}
           actions={
             <>
@@ -111,7 +113,7 @@ export function ReservationDetailPage() {
                   })
                 }
               >
-                Zurück
+                {t("reservations.detail.back")}
               </Button>
 
               {reservation.status !== "CANCELLED" && (
@@ -123,7 +125,7 @@ export function ReservationDetailPage() {
                       setIsEditing((current) => !current);
                     }}
                   >
-                    {isEditing ? "Abbrechen" : "Bearbeiten"}
+                    {isEditing ? t("reservations.detail.cancelEdit") : t("reservations.detail.edit")}
                   </Button>
 
                   <Button
@@ -131,7 +133,7 @@ export function ReservationDetailPage() {
                     variant="error"
                     onClick={() => setShowCancelDialog(true)}
                   >
-                    Stornieren
+                    {t("reservations.detail.cancelReservation")}
                   </Button>
                 </>
               )}
@@ -145,7 +147,7 @@ export function ReservationDetailPage() {
                   }}
                   loading={reactivateReservationMutation.isPending}
                 >
-                  Reaktivieren
+                  {t("reservations.detail.reactivate")}
                 </Button>
               )}
             </>
@@ -185,7 +187,7 @@ export function ReservationDetailPage() {
 
           {cancelReservationMutation.isError && (
             <div role="alert" className="alert alert-error mt-6">
-              Reservierung konnte nicht storniert werden.
+              {t("reservations.detail.cancelError")}
             </div>
           )}
 
@@ -199,10 +201,10 @@ export function ReservationDetailPage() {
 
       <ConfirmDeleteDialog
         open={showCancelDialog}
-        title="Reservierung stornieren?"
-        message="Möchten Sie diese Reservierung wirklich stornieren? Das Gerät wird danach für diesen Zeitraum wieder verfügbar."
-        confirmLabel="Stornieren"
-        cancelLabel="Abbrechen"
+        title={t("reservations.detail.confirmTitle")}
+        message={t("reservations.detail.confirmMessage")}
+        confirmLabel={t("reservations.detail.cancelReservation")}
+        cancelLabel={t("reservations.detail.cancelEdit")}
         loading={cancelReservationMutation.isPending}
         onConfirm={() => cancelReservationMutation.mutate()}
         onCancel={() => setShowCancelDialog(false)}

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 
 import { SearchBox } from "../molecules/SearchBox";
 
@@ -17,11 +18,14 @@ export function ListLayout({
   title,
   description,
   searchValue,
-  searchPlaceholder = "Suchen...",
+  searchPlaceholder,
   onSearchChange,
   actions,
   children,
 }: ListLayoutProps) {
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.resolvedLanguage?.startsWith("ar") ?? false;
+
   return (
     <section className="space-y-6">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -36,9 +40,10 @@ export function ListLayout({
 
           <Link
             to="/dashboard"
-            className="btn btn-ghost btn-sm mt-3 -ml-3"
+            className="btn btn-ghost btn-sm mt-3 -ml-3 gap-2"
           >
-            ← Zum Dashboard
+            <span aria-hidden="true">{isRTL ? "→" : "←"}</span>
+            <span>{t("common.backToDashboard")}</span>
           </Link>
         </div>
 
@@ -53,7 +58,7 @@ export function ListLayout({
         <SearchBox
           value={searchValue}
           onChange={onSearchChange}
-          placeholder={searchPlaceholder}
+          placeholder={searchPlaceholder ?? t("common.search")}
         />
       </div>
 

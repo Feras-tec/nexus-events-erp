@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
 
@@ -13,6 +14,7 @@ import { useCreateReservation } from "../features/reservations/hooks/useCreateRe
 
 export function ReservationsPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -68,10 +70,10 @@ export function ReservationsPage() {
 
   return (
     <ListLayout
-      title="Reservierungen"
-      description="Geräte für Events reservieren und Verfügbarkeiten verwalten."
+      title={t("reservations.title")}
+      description={t("reservations.description")}
       searchValue={search}
-      searchPlaceholder="Reservierungen suchen..."
+      searchPlaceholder={t("reservations.search")}
       onSearchChange={setSearch}
       actions={
         <Button
@@ -80,7 +82,7 @@ export function ReservationsPage() {
             setShowForm((current) => !current);
           }}
         >
-          {showForm ? "Abbrechen" : "Neue Reservierung"}
+          {showForm ? t("reservations.cancel") : t("reservations.new")}
         </Button>
       }
     >
@@ -116,14 +118,14 @@ export function ReservationsPage() {
         <div className="flex justify-center py-12">
           <span
             className="loading loading-spinner loading-lg"
-            aria-label="Reservierungen werden geladen"
+            aria-label={t("reservations.loading")}
           />
         </div>
       )}
 
       {isError && (
         <div role="alert" className="alert alert-error">
-          Reservierungen konnten nicht geladen werden.
+          {t("reservations.loadError")}
         </div>
       )}
 

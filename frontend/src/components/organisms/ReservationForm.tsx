@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { EventItem } from "./EventTable";
 
 export type ReservationFormData = {
@@ -55,6 +56,8 @@ export function ReservationForm({
   editMode = false,
   onSubmit,
 }: ReservationFormProps) {
+  const { t } = useTranslation();
+
   const [formData, setFormData] = useState<ReservationFormData>({
     eventId: initialValues?.eventId ?? "",
     inventoryItemId: initialValues?.inventoryItemId ?? "",
@@ -108,7 +111,7 @@ export function ReservationForm({
     >
       <div className="grid gap-4 md:grid-cols-2">
         <label className="form-control md:col-span-2">
-          <span className="label-text mb-2 font-medium">Event</span>
+          <span className="label-text mb-2 font-medium">{t("reservations.form.event")}</span>
 
           <select
             className="select select-bordered w-full"
@@ -117,7 +120,7 @@ export function ReservationForm({
             disabled={loading || editMode}
             required
           >
-            <option value="">Event auswählen</option>
+            <option value="">{t("reservations.form.selectEvent")}</option>
 
             {events.map((event) => (
               <option key={event.id} value={event.id}>
@@ -128,7 +131,7 @@ export function ReservationForm({
         </label>
 
         <label className="form-control md:col-span-2">
-          <span className="label-text mb-2 font-medium">Gerät</span>
+          <span className="label-text mb-2 font-medium">{t("reservations.form.equipment")}</span>
 
           <select
             className="select select-bordered w-full"
@@ -142,7 +145,7 @@ export function ReservationForm({
             disabled={loading || editMode}
             required
           >
-            <option value="">Gerät auswählen</option>
+            <option value="">{t("reservations.form.selectEquipment")}</option>
 
             {selectableEquipment.map((item) => (
               <option key={item.id} value={item.id}>
@@ -155,12 +158,12 @@ export function ReservationForm({
           </select>
 
           <span className="mt-1 text-xs text-base-content/60">
-            Verlorene oder ausgemusterte Geräte werden nicht angezeigt.
+            {t("reservations.form.equipmentHint")}
           </span>
         </label>
 
         <label className="form-control">
-          <span className="label-text mb-2 font-medium">Von</span>
+          <span className="label-text mb-2 font-medium">{t("reservations.form.from")}</span>
 
           <input
             type="datetime-local"
@@ -178,7 +181,7 @@ export function ReservationForm({
         </label>
 
         <label className="form-control">
-          <span className="label-text mb-2 font-medium">Bis</span>
+          <span className="label-text mb-2 font-medium">{t("reservations.form.to")}</span>
 
           <input
             type="datetime-local"
@@ -197,7 +200,7 @@ export function ReservationForm({
         </label>
 
         <label className="form-control md:col-span-2">
-          <span className="label-text mb-2 font-medium">Status</span>
+          <span className="label-text mb-2 font-medium">{t("reservations.form.status")}</span>
 
           <select
             className="select select-bordered w-full"
@@ -210,20 +213,20 @@ export function ReservationForm({
             }
             disabled={loading}
           >
-            <option value="PENDING">Ausstehend</option>
-            <option value="CONFIRMED">Bestätigt</option>
+            <option value="PENDING">{t("status.PENDING")}</option>
+            <option value="CONFIRMED">{t("status.CONFIRMED")}</option>
 
             {editMode && (
               <>
-                <option value="COMPLETED">Abgeschlossen</option>
-                <option value="CANCELLED">Storniert</option>
+                <option value="COMPLETED">{t("status.COMPLETED")}</option>
+                <option value="CANCELLED">{t("status.CANCELLED")}</option>
               </>
             )}
           </select>
         </label>
 
         <label className="form-control md:col-span-2">
-          <span className="label-text mb-2 font-medium">Notizen</span>
+          <span className="label-text mb-2 font-medium">{t("reservations.form.notes")}</span>
 
           <textarea
             className="textarea textarea-bordered min-h-28 w-full"
@@ -236,7 +239,7 @@ export function ReservationForm({
               }))
             }
             disabled={loading}
-            placeholder="Optionale Notizen zur Reservierung"
+            placeholder={t("reservations.form.notesPlaceholder")}
           />
         </label>
       </div>
@@ -249,7 +252,7 @@ export function ReservationForm({
         >
           {loading && <span className="loading loading-spinner loading-sm" />}
 
-          {editMode ? "Änderungen speichern" : "Reservierung erstellen"}
+          {editMode ? t("reservations.form.save") : t("reservations.form.create")}
         </button>
       </div>
     </form>

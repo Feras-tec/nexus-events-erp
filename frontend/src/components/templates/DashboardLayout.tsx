@@ -108,7 +108,7 @@ export function DashboardLayout({
 
             <div className="min-w-0">
               <p className="truncate text-sm text-base-content/60">
-                {t("nav.managementSystem")}
+                {t("app.managementSystem")}
               </p>
             </div>
           </div>
