@@ -10,6 +10,11 @@ import {
 import { EmployeeTable } from "../components/organisms/EmployeeTable";
 import { ListLayout } from "../components/templates/ListLayout";
 import { useEmployees } from "../features/employees/hooks/useEmployees";
+import { EmployeeStats } from "../features/employees/components/EmployeeStats";
+import {
+  EmployeeFilters,
+  type EmployeeStatusFilter,
+} from "../features/employees/components/EmployeeFilters";
 import { useEmployeeFormOptions } from "../features/employees/hooks/useEmployeeFormOptions";
 import { useCreateEmployee } from "../features/employees/hooks/useCreateEmployee";
 
@@ -18,6 +23,10 @@ export function EmployeesPage() {
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] =
+    useState<EmployeeStatusFilter>("ALL");
+  const [branchFilter, setBranchFilter] = useState("ALL");
+  const [departmentFilter, setDepartmentFilter] = useState("ALL");
   const [showCreateForm, setShowCreateForm] = useState(false);
 
   const {
@@ -39,9 +48,44 @@ export function EmployeesPage() {
     onSuccess: () => setShowCreateForm(false),
   });
 
+  const availableBranches = Array.from(
+    new Map(
+      employees.map((employee) => [
+        employee.branch.id,
+        employee.branch,
+      ])
+    ).values()
+  ).sort((a, b) => a.name.localeCompare(b.name));
+
+  const availableDepartments = Array.from(
+    new Map(
+      employees
+        .filter((employee) => employee.department)
+        .map((employee) => [
+          employee.department!.id,
+          employee.department!,
+        ])
+    ).values()
+  ).sort((a, b) => a.name.localeCompare(b.name));
+
   const normalizedSearch = search.trim().toLowerCase();
 
   const filteredEmployees = employees.filter((employee) => {
+    if (statusFilter !== "ALL" && employee.status !== statusFilter) {
+      return false;
+    }
+
+    if (branchFilter !== "ALL" && employee.branch.id !== branchFilter) {
+      return false;
+    }
+
+    if (
+      departmentFilter !== "ALL" &&
+      employee.department?.id !== departmentFilter
+    ) {
+      return false;
+    }
+
     if (!normalizedSearch) return true;
 
     const searchableText = [
@@ -149,6 +193,31 @@ export function EmployeesPage() {
         {isError && (
           <div role="alert" className="alert alert-error">
             {t("employees.loadError")}
+          </div>
+        )}
+
+        {!isLoading && !isError && (
+          <EmployeeStats employees={employees} />
+        )}
+
+        {!isLoading && !isError && (
+          <div className="mb-6">
+            <EmployeeFilters
+              status={statusFilter}
+              branchId={branchFilter}
+              departmentId={departmentFilter}
+              branches={availableBranches}
+              departments={availableDepartments}
+              onStatusChange={setStatusFilter}
+              onBranchChange={setBranchFilter}
+              onDepartmentChange={setDepartmentFilter}
+              onReset={() => {
+                setStatusFilter("ALL");
+                setBranchFilter("ALL");
+                setDepartmentFilter("ALL");
+                setSearch("");
+              }}
+            />
           </div>
         )}
 

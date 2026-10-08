@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 
 import { StatusChip } from "../atoms/StatusChip";
+import { EmployeeMobileCards } from "../../features/employees/components/EmployeeMobileCards";
 
 type Employee = {
   id: string;
@@ -43,8 +44,11 @@ export function EmployeeTable({
   }
 
   return (
-    <div className="overflow-x-auto rounded-box border border-base-300 bg-base-100">
-      <table className="table">
+    <>
+      <EmployeeMobileCards employees={employees} onView={onView} />
+
+      <div className="hidden overflow-x-auto rounded-box border border-base-300 bg-base-100 md:block">
+        <table className="table">
         <thead>
           <tr>
             <th>{t("employees.table.employee")}</th>
@@ -107,7 +111,8 @@ export function EmployeeTable({
             </tr>
           ))}
         </tbody>
-      </table>
-    </div>
+        </table>
+      </div>
+    </>
   );
 }

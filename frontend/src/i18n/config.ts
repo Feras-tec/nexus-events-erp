@@ -73,6 +73,8 @@ const resources = {
         REPAIRED: "Repariert",
         LOST: "Verloren",
         RETIRED: "Ausgemustert",
+        ON_LEAVE: "Im Urlaub",
+        SUSPENDED: "Suspendiert",
       },
       invoices: {
         form: {
@@ -364,7 +366,28 @@ const resources = {
         },
       },
       employees: {
+        filters: {
+          title: "Filter",
+          status: "Status",
+          branch: "Niederlassung",
+          department: "Abteilung",
+          allStatuses: "Alle Status",
+          allBranches: "Alle Niederlassungen",
+          allDepartments: "Alle Abteilungen",
+          reset: "Zurücksetzen",
+        },
+        statuses: {
+          ACTIVE: "Aktiv",
+          INACTIVE: "Inaktiv",
+          ON_LEAVE: "Im Urlaub",
+          SUSPENDED: "Suspendiert",
+        },
         title: "Mitarbeiter",
+        stats: {
+          total: "Alle Mitarbeiter",
+          active: "Aktive Mitarbeiter",
+          unavailable: "Nicht aktive Mitarbeiter",
+        },
         description: "Mitarbeiter und ihre Zuordnung verwalten.",
         searchPlaceholder: "Mitarbeiter suchen...",
         newEmployee: "Neuer Mitarbeiter",
@@ -928,6 +951,8 @@ const resources = {
         REPAIRED: "Repaired",
         LOST: "Lost",
         RETIRED: "Retired",
+        ON_LEAVE: "On leave",
+        SUSPENDED: "Suspended",
       },
       invoices: {
         form: {
@@ -1219,7 +1244,28 @@ const resources = {
         },
       },
       employees: {
+        filters: {
+          title: "Filters",
+          status: "Status",
+          branch: "Branch",
+          department: "Department",
+          allStatuses: "All statuses",
+          allBranches: "All branches",
+          allDepartments: "All departments",
+          reset: "Reset",
+        },
+        statuses: {
+          ACTIVE: "Active",
+          INACTIVE: "Inactive",
+          ON_LEAVE: "On leave",
+          SUSPENDED: "Suspended",
+        },
         title: "Employees",
+        stats: {
+          total: "Total Employees",
+          active: "Active Employees",
+          unavailable: "Inactive Employees",
+        },
         description: "Manage employees and their assignments.",
         searchPlaceholder: "Search employees...",
         newEmployee: "New employee",
@@ -1783,6 +1829,8 @@ const resources = {
         REPAIRED: "تم إصلاحه",
         LOST: "مفقود",
         RETIRED: "خارج الخدمة",
+        ON_LEAVE: "في إجازة",
+        SUSPENDED: "موقوف",
       },
       invoices: {
         form: {
@@ -2074,7 +2122,28 @@ const resources = {
         },
       },
       employees: {
+        filters: {
+          title: "الفلاتر",
+          status: "الحالة",
+          branch: "الفرع",
+          department: "القسم",
+          allStatuses: "جميع الحالات",
+          allBranches: "جميع الفروع",
+          allDepartments: "جميع الأقسام",
+          reset: "إعادة تعيين",
+        },
+        statuses: {
+          ACTIVE: "نشط",
+          INACTIVE: "غير نشط",
+          ON_LEAVE: "في إجازة",
+          SUSPENDED: "موقوف",
+        },
         title: "الموظفون",
+        stats: {
+          total: "إجمالي الموظفين",
+          active: "الموظفون النشطون",
+          unavailable: "الموظفون غير النشطين",
+        },
         description: "إدارة الموظفين وتعييناتهم.",
         searchPlaceholder: "البحث عن الموظفين...",
         newEmployee: "موظف جديد",

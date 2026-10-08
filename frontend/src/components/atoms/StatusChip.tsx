@@ -12,6 +12,7 @@ const statusVariants = {
   CONFIRMED: "success",
   COMPLETED: "success",
 
+  ON_LEAVE: "warning",
   PENDING: "warning",
   PICKING: "warning",
   DRAFT: "warning",
@@ -19,6 +20,7 @@ const statusVariants = {
   INACTIVE: "neutral",
   CANCELLED: "neutral",
 
+  SUSPENDED: "error",
   ERROR: "error",
   OVERDUE: "error",
 
