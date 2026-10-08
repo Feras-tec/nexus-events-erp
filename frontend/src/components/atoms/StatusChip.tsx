@@ -10,6 +10,7 @@ const statusVariants = {
   AVAILABLE: "success",
   PAID: "success",
   CONFIRMED: "success",
+  COMPLETED: "success",
 
   PENDING: "warning",
   PICKING: "warning",
@@ -31,9 +32,8 @@ export function StatusChip({ status }: StatusChipProps) {
   const normalizedStatus = status.toUpperCase();
 
   const variant =
-    statusVariants[
-      normalizedStatus as keyof typeof statusVariants
-    ] ?? "neutral";
+    statusVariants[normalizedStatus as keyof typeof statusVariants] ??
+    "neutral";
 
   return (
     <Badge variant={variant}>

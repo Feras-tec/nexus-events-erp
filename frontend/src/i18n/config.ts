@@ -757,6 +757,19 @@ const resources = {
         loadError: "Reservierungen konnten nicht geladen werden.",
       },
       events: {
+        filters: {
+          title: "Filter",
+          status: "Status",
+          allStatuses: "Alle Status",
+          period: "Zeitraum",
+          reset: "Zurücksetzen",
+          periods: {
+            ALL: "Alle Zeiträume",
+            UPCOMING: "Bevorstehend",
+            ONGOING: "Aktuell laufend",
+            PAST: "Vergangen",
+          },
+        },
         description: "Veranstaltungen und Projekte verwalten.",
         searchPlaceholder: "Veranstaltungen suchen...",
         newEvent: "Neue Veranstaltung",
@@ -1571,6 +1584,19 @@ const resources = {
         loadError: "Reservations could not be loaded.",
       },
       events: {
+        filters: {
+          title: "Filters",
+          status: "Status",
+          allStatuses: "All statuses",
+          period: "Period",
+          reset: "Reset",
+          periods: {
+            ALL: "All dates",
+            UPCOMING: "Upcoming",
+            ONGOING: "Ongoing",
+            PAST: "Past",
+          },
+        },
         description: "Manage events and projects.",
         searchPlaceholder: "Search events...",
         newEvent: "New event",
@@ -2389,6 +2415,19 @@ const resources = {
         loadError: "تعذر تحميل الحجوزات.",
       },
       events: {
+        filters: {
+          title: "الفلاتر",
+          status: "الحالة",
+          allStatuses: "جميع الحالات",
+          period: "الفترة",
+          reset: "إعادة تعيين",
+          periods: {
+            ALL: "جميع التواريخ",
+            UPCOMING: "القادمة",
+            ONGOING: "الجارية حاليًا",
+            PAST: "السابقة",
+          },
+        },
         description: "إدارة الفعاليات والمشاريع.",
         searchPlaceholder: "البحث عن الفعاليات...",
         newEvent: "فعالية جديدة",

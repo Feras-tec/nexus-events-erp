@@ -9,12 +9,22 @@ import { ListLayout } from "../components/templates/ListLayout";
 import { useEvents } from "../features/events/hooks/useEvents";
 import { useEventFormCustomers } from "../features/events/hooks/useEventFormCustomers";
 import { useCreateEvent } from "../features/events/hooks/useCreateEvent";
+import {
+  EventFilters,
+  type EventStatusFilter,
+  type EventPeriodFilter,
+} from "../features/events/components/EventFilters";
+import { EventStats } from "../features/events/components/EventStats";
 
 export function EventsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] =
+    useState<EventStatusFilter>("ALL");
+  const [periodFilter, setPeriodFilter] =
+    useState<EventPeriodFilter>("ALL");
   const [showEventForm, setShowEventForm] = useState(false);
 
   const {
@@ -34,7 +44,45 @@ export function EventsPage() {
 
   const normalizedSearch = search.trim().toLowerCase();
 
+  const now = Date.now();
+
   const filteredEvents = events.filter((event) => {
+    const status = event.status.toUpperCase();
+
+    if (statusFilter !== "ALL" && status !== statusFilter) {
+      return false;
+    }
+
+    const start = new Date(event.startDate).getTime();
+    const end = new Date(event.endDate).getTime();
+
+    if (periodFilter !== "ALL") {
+      if (!Number.isFinite(start) || !Number.isFinite(end)) {
+        return false;
+      }
+
+      if (
+        ["CANCELLED", "COMPLETED", "CLOSED"].includes(status) &&
+        (periodFilter === "UPCOMING" || periodFilter === "ONGOING")
+      ) {
+        return false;
+      }
+
+      if (periodFilter === "UPCOMING" && start <= now) {
+        return false;
+      }
+
+      if (
+        periodFilter === "ONGOING" &&
+        !(start <= now && end >= now)
+      ) {
+        return false;
+      }
+
+      if (periodFilter === "PAST" && end >= now) {
+        return false;
+      }
+    }
     if (!normalizedSearch) return true;
 
     const customerName = event.customer.companyName
@@ -79,6 +127,26 @@ export function EventsPage() {
         </Button>
       }
     >
+      {!isLoading && !isError && (
+        <div className="mb-6">
+          <EventStats events={events} />
+        </div>
+      )}
+
+      <div className="mb-6">
+        <EventFilters
+          status={statusFilter}
+          period={periodFilter}
+          onStatusChange={setStatusFilter}
+          onPeriodChange={setPeriodFilter}
+          onReset={() => {
+            setSearch("");
+            setStatusFilter("ALL");
+            setPeriodFilter("ALL");
+          }}
+        />
+      </div>
+
       {showEventForm && (
         <div className="space-y-4">
           <EventForm
