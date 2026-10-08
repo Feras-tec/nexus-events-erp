@@ -1,3 +1,5 @@
+import { formatQuoteDate } from "./quote-date";
+
 function getQuotePrintLocale(language: string) {
   if (language.startsWith("ar")) return "ar";
   if (language.startsWith("en")) return "en-GB";
@@ -16,13 +18,7 @@ export function formatQuotePrintCurrency(
 
 export function formatQuotePrintDate(
   value?: string | null,
-  language = "de",
+  _language = "de",
 ) {
-  if (!value) {
-    return "—";
-  }
-
-  return new Intl.DateTimeFormat(
-    getQuotePrintLocale(language),
-  ).format(new Date(value));
+  return formatQuoteDate(value);
 }

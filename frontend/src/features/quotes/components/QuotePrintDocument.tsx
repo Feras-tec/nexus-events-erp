@@ -16,11 +16,9 @@ export function QuotePrintDocument({
   const { t, i18n } = useTranslation();
   const language = i18n.language;
   const isArabic = language.startsWith("ar");
-  const locale = isArabic
-    ? "ar"
-    : language.startsWith("en")
-      ? "en-GB"
-      : "de-DE";
+  const locale = language.startsWith("en")
+    ? "en-GB"
+    : "de-DE";
 
   const customerName =
     quote.customer.companyName ||
@@ -89,7 +87,7 @@ export function QuotePrintDocument({
               {t("quotes.print.createdAt")}
             </p>
 
-            <p className="mt-1">
+            <p dir="ltr" className="mt-1 tabular-nums">
               {formatQuotePrintDate(quote.createdAt, language)}
             </p>
           </div>
@@ -99,7 +97,7 @@ export function QuotePrintDocument({
               {t("quotes.print.validUntil")}
             </p>
 
-            <p className="mt-1">
+            <p dir="ltr" className="mt-1 tabular-nums">
               {formatQuotePrintDate(quote.validUntil, language)}
             </p>
           </div>

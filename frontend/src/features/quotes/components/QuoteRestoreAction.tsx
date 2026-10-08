@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { ConfirmDeleteDialog } from "../../../components/molecules/ConfirmDeleteDialog";
 import { useRestoreQuote } from "../hooks/useRestoreQuote";
 
 type QuoteRestoreActionProps = {
@@ -26,65 +27,47 @@ export function QuoteRestoreAction({
       await restoreQuote(quoteId);
       setShowConfirm(false);
     } catch {
-      // Fehler wird über restoreError angezeigt.
+      // Error is displayed inside the dialog.
     }
   }
 
-  if (showConfirm) {
-    return (
-      <div className="rounded-box border border-warning/30 bg-warning/5 p-4">
-        <p className="font-semibold">
-          {t("quotes.actions.restoreQuestion", { quoteNo })}
-        </p>
-
-        <p className="mt-1 text-sm opacity-70">
-          {t("quotes.actions.restoreDescription")}
-        </p>
-
-        {restoreError && (
-          <div
-            role="alert"
-            className="alert alert-error mt-3"
-          >
-            {restoreError}
-          </div>
-        )}
-
-        <div className="mt-4 flex flex-wrap justify-end gap-2">
-          <button
-            type="button"
-            className="btn btn-ghost"
-            disabled={isRestoring}
-            onClick={() => setShowConfirm(false)}
-          >
-            {t("quotes.actions.cancelButton")}
-          </button>
-
-          <button
-            type="button"
-            className="btn btn-warning"
-            disabled={isRestoring}
-            onClick={handleRestore}
-          >
-            {isRestoring && (
-              <span className="loading loading-spinner loading-sm" />
-            )}
-
-            {t("quotes.actions.restoreQuote")}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <button
-      type="button"
-      className="btn btn-outline btn-warning btn-sm"
-      disabled={isRestoring}
-      onClick={() => setShowConfirm(true)}
-    >
-      {t("quotes.actions.restoreQuote")}
-    </button>
+    <>
+      <button
+        type="button"
+        className="btn btn-outline btn-warning btn-sm"
+        disabled={isRestoring}
+        onClick={() => setShowConfirm(true)}
+      >
+        {t("quotes.actions.restoreQuote")}
+      </button>
+
+      <ConfirmDeleteDialog
+        open={showConfirm}
+        title={
+          <span className="flex flex-col gap-1">
+            <span>
+              {t("quotes.actions.restoreQuestion", {
+                quoteNo: "",
+              }).replace(/\\s+/g, " ").trim()}
+            </span>
+            <span
+              dir="ltr"
+              className="block w-fit max-w-full whitespace-nowrap font-bold"
+            >
+              {quoteNo}
+            </span>
+          </span>
+        }
+        message={t("quotes.actions.restoreDescription")}
+        confirmLabel={t("quotes.actions.restoreQuote")}
+        cancelLabel={t("quotes.actions.cancelButton")}
+        confirmVariant="warning"
+        loading={isRestoring}
+        error={restoreError}
+        onCancel={() => setShowConfirm(false)}
+        onConfirm={handleRestore}
+      />
+    </>
   );
 }

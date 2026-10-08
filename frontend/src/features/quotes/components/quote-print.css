@@ -19,6 +19,11 @@
     display: none !important;
   }
 
+  /* The quote print portal is outside #root. */
+  #root {
+    display: none !important;
+  }
+
   /*
    * Hide the application visually during printing,
    * while keeping the printable quote visible.

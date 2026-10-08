@@ -7,6 +7,7 @@ import { motion } from "motion/react";
 import { QuoteCancelAction } from "../features/quotes/components/QuoteCancelAction";
 import { QuoteEmailAction } from "../features/quotes/components/QuoteEmailAction";
 import { QuoteForm } from "../features/quotes/components/QuoteForm";
+import { QuoteDetailMobileItems } from "../features/quotes/components/QuoteDetailMobileItems";
 import { QuotePrintAction } from "../features/quotes/components/QuotePrintAction";
 import { QuotePrintDocument } from "../features/quotes/components/QuotePrintDocument";
 import { QuoteRestoreAction } from "../features/quotes/components/QuoteRestoreAction";
@@ -22,13 +23,19 @@ function formatDate(
 ) {
   if (!value) return "—";
 
-  const locale = language.startsWith("ar")
-    ? "ar"
-    : language.startsWith("en")
-      ? "en-GB"
-      : "de-DE";
+  const date = new Date(value);
 
-  return new Intl.DateTimeFormat(locale).format(new Date(value));
+  if (Number.isNaN(date.getTime())) return "—";
+
+  const locale = language.startsWith("de")
+    ? "de-DE"
+    : "en-GB";
+
+  return new Intl.DateTimeFormat(locale, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
 }
 
 export function QuoteDetailPage() {
@@ -75,7 +82,7 @@ export function QuoteDetailPage() {
           className="btn btn-ghost"
           onClick={() => navigate({ to: "/quotes" })}
         >
-          ← {t("quotes.detail.back")}
+          {i18n.language.startsWith("ar") ? "→" : "←"} {t("quotes.detail.back")}
         </button>
 
         <div role="alert" className="alert alert-error">
@@ -116,23 +123,29 @@ export function QuoteDetailPage() {
         className="btn btn-ghost"
         onClick={() => navigate({ to: "/quotes" })}
       >
-        ← {t("quotes.detail.back")}
+        {i18n.language.startsWith("ar") ? "→" : "←"} {t("quotes.detail.back")}
       </button>
 
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-sm text-base-content/60">
-            {t("quotes.detail.quote")}
-          </p>
-          <h1 className="text-3xl font-bold">
-            {quote.quoteNo}
-          </h1>
-        </div>
+      <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0 space-y-3">
+          <div>
+            <p className="text-sm text-base-content/60">
+              {t("quotes.detail.quote")}
+            </p>
+            <h1
+              className="break-all text-2xl font-bold sm:text-3xl"
+              dir="ltr"
+            >
+              {quote.quoteNo}
+            </h1>
+          </div>
 
-        <div className="flex flex-wrap items-center gap-2">
           <span className="badge badge-lg badge-outline">
             {t(`quotes.statuses.${quote.status}`)}
           </span>
+        </div>
+
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
 
           <QuotePrintAction />
 
@@ -275,7 +288,9 @@ export function QuoteDetailPage() {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-box border border-base-300 bg-base-100">
+      <QuoteDetailMobileItems items={quote.items} />
+
+      <div className="hidden max-w-full overflow-x-auto rounded-box border border-base-300 bg-base-100 lg:block">
         <table className="table">
           <thead>
             <tr>
@@ -310,25 +325,25 @@ export function QuoteDetailPage() {
       </div>
 
       <div className="card bg-base-100 border border-base-300">
-        <div className="card-body ml-auto w-full max-w-md">
-          <div className="flex justify-between">
+        <div className="card-body ms-auto w-full max-w-md">
+          <div className="flex items-center justify-between gap-4">
             <span>{t("quotes.detail.subtotal")}</span>
             <span>{formatQuoteCurrency(quote.subtotal, i18n.language)}</span>
           </div>
 
-          <div className="flex justify-between">
+          <div className="flex items-center justify-between gap-4">
             <span>{t("quotes.detail.discount")}</span>
             <span>{quote.discount} %</span>
           </div>
 
-          <div className="flex justify-between">
+          <div className="flex items-center justify-between gap-4">
             <span>{t("quotes.detail.tax")}</span>
             <span>{quote.tax} %</span>
           </div>
 
           <div className="divider my-1" />
 
-          <div className="flex justify-between text-lg font-bold">
+          <div className="flex items-center justify-between gap-4 text-lg font-bold">
             <span>{t("quotes.detail.total")}</span>
             <span>{formatQuoteCurrency(quote.total, i18n.language)}</span>
           </div>

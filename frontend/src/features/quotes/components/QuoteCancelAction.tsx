@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { ConfirmDeleteDialog } from "../../../components/molecules/ConfirmDeleteDialog";
 import { useQuoteStatusAction } from "../hooks/useQuoteStatusAction";
 
 type QuoteCancelActionProps = {
@@ -32,65 +33,47 @@ export function QuoteCancelAction({
 
       setShowConfirm(false);
     } catch {
-      // Fehler wird über statusError angezeigt.
+      // Error is displayed inside the dialog.
     }
   }
 
-  if (showConfirm) {
-    return (
-      <div className="rounded-box border border-error/30 bg-error/5 p-4">
-        <p className="font-semibold">
-          {t("quotes.actions.cancelQuestion", { quoteNo })}
-        </p>
-
-        <p className="mt-1 text-sm opacity-70">
-          {t("quotes.actions.cancelDescription")}
-        </p>
-
-        {statusError && (
-          <div
-            role="alert"
-            className="alert alert-error mt-3"
-          >
-            {statusError}
-          </div>
-        )}
-
-        <div className="mt-4 flex flex-wrap justify-end gap-2">
-          <button
-            type="button"
-            className="btn btn-ghost"
-            disabled={isChangingStatus}
-            onClick={() => setShowConfirm(false)}
-          >
-            {t("quotes.actions.cancelButton")}
-          </button>
-
-          <button
-            type="button"
-            className="btn btn-error"
-            disabled={isChangingStatus}
-            onClick={handleCancel}
-          >
-            {isChangingStatus && (
-              <span className="loading loading-spinner loading-sm" />
-            )}
-
-            {t("quotes.actions.confirmCancel")}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <button
-      type="button"
-      className="btn btn-outline btn-error"
-      disabled={disabled || isChangingStatus}
-      onClick={() => setShowConfirm(true)}
-    >
-      {t("quotes.actions.cancelQuote")}
-    </button>
+    <>
+      <button
+        type="button"
+        className="btn btn-outline btn-error btn-sm"
+        disabled={disabled || isChangingStatus}
+        onClick={() => setShowConfirm(true)}
+      >
+        {t("quotes.actions.cancelQuote")}
+      </button>
+
+      <ConfirmDeleteDialog
+        open={showConfirm}
+        title={
+          <span className="flex flex-col gap-1">
+            <span>
+              {t("quotes.actions.cancelQuestion", {
+                quoteNo: "",
+              }).replace(/\\s+/g, " ").trim()}
+            </span>
+            <span
+              dir="ltr"
+              className="block w-fit max-w-full whitespace-nowrap font-bold"
+            >
+              {quoteNo}
+            </span>
+          </span>
+        }
+        message={t("quotes.actions.cancelDescription")}
+        confirmLabel={t("quotes.actions.confirmCancel")}
+        cancelLabel={t("quotes.actions.cancelButton")}
+        confirmVariant="error"
+        loading={isChangingStatus}
+        error={statusError}
+        onCancel={() => setShowConfirm(false)}
+        onConfirm={handleCancel}
+      />
+    </>
   );
 }

@@ -35,7 +35,7 @@ export function QuoteEmailAction({
   const formattedSentAt = sentAt
     ? new Intl.DateTimeFormat(
       i18n.language.startsWith("ar")
-        ? "ar"
+        ? "en-GB"
         : i18n.language.startsWith("en")
           ? "en-GB"
           : "de-DE",
@@ -56,10 +56,10 @@ export function QuoteEmailAction({
   };
 
   return (
-    <div className="relative">
+    <div className="contents">
       <button
         type="button"
-        className="btn btn-outline btn-sm w-40"
+        className="btn btn-outline btn-sm"
         disabled={disabled || isSending || !customerEmail}
         title={
           customerEmail
@@ -81,14 +81,14 @@ export function QuoteEmailAction({
       </button>
 
       {wasSent && sentTo && (
-        <span className="absolute right-0 top-full mt-1 whitespace-nowrap text-xs text-success">
+        <span className="order-last basis-full break-words text-xs text-success">
           {t("quotes.actions.sentTo", { email: sentTo })}
           {formattedSentAt ? ` · ${formattedSentAt}` : ""}
         </span>
       )}
 
       {sendError && (
-        <span className="absolute right-0 top-full mt-1 w-72 text-right text-xs text-error">
+        <span className="order-last basis-full break-words text-xs text-error">
           {sendError}
         </span>
       )}

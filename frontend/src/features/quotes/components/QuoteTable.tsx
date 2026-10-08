@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import type { Quote } from "../types/quote.types";
+import { formatQuoteDate } from "../utils/quote-date";
 import { QuoteMobileCards } from "./QuoteMobileCards";
 
 type QuoteTableProps = {
@@ -22,14 +23,6 @@ function formatCurrency(value: number, locale: string) {
     style: "currency",
     currency: "EUR",
   }).format(value);
-}
-
-function formatDate(value: string | null | undefined, locale: string) {
-  if (!value) return "—";
-
-  return new Intl.DateTimeFormat(locale).format(
-    new Date(value),
-  );
 }
 
 export function QuoteTable({
@@ -90,7 +83,11 @@ export function QuoteTable({
                 </span>
               </td>
 
-              <td>{formatDate(quote.validUntil, locale)}</td>
+              <td>
+                <span dir="ltr" className="inline-block whitespace-nowrap tabular-nums">
+                  {formatQuoteDate(quote.validUntil)}
+                </span>
+              </td>
 
               <td className="text-right font-medium">
                 {formatCurrency(quote.total, locale)}

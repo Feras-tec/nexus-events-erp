@@ -2,6 +2,7 @@ import { CalendarDays, Eye, UserRound, CalendarCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import type { Quote } from "../types/quote.types";
+import { formatQuoteDate } from "../utils/quote-date";
 
 type QuoteMobileCardsProps = {
   quotes: Quote[];
@@ -35,15 +36,6 @@ export function QuoteMobileCards({
       style: "currency",
       currency: "EUR",
     }).format(value);
-
-  const formatDate = (value?: string | null) => {
-    if (!value) return "—";
-
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return "—";
-
-    return new Intl.DateTimeFormat(locale).format(date);
-  };
 
   return (
     <div className="space-y-3 md:hidden">
@@ -97,7 +89,7 @@ export function QuoteMobileCards({
                 <p className="text-xs text-base-content/60">
                   {t("quotes.table.validUntil")}
                 </p>
-                <p>{formatDate(quote.validUntil)}</p>
+                <p dir="ltr" className="w-fit whitespace-nowrap tabular-nums">{formatQuoteDate(quote.validUntil)}</p>
               </div>
             </div>
           </div>
