@@ -191,6 +191,12 @@
   text-align: right;
 }
 
+@media screen {
+  #invoice-print-document {
+    display: none !important;
+  }
+}
+
 @media print {
   @page {
     size: A4 portrait;
@@ -198,48 +204,36 @@
   }
 
   html,
-  body,
-  #root {
-    width: 100%;
-    height: auto !important;
-    min-height: 0 !important;
+  body {
     margin: 0 !important;
     padding: 0 !important;
     background: white !important;
   }
 
-  body * {
-    visibility: hidden !important;
-  }
-
-  #invoice-print-document,
-  #invoice-print-document * {
-    visibility: visible !important;
+  #root {
+    display: none !important;
   }
 
   #invoice-print-document {
     display: block !important;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 260mm;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: white !important;
   }
 
   .invoice-print-sheet {
-    width: 100%;
-    height: 260mm;
-    min-height: 0;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    font-size: 12px;
-    box-shadow: none;
+    width: 100% !important;
+    min-height: 250mm !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-shadow: none !important;
   }
 
   .invoice-print-notes {
@@ -258,33 +252,5 @@
   .invoice-print-items tr {
     break-inside: avoid;
     page-break-inside: avoid;
-  }
-}
-
-@media print {
-  #root * {
-    visibility: hidden !important;
-  }
-
-  #root *:not(:has(#invoice-print-document)):not(#invoice-print-document):not(#invoice-print-document *) {
-    display: none !important;
-  }
-
-  #invoice-print-document,
-  #invoice-print-document * {
-    visibility: visible !important;
-  }
-
-  #invoice-print-document {
-    position: absolute !important;
-    inset: 0 auto auto 0 !important;
-    width: 100% !important;
-    height: auto !important;
-    overflow: visible !important;
-  }
-
-  .invoice-print-sheet {
-    height: 260mm !important;
-    min-height: 0 !important;
   }
 }

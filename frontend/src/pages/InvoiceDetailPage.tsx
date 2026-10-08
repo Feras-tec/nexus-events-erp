@@ -1,10 +1,13 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { motion } from "motion/react";
 
+import { formatInvoiceDate } from "../features/invoices/utils/invoice-date";
 import { InvoiceSummary } from "../components/molecules/InvoiceSummary";
 import { InvoiceForm } from "../components/organisms/InvoiceForm";
+import { InvoiceDetailMobileItems } from "../features/invoices/components/InvoiceDetailMobileItems";
 import { InvoicePrintAction } from "../features/invoices/components/InvoicePrintAction";
 import { InvoicePrintDocument } from "../features/invoices/components/InvoicePrintDocument";
 import { useInvoiceDetail } from "../features/invoices/hooks/useInvoiceDetail";
@@ -20,14 +23,6 @@ function formatCurrency(value: number, locale: string) {
     style: "currency",
     currency: "EUR",
   }).format(value);
-}
-
-function formatDate(value: string | null | undefined, locale: string) {
-  if (!value) return "—";
-
-  return new Intl.DateTimeFormat(locale).format(
-    new Date(value),
-  );
 }
 
 export function InvoiceDetailPage() {
@@ -145,20 +140,23 @@ export function InvoiceDetailPage() {
   }
 
   return (
-    <motion.div
+    <>
+      {createPortal(
+        <div
+          id="invoice-print-document"
+          aria-hidden="true"
+        >
+          <InvoicePrintDocument invoice={invoice} />
+        </div>,
+        document.body,
+      )}
+
+      <motion.div
       className="space-y-6"
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
     >
-      <div
-        id="invoice-print-document"
-        className="hidden print:block"
-        aria-hidden="true"
-      >
-        <InvoicePrintDocument invoice={invoice} />
-      </div>
-
       <button
         type="button"
         className="btn btn-ghost"
@@ -294,7 +292,7 @@ export function InvoiceDetailPage() {
               {t("invoices.table.dueDate")}
             </span>
 
-            <strong>{formatDate(invoice.dueDate, locale)}</strong>
+            <strong dir="ltr" className="block w-fit">{formatInvoiceDate(invoice.dueDate)}</strong>
           </div>
         </div>
 
@@ -316,7 +314,7 @@ export function InvoiceDetailPage() {
               {t("invoices.table.issueDate")}
             </span>
 
-            <strong>{formatDate(invoice.issueDate, locale)}</strong>
+            <strong dir="ltr" className="block w-fit">{formatInvoiceDate(invoice.issueDate)}</strong>
           </div>
         </div>
 
@@ -333,7 +331,9 @@ export function InvoiceDetailPage() {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-box border border-base-300 bg-base-100">
+      <InvoiceDetailMobileItems items={invoice.items} />
+
+      <div className="hidden overflow-x-auto rounded-box border border-base-300 bg-base-100 lg:block">
         <table className="table">
           <thead>
             <tr>
@@ -393,5 +393,6 @@ export function InvoiceDetailPage() {
         </div>
       )}
     </motion.div>
+    </>
   );
 }

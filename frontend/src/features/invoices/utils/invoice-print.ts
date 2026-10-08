@@ -1,3 +1,5 @@
+import { formatInvoiceDate } from "./invoice-date";
+
 export function formatInvoicePrintCurrency(value: number, locale = "de-DE") {
   return new Intl.NumberFormat(locale, {
     style: "currency",
@@ -7,13 +9,7 @@ export function formatInvoicePrintCurrency(value: number, locale = "de-DE") {
 
 export function formatInvoicePrintDate(
   value?: string | null,
-  locale = "de-DE",
+  _locale = "de-DE",
 ) {
-  if (!value) {
-    return "—";
-  }
-
-  return new Intl.DateTimeFormat(locale).format(
-    new Date(value),
-  );
+  return formatInvoiceDate(value);
 }

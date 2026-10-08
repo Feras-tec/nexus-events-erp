@@ -71,10 +71,16 @@ export function InvoicePrintDocument({
 
           <span>{t("invoices.print.createdAt")}</span>
           <strong>
-            {new Intl.DateTimeFormat(locale, {
-              dateStyle: "short",
-              timeStyle: "short",
-            }).format(new Date(invoice.createdAt))}
+            <span dir="ltr">
+              {new Intl.DateTimeFormat("en-GB", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hourCycle: "h23",
+              }).format(new Date(invoice.createdAt))}
+            </span>
           </strong>
         </div>
       </section>
