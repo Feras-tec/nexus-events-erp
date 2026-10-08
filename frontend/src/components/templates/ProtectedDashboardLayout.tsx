@@ -8,12 +8,10 @@ type Props = {
   children: ReactNode;
 };
 
-type AppUser = {
-  id: string;
-  clerkUserId: string;
-  role: string;
-  isActive: boolean;
-};
+import {
+  AppUserProvider,
+  type AppUser,
+} from "../../features/users/context/AppUserContext";
 
 export function ProtectedDashboardLayout({ children }: Props) {
   const { isLoaded, isSignedIn, userId, getToken } = useAuth();
@@ -93,5 +91,9 @@ export function ProtectedDashboardLayout({ children }: Props) {
     );
   }
 
-  return <DashboardLayout>{children}</DashboardLayout>;
+  return (
+    <AppUserProvider user={account.user}>
+      <DashboardLayout>{children}</DashboardLayout>
+    </AppUserProvider>
+  );
 }

@@ -26,6 +26,7 @@ const resources = {
       },
       navigation: {
         dashboard: "Dashboard",
+        users: "Benutzerverwaltung",
         events: "Veranstaltungen",
         customers: "Kunden",
         employees: "Mitarbeiter",
@@ -951,6 +952,7 @@ const resources = {
       },
       navigation: {
         dashboard: "Dashboard",
+        users: "User Management",
         events: "Events",
         customers: "Customers",
         employees: "Employees",
@@ -1876,6 +1878,7 @@ const resources = {
       },
       navigation: {
         dashboard: "لوحة التحكم",
+        users: "إدارة المستخدمين",
         events: "الفعاليات",
         customers: "العملاء",
         employees: "الموظفون",

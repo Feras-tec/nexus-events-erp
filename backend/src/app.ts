@@ -18,6 +18,7 @@ import quoteRoutes from "./routes/quote.routes.js";
 import invoiceRoutes from "./routes/invoice.routes.js";
 import { clerkMiddleware } from "@clerk/express";
 import authRoutes from "./routes/auth.routes.js";
+import appUserRoutes from "./routes/app-user.routes.js";
 
 const app = express();
 
@@ -57,6 +58,7 @@ app.use(
 
 // API-Routen für Authentifizierung
 app.use("/api/auth", authRoutes);
+app.use("/api/users", appUserRoutes);
 
 // API-Routen für Niederlassungen
 app.use("/api/branches", branchRoutes);

@@ -1,8 +1,10 @@
 import { useEffect } from "react";
+import { useAppUser } from "../../features/users/context/AppUserContext";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import {
+  ShieldCheck,
   LayoutDashboard,
   CalendarDays,
   UsersRound,
@@ -25,6 +27,7 @@ type NavigationItem = {
 
 const navigationItems: NavigationItem[] = [
   { key: "dashboard", icon: LayoutDashboard, to: "/dashboard" },
+  { key: "users", icon: ShieldCheck, to: "/users" },
   { key: "events", icon: CalendarDays, to: "/events" },
   { key: "customers", icon: UsersRound, to: "/customers" },
   { key: "employees", icon: UserRound, to: "/employees" },
@@ -40,6 +43,7 @@ type NavigationContentProps = {
 };
 
 function NavigationContent({ onNavigate }: NavigationContentProps) {
+  const currentUser = useAppUser();
   const { t } = useTranslation();
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
@@ -68,7 +72,7 @@ function NavigationContent({ onNavigate }: NavigationContentProps) {
         className="flex-1 overflow-y-auto px-3 py-5"
       >
         <ul className="flex flex-col gap-1.5">
-          {navigationItems.map((item, index) => {
+          {navigationItems.filter((item) => item.key !== "users" || currentUser?.role === "OWNER").map((item, index) => {
             const Icon = item.icon;
             const active =
               pathname === item.to ||
@@ -96,7 +100,7 @@ function NavigationContent({ onNavigate }: NavigationContentProps) {
                     className={[
                       "group relative flex min-h-11 items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5",
                       "text-sm font-medium transition-colors duration-200",
-                      "focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary",
+                      "focus-visible:outline-2 focus-visible:outline-primary",
                       active
                         ? "bg-primary/10 text-primary"
                         : "text-base-content/70 hover:bg-base-200 hover:text-base-content",
@@ -105,7 +109,7 @@ function NavigationContent({ onNavigate }: NavigationContentProps) {
                     {active && (
                       <motion.span
                         layoutId="nexus-active-navigation"
-                        className="absolute inset-y-2 start-0 w-1 rounded-full bg-primary"
+                        className="absolute inset-y-2 inset-s-0 w-1 rounded-full bg-primary"
                         transition={{
                           type: "spring",
                           stiffness: 350,
@@ -219,7 +223,7 @@ export function MobileNavigation({
           >
             <button
               type="button"
-              className="btn btn-ghost btn-square btn-sm absolute end-3 top-3 z-20"
+              className="btn btn-ghost btn-square btn-sm absolute inset-e-3 top-3 z-20"
               aria-label={t("common.closeNavigation")}
               onClick={onClose}
             >

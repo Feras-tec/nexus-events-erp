@@ -9,6 +9,7 @@ import {
   ChevronDown,
   Check,
   type LucideIcon,
+  ShieldCheck,
   LayoutDashboard,
   CalendarDays,
   UsersRound,
@@ -47,6 +48,7 @@ const pageItems: Array<{
   icon: LucideIcon;
 }> = [
   { key: "dashboard", path: "/dashboard", icon: LayoutDashboard },
+  { key: "users", path: "/users", icon: ShieldCheck },
   { key: "events", path: "/events", icon: CalendarDays },
   { key: "customers", path: "/customers", icon: UsersRound },
   { key: "employees", path: "/employees", icon: UserRound },

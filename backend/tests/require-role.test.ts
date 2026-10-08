@@ -26,6 +26,49 @@ jest.unstable_mockModule("../src/lib/prisma.js", () => ({
 const { requireRole } = await import("../src/middleware/require-role.js");
 
 describe("requireRole Middleware", () => {
+
+  it("sollte ADMIN bei OWNER-only Zugriff ablehnen", async () => {
+    mockGetAuth.mockReturnValue({
+      isAuthenticated: true,
+      userId: "admin-user",
+    });
+
+    mockFindUnique.mockResolvedValue({
+      clerkUserId: "admin-user",
+      role: "ADMIN",
+      isActive: true,
+    } as never);
+
+    const json = jest.fn();
+    const status = jest.fn(() => ({ json }));
+    const res = { status } as unknown as Response;
+    const next = jest.fn() as NextFunction;
+
+    await requireRole("OWNER")({} as Request, res, next);
+
+    expect(status).toHaveBeenCalledWith(403);
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  it("sollte nicht authentifizierte Benutzer ablehnen", async () => {
+    mockGetAuth.mockReturnValue({
+      isAuthenticated: false,
+      userId: null,
+    });
+
+    const json = jest.fn();
+    const status = jest.fn(() => ({ json }));
+    const res = { status } as unknown as Response;
+    const next = jest.fn() as NextFunction;
+
+    await requireRole("OWNER")({} as Request, res, next);
+
+    expect(status).toHaveBeenCalledWith(401);
+    expect(mockFindUnique).not.toHaveBeenCalled();
+    expect(next).not.toHaveBeenCalled();
+  });
+
+
   beforeEach(() => {
     jest.clearAllMocks();
   });

@@ -178,11 +178,20 @@ const invoiceDetailRoute = createRoute({
   component: InvoiceDetailPage,
 });
 
+const UsersPage = lazy(() => import("./pages/UsersPage"));
+
+const usersRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/users",
+  component: UsersPage,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   signInRoute,
   appRoute.addChildren([
     dashboardRoute,
+    usersRoute,
     eventsRoute,
     eventDetailRoute,
     employeesRoute,
