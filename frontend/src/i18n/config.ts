@@ -41,6 +41,7 @@ const resources = {
       },
       status: {
         ACTIVE: "Aktiv",
+        RECEIVED: "Wareneingang",
         AVAILABLE: "Verfügbar",
         PAID: "Bezahlt",
         CONFIRMED: "Bestätigt",
@@ -471,7 +472,21 @@ const resources = {
         overdue: "Überfällig",
         unpaid: "Offen",
       },
-      equipment: {        editPanel: {
+      equipment: {
+        filters: {
+          title: "Filter",
+          status: "Gerätestatus",
+          allStatuses: "Alle Status",
+          warehouse: "Lager",
+          allWarehouses: "Alle Lager",
+          reset: "Zurücksetzen",
+        },
+        stats: {
+          total: "Alle Geräte",
+          available: "Verfügbare Geräte",
+          needsAttention: "Prüfung erforderlich",
+        },
+        editPanel: {
           dataError: "Produkte oder Lager konnten nicht geladen werden.",
           updateError: "Änderungen konnten nicht gespeichert werden.",
         },
@@ -881,6 +896,7 @@ const resources = {
       },
       status: {
         ACTIVE: "Active",
+        RECEIVED: "Received",
         AVAILABLE: "Available",
         PAID: "Paid",
         CONFIRMED: "Confirmed",
@@ -1311,7 +1327,21 @@ const resources = {
         overdue: "Overdue",
         unpaid: "Unpaid",
       },
-      equipment: {        editPanel: {
+      equipment: {
+        filters: {
+          title: "Filters",
+          status: "Equipment status",
+          allStatuses: "All statuses",
+          warehouse: "Warehouse",
+          allWarehouses: "All warehouses",
+          reset: "Reset",
+        },
+        stats: {
+          total: "Total equipment",
+          available: "Available equipment",
+          needsAttention: "Needs attention",
+        },
+        editPanel: {
           dataError: "Products or warehouses could not be loaded.",
           updateError: "Changes could not be saved.",
         },
@@ -1721,6 +1751,7 @@ const resources = {
       },
       status: {
         ACTIVE: "نشط",
+        RECEIVED: "تم الاستلام",
         AVAILABLE: "متاح",
         PAID: "مدفوع",
         CONFIRMED: "مؤكد",
@@ -2151,7 +2182,21 @@ const resources = {
         overdue: "متأخرة",
         unpaid: "غير مدفوعة",
       },
-      equipment: {        editPanel: {
+      equipment: {
+        filters: {
+          title: "الفلاتر",
+          status: "حالة المعدة",
+          allStatuses: "جميع الحالات",
+          warehouse: "المستودع",
+          allWarehouses: "جميع المستودعات",
+          reset: "إعادة تعيين",
+        },
+        stats: {
+          total: "إجمالي المعدات",
+          available: "المعدات المتاحة",
+          needsAttention: "تحتاج إلى متابعة",
+        },
+        editPanel: {
           dataError: "تعذر تحميل المنتجات أو المستودعات.",
           updateError: "تعذر حفظ التغييرات.",
         },

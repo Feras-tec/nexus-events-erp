@@ -1,34 +1,12 @@
 import { useTranslation } from "react-i18next";
 import { StatusChip } from "../atoms/StatusChip";
+import type { InventoryItem } from "../../features/equipment/hooks/useEquipment";
+import { EquipmentMobileCards } from "../../features/equipment/components/EquipmentMobileCards";
 
-type EquipmentItem = {
-  id: string;
-  assetNo: string;
-  manufacturerSerial?: string | null;
-  barcode?: string | null;
-  status: string;
-  location?: string | null;
 
-  product: {
-    id: string;
-    productNo: string;
-    name: string;
-    brand?: string | null;
-    model?: string | null;
-  };
-
-  warehouse: {
-    id: string;
-    name: string;
-    branch: {
-      id: string;
-      name: string;
-    };
-  };
-};
 
 type EquipmentTableProps = {
-  equipment: EquipmentItem[];
+  equipment: InventoryItem[];
   onView?: (equipmentId: string) => void;
 };
 
@@ -48,7 +26,9 @@ export function EquipmentTable({
   }
 
   return (
-    <div className="overflow-x-auto rounded-box border border-base-300 bg-base-100">
+    <>
+      <EquipmentMobileCards equipment={equipment} onView={onView} />
+      <div className="hidden overflow-x-auto rounded-box border border-base-300 bg-base-100 md:block">
       <table className="table">
         <thead>
           <tr>
@@ -113,6 +93,7 @@ export function EquipmentTable({
           ))}
         </tbody>
       </table>
-    </div>
+      </div>
+    </>
   );
 }

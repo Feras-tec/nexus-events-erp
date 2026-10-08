@@ -10,6 +10,11 @@ import {
 import { EquipmentTable } from "../components/organisms/EquipmentTable";
 import { ListLayout } from "../components/templates/ListLayout";
 import { useEquipment } from "../features/equipment/hooks/useEquipment";
+import { EquipmentStats } from "../features/equipment/components/EquipmentStats";
+import {
+  EquipmentFilters,
+  type EquipmentStatusFilter,
+} from "../features/equipment/components/EquipmentFilters";
 import { useEquipmentFormOptions } from "../features/equipment/hooks/useEquipmentFormOptions";
 import { useCreateEquipment } from "../features/equipment/hooks/useCreateEquipment";
 
@@ -18,6 +23,9 @@ export function EquipmentPage() {
   const { t } = useTranslation();
 
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] =
+    useState<EquipmentStatusFilter>("ALL");
+  const [warehouseFilter, setWarehouseFilter] = useState("ALL");
   const [showCreateForm, setShowCreateForm] = useState(false);
 
   const {
@@ -42,6 +50,17 @@ export function EquipmentPage() {
   const normalizedSearch = search.trim().toLowerCase();
 
   const filteredEquipment = equipment.filter((item) => {
+    if (statusFilter !== "ALL" && item.status !== statusFilter) {
+      return false;
+    }
+
+    if (
+      warehouseFilter !== "ALL" &&
+      item.warehouse.id !== warehouseFilter
+    ) {
+      return false;
+    }
+
     if (!normalizedSearch) return true;
 
     const searchableText = [
@@ -88,6 +107,27 @@ export function EquipmentPage() {
           </Button>
         }
       >
+        {!isLoading && !isError && (
+          <div className="mb-6">
+            <EquipmentStats equipment={equipment} />
+          </div>
+        )}
+
+        <div className="mb-6">
+          <EquipmentFilters
+            equipment={equipment}
+            status={statusFilter}
+            warehouseId={warehouseFilter}
+            onStatusChange={setStatusFilter}
+            onWarehouseChange={setWarehouseFilter}
+            onReset={() => {
+              setSearch("");
+              setStatusFilter("ALL");
+              setWarehouseFilter("ALL");
+            }}
+          />
+        </div>
+
         <AnimatePresence>
           {showCreateForm && (
             <motion.div
