@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 
 import { ListLayout } from "../components/templates/ListLayout";
 import { QuoteForm } from "../features/quotes/components/QuoteForm";
@@ -11,6 +12,7 @@ import { useQuotes } from "../features/quotes/hooks/useQuotes";
 import type { QuoteFormData } from "../features/quotes/types/quote.types";
 
 export function QuotesPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
@@ -90,10 +92,10 @@ export function QuotesPage() {
       transition={{ duration: 0.25 }}
     >
       <ListLayout
-        title="Angebote"
-        description="Angebote für Kunden und Events verwalten."
+        title={t("navigation.quotes")}
+        description={t("quotes.description")}
         searchValue={search}
-        searchPlaceholder="Angebote suchen..."
+        searchPlaceholder={t("quotes.searchPlaceholder")}
         onSearchChange={setSearch}
         actions={
           <button
@@ -105,7 +107,7 @@ export function QuotesPage() {
             }
             onClick={() => setShowForm((current) => !current)}
           >
-            {showForm ? "Abbrechen" : "+ Neues Angebot"}
+            {showForm ? t("common.cancel") : `+ ${t("quotes.newQuote")}`}
           </button>
         }
       >
@@ -120,7 +122,7 @@ export function QuotesPage() {
 
               {optionsError && (
                 <div role="alert" className="alert alert-error">
-                  Kunden, Events oder Produkte konnten nicht geladen werden.
+                  {t("quotes.optionsError")}
                 </div>
               )}
 
@@ -146,14 +148,14 @@ export function QuotesPage() {
             <div className="flex justify-center py-12">
               <span
                 className="loading loading-spinner loading-lg"
-                aria-label="Angebote werden geladen"
+                aria-label={t("quotes.loading")}
               />
             </div>
           )}
 
           {isError && (
             <div role="alert" className="alert alert-error">
-              Angebote konnten nicht geladen werden.
+              {t("quotes.loadError")}
             </div>
           )}
 

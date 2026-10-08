@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { ProductTableItem } from "../../../components/organisms/ProductTable";
 import type { QuoteFormItem } from "../types/quote.types";
 import { QuoteItemRow } from "./QuoteItemRow";
@@ -26,6 +27,8 @@ export function QuoteItems({
   loading = false,
   onChange,
 }: QuoteItemsProps) {
+  const { t } = useTranslation();
+
   function handleItemChange(
     index: number,
     updatedItem: QuoteFormItem,
@@ -54,11 +57,11 @@ export function QuoteItems({
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 className="text-lg font-semibold">
-            Positionen
+            {t("quotes.items.title")}
           </h2>
 
           <p className="text-sm text-base-content/60">
-            Equipment, Dienstleistungen, Transport oder Personal.
+            {t("quotes.items.description")}
           </p>
         </div>
 
@@ -68,7 +71,7 @@ export function QuoteItems({
           disabled={loading}
           onClick={handleAdd}
         >
-          + Position hinzufügen
+          + {t("quotes.items.add")}
         </button>
       </div>
 

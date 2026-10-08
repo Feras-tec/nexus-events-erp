@@ -1,7 +1,9 @@
+import { useTranslation } from "react-i18next";
 import { useQuotePrint } from "../hooks/useQuotePrint";
 import "./quote-print.css";
 
 export function QuotePrintAction() {
+  const { t } = useTranslation();
   const { printQuote } = useQuotePrint();
 
   return (
@@ -10,7 +12,7 @@ export function QuotePrintAction() {
       className="btn btn-outline btn-sm"
       onClick={printQuote}
     >
-      Drucken / PDF
+      {t("quotes.actions.print")}
     </button>
   );
 }

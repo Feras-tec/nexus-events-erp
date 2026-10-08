@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { useRestoreQuote } from "../hooks/useRestoreQuote";
 
@@ -11,6 +12,7 @@ export function QuoteRestoreAction({
   quoteId,
   quoteNo,
 }: QuoteRestoreActionProps) {
+  const { t } = useTranslation();
   const [showConfirm, setShowConfirm] = useState(false);
 
   const {
@@ -32,12 +34,11 @@ export function QuoteRestoreAction({
     return (
       <div className="rounded-box border border-warning/30 bg-warning/5 p-4">
         <p className="font-semibold">
-          Stornierung von {quoteNo} aufheben?
+          {t("quotes.actions.restoreQuestion", { quoteNo })}
         </p>
 
         <p className="mt-1 text-sm opacity-70">
-          Das Angebot wird auf den Status vor der
-          Stornierung zurückgesetzt.
+          {t("quotes.actions.restoreDescription")}
         </p>
 
         {restoreError && (
@@ -56,7 +57,7 @@ export function QuoteRestoreAction({
             disabled={isRestoring}
             onClick={() => setShowConfirm(false)}
           >
-            Abbrechen
+            {t("quotes.actions.cancelButton")}
           </button>
 
           <button
@@ -69,7 +70,7 @@ export function QuoteRestoreAction({
               <span className="loading loading-spinner loading-sm" />
             )}
 
-            Stornierung aufheben
+            {t("quotes.actions.restoreQuote")}
           </button>
         </div>
       </div>
@@ -83,7 +84,7 @@ export function QuoteRestoreAction({
       disabled={isRestoring}
       onClick={() => setShowConfirm(true)}
     >
-      Stornierung aufheben
+      {t("quotes.actions.restoreQuote")}
     </button>
   );
 }

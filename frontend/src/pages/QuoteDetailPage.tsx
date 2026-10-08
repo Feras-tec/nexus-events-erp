@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { motion } from "motion/react";
 
@@ -12,33 +14,25 @@ import { useQuoteDetail } from "../features/quotes/hooks/useQuoteDetail";
 import { useQuoteFormOptions } from "../features/quotes/hooks/useQuoteFormOptions";
 import { useUpdateQuote } from "../features/quotes/hooks/useUpdateQuote";
 import { quoteToFormData } from "../features/quotes/utils/quote-form";
-import type { QuoteStatus } from "../features/quotes/types/quote.types";
+import { formatQuoteCurrency } from "../features/quotes/utils/quote-calculations";
 
-const statusLabels: Record<QuoteStatus, string> = {
-  DRAFT: "Entwurf",
-  SENT: "Gesendet",
-  ACCEPTED: "Angenommen",
-  REJECTED: "Abgelehnt",
-  EXPIRED: "Abgelaufen",
-  CANCELLED: "Storniert",
-};
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("de-DE", {
-    style: "currency",
-    currency: "EUR",
-  }).format(value);
-}
-
-function formatDate(value?: string | null) {
+function formatDate(
+  value: string | null | undefined,
+  language: string,
+) {
   if (!value) return "—";
 
-  return new Intl.DateTimeFormat("de-DE").format(
-    new Date(value),
-  );
+  const locale = language.startsWith("ar")
+    ? "ar"
+    : language.startsWith("en")
+      ? "en-GB"
+      : "de-DE";
+
+  return new Intl.DateTimeFormat(locale).format(new Date(value));
 }
 
 export function QuoteDetailPage() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const { quoteId } = useParams({
@@ -81,11 +75,11 @@ export function QuoteDetailPage() {
           className="btn btn-ghost"
           onClick={() => navigate({ to: "/quotes" })}
         >
-          ← Zurück
+          ← {t("quotes.detail.back")}
         </button>
 
         <div role="alert" className="alert alert-error">
-          Angebot konnte nicht geladen werden.
+          {t("quotes.detail.loadError")}
         </div>
       </div>
     );
@@ -98,32 +92,37 @@ export function QuoteDetailPage() {
       .join(" ");
 
   return (
-    <motion.div
+    <>
+      {createPortal(
+        <div
+          id="quote-print-document"
+          className="quote-print-container"
+          aria-hidden="true"
+        >
+          <QuotePrintDocument quote={quote} />
+        </div>,
+        document.body,
+      )}
+
+      <motion.div
       className="space-y-6"
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
     >
-      <div
-        id="quote-print-document"
-        className="hidden print:block"
-        aria-hidden="true"
-      >
-        <QuotePrintDocument quote={quote} />
-      </div>
 
       <button
         type="button"
         className="btn btn-ghost"
         onClick={() => navigate({ to: "/quotes" })}
       >
-        ← Zurück zu Angebote
+        ← {t("quotes.detail.back")}
       </button>
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-sm text-base-content/60">
-            Angebot
+            {t("quotes.detail.quote")}
           </p>
           <h1 className="text-3xl font-bold">
             {quote.quoteNo}
@@ -132,7 +131,7 @@ export function QuoteDetailPage() {
 
         <div className="flex flex-wrap items-center gap-2">
           <span className="badge badge-lg badge-outline">
-            {statusLabels[quote.status]}
+            {t(`quotes.statuses.${quote.status}`)}
           </span>
 
           <QuotePrintAction />
@@ -162,8 +161,8 @@ export function QuoteDetailPage() {
                 }
               >
                 {isEditing
-                  ? "Bearbeiten schließen"
-                  : "Bearbeiten"}
+                  ? t("quotes.detail.closeEdit")
+                  : t("quotes.detail.edit")}
               </button>
 
               {!isEditing && (
@@ -187,7 +186,7 @@ export function QuoteDetailPage() {
 
           {optionsError && (
             <div role="alert" className="alert alert-error">
-              Kunden, Events oder Produkte konnten nicht geladen werden.
+              {t("quotes.detail.optionsError")}
             </div>
           )}
 
@@ -204,7 +203,7 @@ export function QuoteDetailPage() {
               events={events}
               products={products}
               initialData={quoteToFormData(quote)}
-              submitLabel="Änderungen speichern"
+              submitLabel={t("quotes.detail.saveChanges")}
               loading={isUpdating}
               onSubmit={async (data) => {
                 try {
@@ -228,7 +227,7 @@ export function QuoteDetailPage() {
               disabled={isUpdating}
               onClick={() => setIsEditing(false)}
             >
-              Abbrechen
+              {t("quotes.detail.cancelEdit")}
             </button>
           </div>
         </div>
@@ -238,7 +237,7 @@ export function QuoteDetailPage() {
         <div className="card bg-base-100 border border-base-300">
           <div className="card-body">
             <span className="text-sm text-base-content/60">
-              Kunde
+              {t("quotes.detail.customer")}
             </span>
             <strong>{customerName || "—"}</strong>
           </div>
@@ -247,7 +246,7 @@ export function QuoteDetailPage() {
         <div className="card bg-base-100 border border-base-300">
           <div className="card-body">
             <span className="text-sm text-base-content/60">
-              Event
+              {t("quotes.detail.event")}
             </span>
             <strong>
               {quote.event
@@ -260,18 +259,18 @@ export function QuoteDetailPage() {
         <div className="card bg-base-100 border border-base-300">
           <div className="card-body">
             <span className="text-sm text-base-content/60">
-              Gültig bis
+              {t("quotes.detail.validUntil")}
             </span>
-            <strong>{formatDate(quote.validUntil)}</strong>
+            <strong>{formatDate(quote.validUntil, i18n.language)}</strong>
           </div>
         </div>
 
         <div className="card bg-base-100 border border-base-300">
           <div className="card-body">
             <span className="text-sm text-base-content/60">
-              Gesamt
+              {t("quotes.detail.total")}
             </span>
-            <strong>{formatCurrency(quote.total)}</strong>
+            <strong>{formatQuoteCurrency(quote.total, i18n.language)}</strong>
           </div>
         </div>
       </div>
@@ -280,29 +279,29 @@ export function QuoteDetailPage() {
         <table className="table">
           <thead>
             <tr>
-              <th>Typ</th>
-              <th>Beschreibung</th>
-              <th className="text-right">Menge</th>
-              <th className="text-right">Einzelpreis</th>
-              <th className="text-right">Rabatt</th>
-              <th className="text-right">Gesamt</th>
+              <th>{t("quotes.detail.type")}</th>
+              <th>{t("quotes.detail.description")}</th>
+              <th className="text-right">{t("quotes.detail.quantity")}</th>
+              <th className="text-right">{t("quotes.detail.unitPrice")}</th>
+              <th className="text-right">{t("quotes.detail.discount")}</th>
+              <th className="text-right">{t("quotes.detail.total")}</th>
             </tr>
           </thead>
 
           <tbody>
             {quote.items.map((item) => (
               <tr key={item.id}>
-                <td>{item.type}</td>
+                <td>{t(`quotes.items.types.${item.type}`)}</td>
                 <td>{item.description}</td>
                 <td className="text-right">{item.quantity}</td>
                 <td className="text-right">
-                  {formatCurrency(item.unitPrice)}
+                  {formatQuoteCurrency(item.unitPrice, i18n.language)}
                 </td>
                 <td className="text-right">
                   {item.discount} %
                 </td>
                 <td className="text-right font-medium">
-                  {formatCurrency(item.total)}
+                  {formatQuoteCurrency(item.total, i18n.language)}
                 </td>
               </tr>
             ))}
@@ -313,25 +312,25 @@ export function QuoteDetailPage() {
       <div className="card bg-base-100 border border-base-300">
         <div className="card-body ml-auto w-full max-w-md">
           <div className="flex justify-between">
-            <span>Zwischensumme</span>
-            <span>{formatCurrency(quote.subtotal)}</span>
+            <span>{t("quotes.detail.subtotal")}</span>
+            <span>{formatQuoteCurrency(quote.subtotal, i18n.language)}</span>
           </div>
 
           <div className="flex justify-between">
-            <span>Rabatt</span>
+            <span>{t("quotes.detail.discount")}</span>
             <span>{quote.discount} %</span>
           </div>
 
           <div className="flex justify-between">
-            <span>MwSt.</span>
+            <span>{t("quotes.detail.tax")}</span>
             <span>{quote.tax} %</span>
           </div>
 
           <div className="divider my-1" />
 
           <div className="flex justify-between text-lg font-bold">
-            <span>Gesamt</span>
-            <span>{formatCurrency(quote.total)}</span>
+            <span>{t("quotes.detail.total")}</span>
+            <span>{formatQuoteCurrency(quote.total, i18n.language)}</span>
           </div>
         </div>
       </div>
@@ -339,11 +338,12 @@ export function QuoteDetailPage() {
       {quote.notes && (
         <div className="card bg-base-100 border border-base-300">
           <div className="card-body">
-            <h2 className="card-title">Notizen</h2>
+            <h2 className="card-title">{t("quotes.detail.notes")}</h2>
             <p className="whitespace-pre-wrap">{quote.notes}</p>
           </div>
         </div>
       )}
-    </motion.div>
+      </motion.div>
+    </>
   );
 }

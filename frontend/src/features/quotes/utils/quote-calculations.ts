@@ -38,8 +38,18 @@ export function calculateQuoteTotals(
   };
 }
 
-export function formatQuoteCurrency(value: number) {
-  return new Intl.NumberFormat("de-DE", {
+export function formatQuoteCurrency(
+  value: number,
+  language = "de",
+) {
+  const locale =
+    language.startsWith("ar")
+      ? "ar"
+      : language.startsWith("en")
+        ? "en-GB"
+        : "de-DE";
+
+  return new Intl.NumberFormat(locale, {
     style: "currency",
     currency: "EUR",
   }).format(value);

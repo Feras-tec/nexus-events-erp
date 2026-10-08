@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { Customer } from "../../../components/organisms/CustomerTable";
 import type { EventItem } from "../../../components/organisms/EventTable";
@@ -48,9 +49,11 @@ export function QuoteForm({
   products,
   loading = false,
   initialData,
-  submitLabel = "Angebot erstellen",
+  submitLabel,
   onSubmit,
 }: QuoteFormProps) {
+  const { t } = useTranslation();
+
   const [formData, setFormData] =
     useState<QuoteFormData>(
       () => initialData ?? initialFormData,
@@ -120,7 +123,7 @@ export function QuoteForm({
             <span className="loading loading-spinner loading-sm" />
           )}
 
-          {submitLabel}
+          {submitLabel ?? t("quotes.form.create")}
         </button>
       </div>
     </form>

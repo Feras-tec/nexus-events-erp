@@ -1,17 +1,9 @@
-import type { Quote, QuoteStatus } from "../types/quote.types";
+import { useTranslation } from "react-i18next";
+import type { Quote } from "../types/quote.types";
 
 type QuoteTableProps = {
   quotes: Quote[];
   onView: (quoteId: string) => void;
-};
-
-const statusLabels: Record<QuoteStatus, string> = {
-  DRAFT: "Entwurf",
-  SENT: "Gesendet",
-  ACCEPTED: "Angenommen",
-  REJECTED: "Abgelehnt",
-  EXPIRED: "Abgelaufen",
-  CANCELLED: "Storniert",
 };
 
 function getCustomerName(quote: Quote) {
@@ -24,17 +16,17 @@ function getCustomerName(quote: Quote) {
     .join(" ");
 }
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("de-DE", {
+function formatCurrency(value: number, locale: string) {
+  return new Intl.NumberFormat(locale, {
     style: "currency",
     currency: "EUR",
   }).format(value);
 }
 
-function formatDate(value?: string | null) {
+function formatDate(value: string | null | undefined, locale: string) {
   if (!value) return "—";
 
-  return new Intl.DateTimeFormat("de-DE").format(
+  return new Intl.DateTimeFormat(locale).format(
     new Date(value),
   );
 }
@@ -43,10 +35,17 @@ export function QuoteTable({
   quotes,
   onView,
 }: QuoteTableProps) {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.resolvedLanguage?.startsWith("ar")
+    ? "ar"
+    : i18n.resolvedLanguage?.startsWith("en")
+      ? "en-GB"
+      : "de-DE";
+
   if (quotes.length === 0) {
     return (
       <div className="py-12 text-center text-base-content/60">
-        Keine Angebote gefunden.
+        {t("quotes.table.empty")}
       </div>
     );
   }
@@ -56,12 +55,12 @@ export function QuoteTable({
       <table className="table">
         <thead>
           <tr>
-            <th>Angebotsnr.</th>
-            <th>Kunde</th>
-            <th>Event</th>
-            <th>Status</th>
-            <th>Gültig bis</th>
-            <th className="text-right">Gesamt</th>
+            <th>{t("quotes.table.quoteNo")}</th>
+            <th>{t("quotes.table.customer")}</th>
+            <th>{t("quotes.table.event")}</th>
+            <th>{t("quotes.table.status")}</th>
+            <th>{t("quotes.table.validUntil")}</th>
+            <th className="text-right">{t("quotes.table.total")}</th>
             <th />
           </tr>
         </thead>
@@ -83,14 +82,14 @@ export function QuoteTable({
 
               <td>
                 <span className="badge badge-outline">
-                  {statusLabels[quote.status]}
+                  {t(`quotes.statuses.${quote.status}`)}
                 </span>
               </td>
 
-              <td>{formatDate(quote.validUntil)}</td>
+              <td>{formatDate(quote.validUntil, locale)}</td>
 
               <td className="text-right font-medium">
-                {formatCurrency(quote.total)}
+                {formatCurrency(quote.total, locale)}
               </td>
 
               <td className="text-right">
@@ -99,7 +98,7 @@ export function QuoteTable({
                   className="btn btn-sm btn-ghost"
                   onClick={() => onView(quote.id)}
                 >
-                  Öffnen
+                  {t("quotes.table.open")}
                 </button>
               </td>
             </tr>

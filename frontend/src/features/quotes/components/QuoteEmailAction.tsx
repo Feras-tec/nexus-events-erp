@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useSendQuoteEmail } from "../hooks/useSendQuoteEmail";
 
 type QuoteEmailActionProps = {
@@ -15,6 +16,8 @@ export function QuoteEmailAction({
   lastSentTo,
   disabled = false,
 }: QuoteEmailActionProps) {
+  const { t, i18n } = useTranslation();
+
   const {
     sendQuoteEmail,
     isSending,
@@ -30,7 +33,13 @@ export function QuoteEmailAction({
   const sentAt = sentEmail?.sentAt ?? lastSentAt;
 
   const formattedSentAt = sentAt
-    ? new Intl.DateTimeFormat("de-DE", {
+    ? new Intl.DateTimeFormat(
+      i18n.language.startsWith("ar")
+        ? "ar"
+        : i18n.language.startsWith("en")
+          ? "en-GB"
+          : "de-DE",
+      {
         dateStyle: "short",
         timeStyle: "short",
       }).format(new Date(sentAt))
@@ -54,26 +63,26 @@ export function QuoteEmailAction({
         disabled={disabled || isSending || !customerEmail}
         title={
           customerEmail
-            ? `An ${customerEmail} senden`
-            : "Kunde hat keine E-Mail-Adresse"
+            ? t("quotes.actions.sendTo", { email: customerEmail })
+            : t("quotes.actions.noCustomerEmail")
         }
         onClick={handleSend}
       >
         {isSending ? (
           <>
             <span className="loading loading-spinner loading-xs" />
-            Wird gesendet...
+            {t("quotes.actions.sending")}
           </>
         ) : wasSent ? (
-          "✓ Erneut senden"
+          `✓ ${t("quotes.actions.resendEmail")}`
         ) : (
-          "E-Mail senden"
+          t("quotes.actions.sendEmail")
         )}
       </button>
 
       {wasSent && sentTo && (
         <span className="absolute right-0 top-full mt-1 whitespace-nowrap text-xs text-success">
-          Gesendet an {sentTo}
+          {t("quotes.actions.sentTo", { email: sentTo })}
           {formattedSentAt ? ` · ${formattedSentAt}` : ""}
         </span>
       )}

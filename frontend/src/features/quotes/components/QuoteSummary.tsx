@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { QuoteFormItem } from "../types/quote.types";
 import {
   calculateQuoteTotals,
@@ -15,6 +16,8 @@ export function QuoteSummary({
   discount,
   tax,
 }: QuoteSummaryProps) {
+  const { t, i18n } = useTranslation();
+
   const totals = calculateQuoteTotals(
     items,
     discount,
@@ -25,52 +28,52 @@ export function QuoteSummary({
     <div className="flex justify-end">
       <div className="w-full max-w-md rounded-box border border-base-300 bg-base-100 p-5">
         <h2 className="mb-4 text-lg font-semibold">
-          Zusammenfassung
+          {t("quotes.summary.title")}
         </h2>
 
         <div className="space-y-3">
           <div className="flex justify-between gap-4">
             <span className="text-base-content/70">
-              Zwischensumme
+              {t("quotes.summary.subtotal")}
             </span>
             <span>
-              {formatQuoteCurrency(totals.subtotal)}
+              {formatQuoteCurrency(totals.subtotal, i18n.language)}
             </span>
           </div>
 
           <div className="flex justify-between gap-4">
             <span className="text-base-content/70">
-              Rabatt ({Number(discount) || 0} %)
+              {t("quotes.summary.discount")} ({Number(discount) || 0} %)
             </span>
             <span>
-              − {formatQuoteCurrency(totals.discountAmount)}
+              − {formatQuoteCurrency(totals.discountAmount, i18n.language)}
             </span>
           </div>
 
           <div className="flex justify-between gap-4">
             <span className="text-base-content/70">
-              Netto
+              {t("quotes.summary.net")}
             </span>
             <span>
-              {formatQuoteCurrency(totals.net)}
+              {formatQuoteCurrency(totals.net, i18n.language)}
             </span>
           </div>
 
           <div className="flex justify-between gap-4">
             <span className="text-base-content/70">
-              MwSt. ({Number(tax) || 0} %)
+              {t("quotes.summary.tax")} ({Number(tax) || 0} %)
             </span>
             <span>
-              {formatQuoteCurrency(totals.taxAmount)}
+              {formatQuoteCurrency(totals.taxAmount, i18n.language)}
             </span>
           </div>
 
           <div className="divider my-1" />
 
           <div className="flex justify-between gap-4 text-lg font-bold">
-            <span>Gesamt</span>
+            <span>{t("quotes.summary.total")}</span>
             <span>
-              {formatQuoteCurrency(totals.total)}
+              {formatQuoteCurrency(totals.total, i18n.language)}
             </span>
           </div>
         </div>

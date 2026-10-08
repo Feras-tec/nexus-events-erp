@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { QuoteItem } from "../types/quote.types";
 import { formatQuotePrintCurrency } from "../utils/quote-print";
 
@@ -8,6 +9,8 @@ type QuotePrintItemsProps = {
 export function QuotePrintItems({
   items,
 }: QuotePrintItemsProps) {
+  const { t, i18n } = useTranslation();
+
   return (
     <table className="w-full table-fixed border-collapse text-sm">
       <colgroup>
@@ -20,12 +23,12 @@ export function QuotePrintItems({
       </colgroup>
       <thead>
         <tr className="border-b-2 border-base-content">
-          <th className="py-2 text-left">Pos.</th>
-          <th className="py-2 text-left">Beschreibung</th>
-          <th className="whitespace-nowrap py-2 text-right">Menge</th>
-          <th className="whitespace-nowrap py-2 text-right">Einzelpreis</th>
-          <th className="whitespace-nowrap py-2 text-right">Rabatt</th>
-          <th className="whitespace-nowrap py-2 text-right">Gesamt</th>
+          <th className="py-2 text-left">{t("quotes.print.position")}</th>
+          <th className="py-2 text-left">{t("quotes.print.description")}</th>
+          <th className="whitespace-nowrap py-2 text-right">{t("quotes.print.quantity")}</th>
+          <th className="whitespace-nowrap py-2 text-right">{t("quotes.print.unitPrice")}</th>
+          <th className="whitespace-nowrap py-2 text-right">{t("quotes.print.discount")}</th>
+          <th className="whitespace-nowrap py-2 text-right">{t("quotes.print.total")}</th>
         </tr>
       </thead>
 
@@ -45,7 +48,7 @@ export function QuotePrintItems({
               </div>
 
               <div className="text-xs opacity-60">
-                {item.type}
+                {t(`quotes.items.types.${item.type}`)}
               </div>
             </td>
 
@@ -56,6 +59,7 @@ export function QuotePrintItems({
             <td className="whitespace-nowrap py-3 text-right align-top">
               {formatQuotePrintCurrency(
                 Number(item.unitPrice),
+                i18n.language,
               )}
             </td>
 
@@ -66,6 +70,7 @@ export function QuotePrintItems({
             <td className="whitespace-nowrap py-3 text-right align-top font-medium">
               {formatQuotePrintCurrency(
                 Number(item.total),
+                i18n.language,
               )}
             </td>
           </tr>

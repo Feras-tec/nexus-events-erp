@@ -20,16 +20,23 @@
   }
 
   /*
-   * Hide everything beside the branch that contains
-   * the printable quote document.
+   * Hide the application visually during printing,
+   * while keeping the printable quote visible.
    */
-  :has(> #quote-print-document) > *:not(#quote-print-document) {
-    display: none !important;
+  body * {
+    visibility: hidden !important;
+  }
+
+  #quote-print-document,
+  #quote-print-document * {
+    visibility: visible !important;
   }
 
   #quote-print-document {
     display: block !important;
-    position: static !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
     width: 100% !important;
     height: auto !important;
     min-height: 0 !important;
@@ -116,5 +123,57 @@
     font-size: 12px !important;
     font-weight: 600 !important;
     opacity: 0.85 !important;
+  }
+}
+
+/* Keep the print document hidden on screen. */
+@media screen {
+  #quote-print-document {
+    display: none !important;
+  }
+}
+
+/* Show the print document when printing. */
+@media print {
+  #quote-print-document {
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  #quote-print-document * {
+    visibility: visible !important;
+  }
+}
+
+/* Keep the print timestamp inside the printable page. */
+@media print {
+  #quote-print-document .quote-print-timestamp {
+    position: static !important;
+    margin-bottom: 6mm !important;
+    text-align: start !important;
+  }
+}
+
+/* Final print readability improvements */
+@media print {
+  #quote-print-document .quote-print-timestamp {
+    font-size: 10px !important;
+    line-height: 1.5 !important;
+    margin-bottom: 7mm !important;
+  }
+
+  #quote-print-document table {
+    font-size: 11px !important;
+  }
+
+  #quote-print-document th {
+    font-size: 10px !important;
+    line-height: 1.5 !important;
+    padding: 8px 4px !important;
+  }
+
+  #quote-print-document td {
+    padding: 9px 4px !important;
+    line-height: 1.5 !important;
   }
 }

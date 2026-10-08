@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { useQuoteStatusAction } from "../hooks/useQuoteStatusAction";
 
@@ -13,6 +14,7 @@ export function QuoteCancelAction({
   quoteNo,
   disabled = false,
 }: QuoteCancelActionProps) {
+  const { t } = useTranslation();
   const [showConfirm, setShowConfirm] = useState(false);
 
   const {
@@ -38,12 +40,11 @@ export function QuoteCancelAction({
     return (
       <div className="rounded-box border border-error/30 bg-error/5 p-4">
         <p className="font-semibold">
-          Angebot {quoteNo} wirklich stornieren?
+          {t("quotes.actions.cancelQuestion", { quoteNo })}
         </p>
 
         <p className="mt-1 text-sm opacity-70">
-          Das Angebot bleibt im System erhalten und wird als
-          storniert markiert.
+          {t("quotes.actions.cancelDescription")}
         </p>
 
         {statusError && (
@@ -62,7 +63,7 @@ export function QuoteCancelAction({
             disabled={isChangingStatus}
             onClick={() => setShowConfirm(false)}
           >
-            Abbrechen
+            {t("quotes.actions.cancelButton")}
           </button>
 
           <button
@@ -75,7 +76,7 @@ export function QuoteCancelAction({
               <span className="loading loading-spinner loading-sm" />
             )}
 
-            Stornierung bestätigen
+            {t("quotes.actions.confirmCancel")}
           </button>
         </div>
       </div>
@@ -89,7 +90,7 @@ export function QuoteCancelAction({
       disabled={disabled || isChangingStatus}
       onClick={() => setShowConfirm(true)}
     >
-      Stornieren
+      {t("quotes.actions.cancelQuote")}
     </button>
   );
 }

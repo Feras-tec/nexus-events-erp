@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { ProductTableItem } from "../../../components/organisms/ProductTable";
 import type {
   QuoteFormItem,
@@ -20,13 +21,12 @@ type QuoteItemRowProps = {
 
 const itemTypes: {
   value: QuoteItemType;
-  label: string;
 }[] = [
-  { value: "EQUIPMENT", label: "Equipment" },
-  { value: "SERVICE", label: "Dienstleistung" },
-  { value: "TRANSPORT", label: "Transport" },
-  { value: "PERSONNEL", label: "Personal" },
-  { value: "OTHER", label: "Sonstiges" },
+  { value: "EQUIPMENT" },
+  { value: "SERVICE" },
+  { value: "TRANSPORT" },
+  { value: "PERSONNEL" },
+  { value: "OTHER" },
 ];
 
 export function QuoteItemRow({
@@ -38,6 +38,8 @@ export function QuoteItemRow({
   onChange,
   onRemove,
 }: QuoteItemRowProps) {
+  const { t, i18n } = useTranslation();
+
   function update(
     field: keyof QuoteFormItem,
     value: string,
@@ -67,7 +69,7 @@ export function QuoteItemRow({
     <div className="rounded-box border border-base-300 bg-base-200/30 p-4">
       <div className="mb-4 flex items-center justify-between gap-4">
         <span className="font-medium">
-          Position {index + 1}
+          {t("quotes.items.row", { number: index + 1 })}
         </span>
 
         <button
@@ -76,14 +78,14 @@ export function QuoteItemRow({
           disabled={loading || !canRemove}
           onClick={() => onRemove(index)}
         >
-          Entfernen
+          {t("quotes.items.remove")}
         </button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <label className="form-control">
           <span className="label-text mb-2 font-medium">
-            Typ
+            {t("quotes.items.type")}
           </span>
 
           <select
@@ -96,7 +98,7 @@ export function QuoteItemRow({
           >
             {itemTypes.map((type) => (
               <option key={type.value} value={type.value}>
-                {type.label}
+                {t(`quotes.items.types.${type.value}`)}
               </option>
             ))}
           </select>
@@ -104,7 +106,7 @@ export function QuoteItemRow({
 
         <label className="form-control lg:col-span-3">
           <span className="label-text mb-2 font-medium">
-            Produkt
+            {t("quotes.items.product")}
           </span>
 
           <select
@@ -116,7 +118,7 @@ export function QuoteItemRow({
             }
           >
             <option value="">
-              Kein Produkt / freie Position
+              {t("quotes.items.noProduct")}
             </option>
 
             {products.map((product) => (
@@ -129,7 +131,7 @@ export function QuoteItemRow({
 
         <label className="form-control md:col-span-2 lg:col-span-4">
           <span className="label-text mb-2 font-medium">
-            Beschreibung
+            {t("quotes.items.itemDescription")}
           </span>
 
           <input
@@ -147,7 +149,7 @@ export function QuoteItemRow({
 
         <label className="form-control">
           <span className="label-text mb-2 font-medium">
-            Menge
+            {t("quotes.items.quantity")}
           </span>
 
           <input
@@ -166,7 +168,7 @@ export function QuoteItemRow({
 
         <label className="form-control">
           <span className="label-text mb-2 font-medium">
-            Einzelpreis
+            {t("quotes.items.unitPrice")}
           </span>
 
           <input
@@ -185,7 +187,7 @@ export function QuoteItemRow({
 
         <label className="form-control">
           <span className="label-text mb-2 font-medium">
-            Rabatt %
+            {t("quotes.items.discount")}
           </span>
 
           <input
@@ -204,12 +206,13 @@ export function QuoteItemRow({
 
         <div className="form-control">
           <span className="label-text mb-2 font-medium">
-            Positionssumme
+            {t("quotes.items.itemTotal")}
           </span>
 
           <div className="flex min-h-12 items-center rounded-btn border border-base-300 bg-base-200 px-4 font-semibold">
             {formatQuoteCurrency(
               calculateQuoteItemTotal(item),
+              i18n.language,
             )}
           </div>
         </div>
