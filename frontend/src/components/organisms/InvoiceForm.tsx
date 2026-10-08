@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "../atoms/Button";
 import { Input } from "../atoms/Input";
@@ -51,9 +52,10 @@ export function InvoiceForm({
   products,
   loading = false,
   initialData,
-  submitLabel = "Rechnung speichern",
+  submitLabel,
   onSubmit,
 }: InvoiceFormProps) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<InvoiceFormData>(
     () =>
       initialData ?? {
@@ -120,7 +122,7 @@ export function InvoiceForm({
       <section className="rounded-box border border-base-300 bg-base-100 p-6">
         <div className="grid gap-4 md:grid-cols-2">
           <Input
-            label="Rechnungs-Nr."
+            label={t("invoices.form.invoiceNo")}
             value={formData.invoiceNo}
             required
             maxLength={50}
@@ -130,11 +132,11 @@ export function InvoiceForm({
           />
 
           <Select
-            label="Status"
+            label={t("invoices.table.status")}
             value={formData.status}
             options={invoiceStatuses.map((status) => ({
               value: status,
-              label: status,
+              label: t(`status.${status}`),
             }))}
             onChange={(event) =>
               updateField("status", event.target.value as InvoiceStatus)
@@ -142,10 +144,10 @@ export function InvoiceForm({
           />
 
           <Select
-            label="Kunde"
+            label={t("invoices.table.customer")}
             value={formData.customerId}
             options={customerOptions}
-            placeholder="Kunde auswählen"
+            placeholder={t("invoices.form.selectCustomer")}
             required
             onChange={(event) =>
               updateField("customerId", event.target.value)
@@ -153,20 +155,20 @@ export function InvoiceForm({
           />
 
           <Select
-            label="Event"
+            label={t("invoices.table.event")}
             value={formData.eventId ?? ""}
             options={eventOptions}
-            placeholder="Kein Event"
+            placeholder={t("invoices.form.noEvent")}
             onChange={(event) =>
               updateField("eventId", event.target.value)
             }
           />
 
           <Select
-            label="Angebot"
+            label={t("invoices.detail.quote")}
             value={formData.quoteId ?? ""}
             options={quoteOptions}
-            placeholder="Kein Angebot"
+            placeholder={t("invoices.form.noQuote")}
             onChange={(event) =>
               updateField("quoteId", event.target.value)
             }
@@ -174,7 +176,7 @@ export function InvoiceForm({
 
           <Input
             type="date"
-            label="Rechnungsdatum"
+            label={t("invoices.table.issueDate")}
             value={formData.issueDate}
             onChange={(event) =>
               updateField("issueDate", event.target.value)
@@ -183,7 +185,7 @@ export function InvoiceForm({
 
           <Input
             type="date"
-            label="Fälligkeitsdatum"
+            label={t("invoices.form.dueDate")}
             value={formData.dueDate}
             min={formData.issueDate}
             onChange={(event) =>
@@ -193,7 +195,7 @@ export function InvoiceForm({
 
           <Input
             type="number"
-            label="Steuer %"
+            label={t("invoices.form.taxPercent")}
             min={0}
             max={100}
             value={formData.tax}
@@ -204,7 +206,7 @@ export function InvoiceForm({
 
           <Input
             type="number"
-            label="Rabatt %"
+            label={t("invoices.form.discountPercent")}
             min={0}
             max={100}
             value={formData.discount}
@@ -249,7 +251,7 @@ export function InvoiceForm({
           htmlFor="invoice-notes"
           className="mb-2 block text-sm font-medium"
         >
-          Notizen
+          {t("invoices.detail.notes")}
         </label>
 
         <textarea
@@ -266,7 +268,7 @@ export function InvoiceForm({
 
       <div className="flex justify-end">
         <Button type="submit" loading={loading}>
-          {submitLabel}
+          {submitLabel ?? t("invoices.form.saveInvoice")}
         </Button>
       </div>
     </form>

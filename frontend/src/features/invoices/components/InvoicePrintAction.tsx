@@ -1,8 +1,10 @@
+import { useTranslation } from "react-i18next";
 import { useInvoicePrint } from "../hooks/useInvoicePrint";
 import "./invoice-print.css";
 
 export function InvoicePrintAction() {
   const { printInvoice } = useInvoicePrint();
+  const { t } = useTranslation();
 
   return (
     <button
@@ -10,7 +12,7 @@ export function InvoicePrintAction() {
       className="btn btn-outline w-36"
       onClick={printInvoice}
     >
-      Drucken / PDF
+      {t("invoices.detail.print")}
     </button>
   );
 }

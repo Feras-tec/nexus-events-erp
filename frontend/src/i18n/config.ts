@@ -73,6 +73,96 @@ const resources = {
         LOST: "Verloren",
         RETIRED: "Ausgemustert",
       },
+      invoices: {
+        form: {
+          invoiceNo: "Rechnungsnummer",
+          selectCustomer: "Kunde auswählen",
+          noEvent: "Kein Event",
+          noQuote: "Kein Angebot",
+          dueDate: "Fälligkeitsdatum",
+          taxPercent: "MwSt. (%)",
+          discountPercent: "Rabatt (%)",
+          saveInvoice: "Rechnung speichern",
+          items: "Positionen",
+          addItem: "Position hinzufügen",
+          product: "Produkt",
+          noProduct: "Kein Produkt",
+          removeItem: "Position entfernen",
+        },
+        errors: {
+          load: "Rechnungen konnten nicht geladen werden",
+          loadDetail: "Rechnung konnte nicht geladen werden",
+          create: "Rechnung konnte nicht erstellt werden",
+          update: "Rechnung konnte nicht aktualisiert werden",
+        },
+        itemTypes: {
+          EQUIPMENT: "Ausrüstung",
+          SERVICE: "Dienstleistung",
+          TRANSPORT: "Transport",
+          PERSONNEL: "Personal",
+          OTHER: "Sonstiges",
+        },
+        print: {
+          title: "RECHNUNG",
+          subtitle: "Event Production & Management",
+          customer: "Kunde",
+          issueDate: "Rechnungsdatum",
+          dueDate: "Fällig am",
+          createdAt: "Erstellt am",
+          event: "Event",
+          quote: "Angebot",
+          type: "Typ",
+          description: "Beschreibung",
+          quantity: "Menge",
+          unitPrice: "Einzelpreis",
+          discount: "Rabatt",
+          total: "Gesamt",
+          subtotal: "Zwischensumme",
+          tax: "MwSt.",
+          totalAmount: "Gesamtbetrag",
+          notes: "Notizen",
+          thankYou: "Vielen Dank für Ihren Auftrag.",
+          paymentNotice: "Bitte überweisen Sie den Rechnungsbetrag bis zum angegebenen Fälligkeitsdatum.",
+        },
+        detail: {
+          back: "Zurück zu Rechnungen",
+          loadError: "Rechnung konnte nicht geladen werden.",
+          invoice: "Rechnung",
+          editInvoice: "Rechnung bearbeiten",
+          sendEmail: "Per E-Mail senden",
+          sending: "Senden...",
+          formOptionsError: "Formulardaten konnten nicht geladen werden.",
+          saveChanges: "Änderungen speichern",
+          quote: "Angebot",
+          type: "Typ",
+          description: "Beschreibung",
+          quantity: "Menge",
+          unitPrice: "Einzelpreis",
+          discount: "Rabatt",
+          subtotal: "Zwischensumme",
+          tax: "MwSt.",
+          notes: "Notizen",
+          print: "Drucken / PDF",
+        },
+        title: "Rechnungen",
+        description: "Rechnungen für Kunden und Events verwalten.",
+        searchPlaceholder: "Rechnungen suchen...",
+        newInvoice: "Neue Rechnung",
+        optionsError: "Kunden, Events, Angebote oder Produkte konnten nicht geladen werden.",
+        loading: "Rechnungen werden geladen",
+        loadError: "Rechnungen konnten nicht geladen werden.",
+        table: {
+          empty: "Keine Rechnungen gefunden.",
+          invoiceNo: "Rechnungsnr.",
+          customer: "Kunde",
+          event: "Event",
+          status: "Status",
+          issueDate: "Rechnungsdatum",
+          dueDate: "Fällig am",
+          total: "Gesamt",
+          open: "Öffnen",
+        },
+      },
       quotes: {
         print: {
           printedAt: "Gedruckt am {{date}}",
@@ -786,6 +876,96 @@ const resources = {
         REPAIRED: "Repaired",
         LOST: "Lost",
         RETIRED: "Retired",
+      },
+      invoices: {
+        form: {
+          invoiceNo: "Invoice number",
+          selectCustomer: "Select customer",
+          noEvent: "No event",
+          noQuote: "No quote",
+          dueDate: "Due date",
+          taxPercent: "VAT (%)",
+          discountPercent: "Discount (%)",
+          saveInvoice: "Save invoice",
+          items: "Items",
+          addItem: "Add item",
+          product: "Product",
+          noProduct: "No product",
+          removeItem: "Remove item",
+        },
+        errors: {
+          load: "Invoices could not be loaded",
+          loadDetail: "Invoice could not be loaded",
+          create: "Invoice could not be created",
+          update: "Invoice could not be updated",
+        },
+        itemTypes: {
+          EQUIPMENT: "Equipment",
+          SERVICE: "Service",
+          TRANSPORT: "Transport",
+          PERSONNEL: "Personnel",
+          OTHER: "Other",
+        },
+        print: {
+          title: "INVOICE",
+          subtitle: "Event Production & Management",
+          customer: "Customer",
+          issueDate: "Invoice date",
+          dueDate: "Due date",
+          createdAt: "Created on",
+          event: "Event",
+          quote: "Quote",
+          type: "Type",
+          description: "Description",
+          quantity: "Quantity",
+          unitPrice: "Unit price",
+          discount: "Discount",
+          total: "Total",
+          subtotal: "Subtotal",
+          tax: "VAT",
+          totalAmount: "Total amount",
+          notes: "Notes",
+          thankYou: "Thank you for your business.",
+          paymentNotice: "Please pay the invoice amount by the specified due date.",
+        },
+        detail: {
+          back: "Back to invoices",
+          loadError: "Invoice could not be loaded.",
+          invoice: "Invoice",
+          editInvoice: "Edit invoice",
+          sendEmail: "Send by email",
+          sending: "Sending...",
+          formOptionsError: "Form data could not be loaded.",
+          saveChanges: "Save changes",
+          quote: "Quote",
+          type: "Type",
+          description: "Description",
+          quantity: "Quantity",
+          unitPrice: "Unit price",
+          discount: "Discount",
+          subtotal: "Subtotal",
+          tax: "VAT",
+          notes: "Notes",
+          print: "Print / PDF",
+        },
+        title: "Invoices",
+        description: "Manage invoices for customers and events.",
+        searchPlaceholder: "Search invoices...",
+        newInvoice: "New invoice",
+        optionsError: "Customers, events, quotes or products could not be loaded.",
+        loading: "Loading invoices",
+        loadError: "Invoices could not be loaded.",
+        table: {
+          empty: "No invoices found.",
+          invoiceNo: "Invoice no.",
+          customer: "Customer",
+          event: "Event",
+          status: "Status",
+          issueDate: "Invoice date",
+          dueDate: "Due date",
+          total: "Total",
+          open: "Open",
+        },
       },
       quotes: {
         print: {
@@ -1501,6 +1681,96 @@ const resources = {
         LOST: "مفقود",
         RETIRED: "خارج الخدمة",
       },
+      invoices: {
+        form: {
+          invoiceNo: "رقم الفاتورة",
+          selectCustomer: "اختر العميل",
+          noEvent: "بدون فعالية",
+          noQuote: "بدون عرض سعر",
+          dueDate: "تاريخ الاستحقاق",
+          taxPercent: "ضريبة القيمة المضافة (%)",
+          discountPercent: "الخصم (%)",
+          saveInvoice: "حفظ الفاتورة",
+          items: "بنود الفاتورة",
+          addItem: "إضافة بند",
+          product: "المنتج",
+          noProduct: "بدون منتج",
+          removeItem: "حذف البند",
+        },
+        errors: {
+          load: "تعذر تحميل الفواتير",
+          loadDetail: "تعذر تحميل الفاتورة",
+          create: "تعذر إنشاء الفاتورة",
+          update: "تعذر تحديث الفاتورة",
+        },
+        itemTypes: {
+          EQUIPMENT: "معدات",
+          SERVICE: "خدمة",
+          TRANSPORT: "نقل",
+          PERSONNEL: "موظفون",
+          OTHER: "أخرى",
+        },
+        print: {
+          title: "فاتورة",
+          subtitle: "إنتاج وإدارة الفعاليات",
+          customer: "العميل",
+          issueDate: "تاريخ الفاتورة",
+          dueDate: "تاريخ الاستحقاق",
+          createdAt: "تاريخ الإنشاء",
+          event: "الفعالية",
+          quote: "عرض السعر",
+          type: "النوع",
+          description: "الوصف",
+          quantity: "الكمية",
+          unitPrice: "سعر الوحدة",
+          discount: "الخصم",
+          total: "الإجمالي",
+          subtotal: "المجموع الفرعي",
+          tax: "ضريبة القيمة المضافة",
+          totalAmount: "المبلغ الإجمالي",
+          notes: "ملاحظات",
+          thankYou: "شكرًا لتعاملكم معنا.",
+          paymentNotice: "يرجى سداد مبلغ الفاتورة قبل تاريخ الاستحقاق المحدد.",
+        },
+        detail: {
+          back: "العودة إلى الفواتير",
+          loadError: "تعذر تحميل الفاتورة.",
+          invoice: "فاتورة",
+          editInvoice: "تعديل الفاتورة",
+          sendEmail: "إرسال بالبريد الإلكتروني",
+          sending: "جارٍ الإرسال...",
+          formOptionsError: "تعذر تحميل بيانات النموذج.",
+          saveChanges: "حفظ التعديلات",
+          quote: "عرض السعر",
+          type: "النوع",
+          description: "الوصف",
+          quantity: "الكمية",
+          unitPrice: "سعر الوحدة",
+          discount: "الخصم",
+          subtotal: "المجموع الفرعي",
+          tax: "ضريبة القيمة المضافة",
+          notes: "ملاحظات",
+          print: "طباعة / PDF",
+        },
+        title: "الفواتير",
+        description: "إدارة فواتير العملاء والفعاليات.",
+        searchPlaceholder: "البحث عن الفواتير...",
+        newInvoice: "فاتورة جديدة",
+        optionsError: "تعذر تحميل العملاء أو الفعاليات أو عروض الأسعار أو المنتجات.",
+        loading: "جارٍ تحميل الفواتير",
+        loadError: "تعذر تحميل الفواتير.",
+        table: {
+          empty: "لم يتم العثور على فواتير.",
+          invoiceNo: "رقم الفاتورة",
+          customer: "العميل",
+          event: "الفعالية",
+          status: "الحالة",
+          issueDate: "تاريخ الفاتورة",
+          dueDate: "تاريخ الاستحقاق",
+          total: "الإجمالي",
+          open: "فتح",
+        },
+      },
       quotes: {
         print: {
           printedAt: "تاريخ الطباعة: {{date}}",
@@ -2149,13 +2419,41 @@ const resources = {
   },
 };
 
+const LANGUAGE_STORAGE_KEY = "nexus-erp-language";
+
+function getSavedLanguage(): "de" | "en" | "ar" {
+  try {
+    const saved = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+
+    if (saved === "de" || saved === "en" || saved === "ar") {
+      return saved;
+    }
+  } catch {
+    // Storage may be unavailable.
+  }
+
+  return "de";
+}
+
 i18n.use(initReactI18next).init({
   resources,
-  lng: "de",
+  lng: getSavedLanguage(),
   fallbackLng: "de",
   interpolation: {
     escapeValue: false,
   },
+});
+
+i18n.on("languageChanged", (language) => {
+  if (language !== "de" && language !== "en" && language !== "ar") {
+    return;
+  }
+
+  try {
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+  } catch {
+    // Storage may be unavailable.
+  }
 });
 
 export default i18n;

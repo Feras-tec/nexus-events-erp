@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { Invoice } from "../types/invoice.types";
 import {
   formatInvoicePrintCurrency,
@@ -22,25 +23,30 @@ function getCustomerName(invoice: Invoice) {
 export function InvoicePrintDocument({
   invoice,
 }: InvoicePrintDocumentProps) {
+  const { t, i18n } = useTranslation();
+  const language = i18n.resolvedLanguage ?? i18n.language;
+  const isArabic = language.startsWith("ar");
+  const locale = isArabic ? "ar" : language.startsWith("en") ? "en-GB" : "de-DE";
+
   return (
-    <article className="invoice-print-sheet">
+    <article className="invoice-print-sheet" dir={isArabic ? "rtl" : "ltr"}>
       <header className="invoice-print-header">
         <div>
           <p className="invoice-print-brand">NEXUS EVENTS</p>
           <p className="invoice-print-subtitle">
-            Event Production & Management
+            {t("invoices.print.subtitle")}
           </p>
         </div>
 
         <div className="invoice-print-title">
-          <h1>RECHNUNG</h1>
+          <h1>{t("invoices.print.title")}</h1>
           <strong>{invoice.invoiceNo}</strong>
         </div>
       </header>
 
       <section className="invoice-print-meta">
         <div>
-          <span>Kunde</span>
+          <span>{t("invoices.print.customer")}</span>
           <strong>{getCustomerName(invoice)}</strong>
 
           {invoice.customer.customerNo && (
@@ -53,19 +59,19 @@ export function InvoicePrintDocument({
         </div>
 
         <div>
-          <span>Rechnungsdatum</span>
+          <span>{t("invoices.print.issueDate")}</span>
           <strong>
-            {formatInvoicePrintDate(invoice.issueDate)}
+            {formatInvoicePrintDate(invoice.issueDate, locale)}
           </strong>
 
-          <span>Fällig am</span>
+          <span>{t("invoices.print.dueDate")}</span>
           <strong>
-            {formatInvoicePrintDate(invoice.dueDate)}
+            {formatInvoicePrintDate(invoice.dueDate, locale)}
           </strong>
 
-          <span>Erstellt am</span>
+          <span>{t("invoices.print.createdAt")}</span>
           <strong>
-            {new Intl.DateTimeFormat("de-DE", {
+            {new Intl.DateTimeFormat(locale, {
               dateStyle: "short",
               timeStyle: "short",
             }).format(new Date(invoice.createdAt))}
@@ -77,7 +83,7 @@ export function InvoicePrintDocument({
         <section className="invoice-print-reference">
           {invoice.event && (
             <div>
-              <span>Event</span>
+              <span>{t("invoices.print.event")}</span>
               <strong>
                 {invoice.event.eventNo} · {invoice.event.name}
               </strong>
@@ -86,7 +92,7 @@ export function InvoicePrintDocument({
 
           {invoice.quote && (
             <div>
-              <span>Angebot</span>
+              <span>{t("invoices.print.quote")}</span>
               <strong>{invoice.quote.quoteNo}</strong>
             </div>
           )}
@@ -97,33 +103,33 @@ export function InvoicePrintDocument({
 
       <section className="invoice-print-totals">
         <div>
-          <span>Zwischensumme</span>
+          <span>{t("invoices.print.subtotal")}</span>
           <span>
-            {formatInvoicePrintCurrency(invoice.subtotal)}
+            {formatInvoicePrintCurrency(invoice.subtotal, locale)}
           </span>
         </div>
 
         <div>
-          <span>Rabatt</span>
+          <span>{t("invoices.print.discount")}</span>
           <span>{invoice.discount} %</span>
         </div>
 
         <div>
-          <span>MwSt.</span>
+          <span>{t("invoices.print.tax")}</span>
           <span>{invoice.tax} %</span>
         </div>
 
         <div className="invoice-print-total">
-          <strong>Gesamtbetrag</strong>
+          <strong>{t("invoices.print.totalAmount")}</strong>
           <strong>
-            {formatInvoicePrintCurrency(invoice.total)}
+            {formatInvoicePrintCurrency(invoice.total, locale)}
           </strong>
         </div>
       </section>
 
       {invoice.notes && (
         <section className="invoice-print-notes">
-          <h2>Notizen</h2>
+          <h2>{t("invoices.print.notes")}</h2>
           <p>{invoice.notes}</p>
         </section>
       )}
@@ -131,15 +137,12 @@ export function InvoicePrintDocument({
       <footer className="invoice-print-footer">
         <div>
           <strong>Nexus Events</strong>
-          <span>Event Production & Management</span>
+          <span>{t("invoices.print.subtitle")}</span>
         </div>
 
         <div>
-          <span>Vielen Dank für Ihren Auftrag.</span>
-          <span>
-            Bitte überweisen Sie den Rechnungsbetrag bis zum
-            angegebenen Fälligkeitsdatum.
-          </span>
+          <span>{t("invoices.print.thankYou")}</span>
+          <span>{t("invoices.print.paymentNotice")}</span>
         </div>
       </footer>
     </article>

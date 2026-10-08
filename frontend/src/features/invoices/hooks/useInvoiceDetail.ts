@@ -1,6 +1,7 @@
 import { useAuth } from "@clerk/react";
 import { useQuery } from "@tanstack/react-query";
 
+import i18n from "../../../i18n/config";
 import { apiFetch } from "../../../services/api";
 import type { Invoice } from "../types/invoice.types";
 
@@ -19,7 +20,7 @@ export function useInvoiceDetail(invoiceId: string) {
 
       if (!response.ok) {
         throw new Error(
-          `Rechnung konnte nicht geladen werden: ${response.status}`,
+          `${i18n.t("invoices.errors.loadDetail")}: ${response.status}`,
         );
       }
 

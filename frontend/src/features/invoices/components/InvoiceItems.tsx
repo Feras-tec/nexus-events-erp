@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "../../../components/atoms/Button";
 import { Input } from "../../../components/atoms/Input";
 import { Select } from "../../../components/atoms/Select";
@@ -34,6 +35,7 @@ export function InvoiceItems({
   onRemove,
   onUpdate,
 }: InvoiceItemsProps) {
+  const { t } = useTranslation();
   const productOptions = products.map((product) => ({
     value: product.id,
     label: `${product.productNo} – ${product.name}`,
@@ -43,11 +45,11 @@ export function InvoiceItems({
     <section className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">
-          Rechnungspositionen
+          {t("invoices.form.items")}
         </h2>
 
         <Button type="button" variant="ghost" onClick={onAdd}>
-          + Position
+          + {t("invoices.form.addItem")}
         </Button>
       </div>
 
@@ -58,11 +60,11 @@ export function InvoiceItems({
         >
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <Select
-              label="Typ"
+              label={t("invoices.detail.type")}
               value={item.type}
               options={itemTypes.map((type) => ({
                 value: type,
-                label: type,
+                label: t(`invoices.itemTypes.${type}`),
               }))}
               onChange={(event) =>
                 onUpdate(index, "type", event.target.value)
@@ -70,10 +72,10 @@ export function InvoiceItems({
             />
 
             <Select
-              label="Produkt"
+              label={t("invoices.form.product")}
               value={item.productId ?? ""}
               options={productOptions}
-              placeholder="Kein Produkt"
+              placeholder={t("invoices.form.noProduct")}
               onChange={(event) =>
                 onUpdate(
                   index,
@@ -84,7 +86,7 @@ export function InvoiceItems({
             />
 
             <Input
-              label="Beschreibung"
+              label={t("invoices.detail.description")}
               value={item.description}
               required
               maxLength={500}
@@ -99,7 +101,7 @@ export function InvoiceItems({
 
             <Input
               type="number"
-              label="Menge"
+              label={t("invoices.detail.quantity")}
               min={0.01}
               step="0.01"
               value={item.quantity}
@@ -115,7 +117,7 @@ export function InvoiceItems({
 
             <Input
               type="number"
-              label="Einzelpreis"
+              label={t("invoices.detail.unitPrice")}
               min={0}
               step="0.01"
               value={item.unitPrice}
@@ -131,7 +133,7 @@ export function InvoiceItems({
 
             <Input
               type="number"
-              label="Rabatt %"
+              label={t("invoices.form.discountPercent")}
               min={0}
               max={100}
               value={item.discount}
@@ -152,7 +154,7 @@ export function InvoiceItems({
                 variant="error"
                 onClick={() => onRemove(index)}
               >
-                Position entfernen
+                {t("invoices.form.removeItem")}
               </Button>
             </div>
           )}

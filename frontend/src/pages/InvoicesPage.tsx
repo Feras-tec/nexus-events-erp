@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
 
@@ -12,6 +13,7 @@ import type { InvoiceFormData } from "../features/invoices/types/invoice.types";
 
 export function InvoicesPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -92,10 +94,10 @@ export function InvoicesPage() {
       transition={{ duration: 0.25 }}
     >
       <ListLayout
-        title="Rechnungen"
-        description="Rechnungen für Kunden und Events verwalten."
+        title={t("invoices.title")}
+        description={t("invoices.description")}
         searchValue={search}
-        searchPlaceholder="Rechnungen suchen..."
+        searchPlaceholder={t("invoices.searchPlaceholder")}
         onSearchChange={setSearch}
         actions={
           <button
@@ -107,7 +109,7 @@ export function InvoicesPage() {
             }
             onClick={() => setShowForm((current) => !current)}
           >
-            {showForm ? "Abbrechen" : "+ Neue Rechnung"}
+            {showForm ? t("common.cancel") : `+ ${t("invoices.newInvoice")}`}
           </button>
         }
       >
@@ -122,7 +124,7 @@ export function InvoicesPage() {
 
               {optionsError && (
                 <div role="alert" className="alert alert-error">
-                  Kunden, Events, Angebote oder Produkte konnten nicht geladen werden.
+                  {t("invoices.optionsError")}
                 </div>
               )}
 
@@ -149,14 +151,14 @@ export function InvoicesPage() {
             <div className="flex justify-center py-12">
               <span
                 className="loading loading-spinner loading-lg"
-                aria-label="Rechnungen werden geladen"
+                aria-label={t("invoices.loading")}
               />
             </div>
           )}
 
           {isError && (
             <div role="alert" className="alert alert-error">
-              Rechnungen konnten nicht geladen werden.
+              {t("invoices.loadError")}
             </div>
           )}
 

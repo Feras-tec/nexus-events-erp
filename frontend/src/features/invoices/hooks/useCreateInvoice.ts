@@ -4,6 +4,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 
+import i18n from "../../../i18n/config";
 import { apiFetch } from "../../../services/api";
 import type {
   Invoice,
@@ -76,7 +77,7 @@ export function useCreateInvoice() {
 
         throw new Error(
           result?.error ||
-            `Rechnung konnte nicht erstellt werden: ${response.status}`,
+            `${i18n.t("invoices.errors.create")}: ${response.status}`,
         );
       }
 

@@ -1,19 +1,12 @@
+import { useTranslation } from "react-i18next";
+
 import type {
   Invoice,
-  InvoiceStatus,
 } from "../types/invoice.types";
 
 type InvoiceTableProps = {
   invoices: Invoice[];
   onView: (invoiceId: string) => void;
-};
-
-const statusLabels: Record<InvoiceStatus, string> = {
-  DRAFT: "Entwurf",
-  ISSUED: "Ausgestellt",
-  PAID: "Bezahlt",
-  OVERDUE: "Überfällig",
-  CANCELLED: "Storniert",
 };
 
 function getCustomerName(invoice: Invoice) {
@@ -29,17 +22,17 @@ function getCustomerName(invoice: Invoice) {
     .join(" ");
 }
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("de-DE", {
+function formatCurrency(value: number, locale: string) {
+  return new Intl.NumberFormat(locale, {
     style: "currency",
     currency: "EUR",
   }).format(value);
 }
 
-function formatDate(value?: string | null) {
+function formatDate(value: string | null | undefined, locale: string) {
   if (!value) return "—";
 
-  return new Intl.DateTimeFormat("de-DE").format(
+  return new Intl.DateTimeFormat(locale).format(
     new Date(value),
   );
 }
@@ -48,10 +41,18 @@ export function InvoiceTable({
   invoices,
   onView,
 }: InvoiceTableProps) {
+  const { t, i18n } = useTranslation();
+  const language = i18n.resolvedLanguage ?? i18n.language;
+  const locale = language.startsWith("ar")
+    ? "ar"
+    : language.startsWith("en")
+      ? "en-GB"
+      : "de-DE";
+
   if (invoices.length === 0) {
     return (
       <div className="py-12 text-center text-base-content/60">
-        Keine Rechnungen gefunden.
+        {t("invoices.table.empty")}
       </div>
     );
   }
@@ -61,13 +62,13 @@ export function InvoiceTable({
       <table className="table">
         <thead>
           <tr>
-            <th>Rechnungsnr.</th>
-            <th>Kunde</th>
-            <th>Event</th>
-            <th>Status</th>
-            <th>Rechnungsdatum</th>
-            <th>Fällig am</th>
-            <th className="text-right">Gesamt</th>
+            <th>{t("invoices.table.invoiceNo")}</th>
+            <th>{t("invoices.table.customer")}</th>
+            <th>{t("invoices.table.event")}</th>
+            <th>{t("invoices.table.status")}</th>
+            <th>{t("invoices.table.issueDate")}</th>
+            <th>{t("invoices.table.dueDate")}</th>
+            <th className="text-right">{t("invoices.table.total")}</th>
             <th />
           </tr>
         </thead>
@@ -91,16 +92,16 @@ export function InvoiceTable({
 
               <td>
                 <span className="badge badge-outline">
-                  {statusLabels[invoice.status]}
+                  {t(`status.${invoice.status}`)}
                 </span>
               </td>
 
-              <td>{formatDate(invoice.issueDate)}</td>
+              <td>{formatDate(invoice.issueDate, locale)}</td>
 
-              <td>{formatDate(invoice.dueDate)}</td>
+              <td>{formatDate(invoice.dueDate, locale)}</td>
 
               <td className="text-right font-medium">
-                {formatCurrency(invoice.total)}
+                {formatCurrency(invoice.total, locale)}
               </td>
 
               <td className="text-right">
@@ -109,7 +110,7 @@ export function InvoiceTable({
                   className="btn btn-sm btn-ghost"
                   onClick={() => onView(invoice.id)}
                 >
-                  Öffnen
+                  {t("invoices.table.open")}
                 </button>
               </td>
             </tr>

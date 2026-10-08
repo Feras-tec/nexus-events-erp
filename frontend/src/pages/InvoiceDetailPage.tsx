@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { motion } from "motion/react";
 
+import { InvoiceSummary } from "../components/molecules/InvoiceSummary";
 import { InvoiceForm } from "../components/organisms/InvoiceForm";
 import { InvoicePrintAction } from "../features/invoices/components/InvoicePrintAction";
 import { InvoicePrintDocument } from "../features/invoices/components/InvoicePrintDocument";
@@ -11,34 +13,32 @@ import { useUpdateInvoice } from "../features/invoices/hooks/useUpdateInvoice";
 import { useSendInvoiceEmail } from "../features/invoices/hooks/useSendInvoiceEmail";
 import type {
   InvoiceFormData,
-  InvoiceStatus,
 } from "../features/invoices/types/invoice.types";
 
-const statusLabels: Record<InvoiceStatus, string> = {
-  DRAFT: "Entwurf",
-  ISSUED: "Ausgestellt",
-  PAID: "Bezahlt",
-  OVERDUE: "Überfällig",
-  CANCELLED: "Storniert",
-};
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("de-DE", {
+function formatCurrency(value: number, locale: string) {
+  return new Intl.NumberFormat(locale, {
     style: "currency",
     currency: "EUR",
   }).format(value);
 }
 
-function formatDate(value?: string | null) {
+function formatDate(value: string | null | undefined, locale: string) {
   if (!value) return "—";
 
-  return new Intl.DateTimeFormat("de-DE").format(
+  return new Intl.DateTimeFormat(locale).format(
     new Date(value),
   );
 }
 
 export function InvoiceDetailPage() {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const language = i18n.resolvedLanguage ?? i18n.language;
+  const locale = language.startsWith("ar")
+    ? "ar"
+    : language.startsWith("en")
+      ? "en-GB"
+      : "de-DE";
   const [isEditing, setIsEditing] = useState(false);
 
   const {
@@ -88,11 +88,11 @@ export function InvoiceDetailPage() {
           className="btn btn-ghost"
           onClick={() => navigate({ to: "/invoices" })}
         >
-          ← Zurück
+          {t("common.back")}
         </button>
 
         <div role="alert" className="alert alert-error">
-          Rechnung konnte nicht geladen werden.
+          {t("invoices.detail.loadError")}
         </div>
       </div>
     );
@@ -164,13 +164,13 @@ export function InvoiceDetailPage() {
         className="btn btn-ghost"
         onClick={() => navigate({ to: "/invoices" })}
       >
-        ← Zurück zu Rechnungen
+        {t("invoices.detail.back")}
       </button>
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-sm text-base-content/60">
-            Rechnung
+            {t("invoices.detail.invoice")}
           </p>
 
           <h1 className="text-3xl font-bold">
@@ -180,7 +180,7 @@ export function InvoiceDetailPage() {
 
         <div className="flex flex-wrap items-center gap-2">
           <span className="badge badge-lg badge-outline">
-            {statusLabels[invoice.status]}
+            {t(`status.${invoice.status}`)}
           </span>
 
           <button
@@ -188,14 +188,14 @@ export function InvoiceDetailPage() {
             className="btn btn-outline w-36"
             onClick={() => setIsEditing((current) => !current)}
           >
-            {isEditing ? "Abbrechen" : "Bearbeiten"}
+            {isEditing ? t("common.cancel") : t("common.edit")}
           </button>
 
           <InvoicePrintAction />
 
           <button
             type="button"
-            className="btn btn-outline w-36"
+            className="btn btn-outline h-auto min-h-10 min-w-36 px-4 py-2 whitespace-nowrap"
             disabled={isSending}
             onClick={async () => {
               await sendInvoiceEmail({
@@ -206,10 +206,10 @@ export function InvoiceDetailPage() {
             {isSending ? (
               <>
                 <span className="loading loading-spinner loading-sm" />
-                Senden...
+                {t("invoices.detail.sending")}
               </>
             ) : (
-              "Per E-Mail senden"
+              t("invoices.detail.sendEmail")
             )}
           </button>
         </div>
@@ -225,7 +225,7 @@ export function InvoiceDetailPage() {
         <div className="card border border-base-300 bg-base-100">
           <div className="card-body">
             <h2 className="card-title">
-              Rechnung bearbeiten
+              {t("invoices.detail.editInvoice")}
             </h2>
 
             {areOptionsLoading && (
@@ -236,7 +236,7 @@ export function InvoiceDetailPage() {
 
             {areOptionsError && (
               <div role="alert" className="alert alert-error">
-                Formulardaten konnten nicht geladen werden.
+                {t("invoices.detail.formOptionsError")}
               </div>
             )}
 
@@ -255,7 +255,7 @@ export function InvoiceDetailPage() {
                 products={products}
                 initialData={initialFormData}
                 loading={isUpdating}
-                submitLabel="Änderungen speichern"
+                submitLabel={t("invoices.detail.saveChanges")}
                 onSubmit={handleUpdate}
               />
             )}
@@ -267,7 +267,7 @@ export function InvoiceDetailPage() {
         <div className="card border border-base-300 bg-base-100">
           <div className="card-body">
             <span className="text-sm text-base-content/60">
-              Kunde
+              {t("invoices.table.customer")}
             </span>
 
             <strong>{customerName || "—"}</strong>
@@ -277,7 +277,7 @@ export function InvoiceDetailPage() {
         <div className="card border border-base-300 bg-base-100">
           <div className="card-body">
             <span className="text-sm text-base-content/60">
-              Event
+              {t("invoices.table.event")}
             </span>
 
             <strong>
@@ -291,20 +291,20 @@ export function InvoiceDetailPage() {
         <div className="card border border-base-300 bg-base-100">
           <div className="card-body">
             <span className="text-sm text-base-content/60">
-              Fällig am
+              {t("invoices.table.dueDate")}
             </span>
 
-            <strong>{formatDate(invoice.dueDate)}</strong>
+            <strong>{formatDate(invoice.dueDate, locale)}</strong>
           </div>
         </div>
 
         <div className="card border border-base-300 bg-base-100">
           <div className="card-body">
             <span className="text-sm text-base-content/60">
-              Gesamt
+              {t("invoices.table.total")}
             </span>
 
-            <strong>{formatCurrency(invoice.total)}</strong>
+            <strong>{formatCurrency(invoice.total, locale)}</strong>
           </div>
         </div>
       </div>
@@ -313,17 +313,17 @@ export function InvoiceDetailPage() {
         <div className="card border border-base-300 bg-base-100">
           <div className="card-body">
             <span className="text-sm text-base-content/60">
-              Rechnungsdatum
+              {t("invoices.table.issueDate")}
             </span>
 
-            <strong>{formatDate(invoice.issueDate)}</strong>
+            <strong>{formatDate(invoice.issueDate, locale)}</strong>
           </div>
         </div>
 
         <div className="card border border-base-300 bg-base-100">
           <div className="card-body">
             <span className="text-sm text-base-content/60">
-              Angebot
+              {t("invoices.detail.quote")}
             </span>
 
             <strong>
@@ -337,19 +337,19 @@ export function InvoiceDetailPage() {
         <table className="table">
           <thead>
             <tr>
-              <th>Typ</th>
-              <th>Beschreibung</th>
-              <th className="text-right">Menge</th>
-              <th className="text-right">Einzelpreis</th>
-              <th className="text-right">Rabatt</th>
-              <th className="text-right">Gesamt</th>
+              <th>{t("invoices.detail.type")}</th>
+              <th>{t("invoices.detail.description")}</th>
+              <th className="text-right">{t("invoices.detail.quantity")}</th>
+              <th className="text-right">{t("invoices.detail.unitPrice")}</th>
+              <th className="text-right">{t("invoices.detail.discount")}</th>
+              <th className="text-right">{t("invoices.table.total")}</th>
             </tr>
           </thead>
 
           <tbody>
             {invoice.items.map((item, index) => (
               <tr key={item.id ?? `${item.description}-${index}`}>
-                <td>{item.type}</td>
+                <td>{t(`invoices.itemTypes.${item.type}`, { defaultValue: item.type })}</td>
 
                 <td>{item.description}</td>
 
@@ -358,7 +358,7 @@ export function InvoiceDetailPage() {
                 </td>
 
                 <td className="text-right">
-                  {formatCurrency(item.unitPrice)}
+                  {formatCurrency(item.unitPrice, locale)}
                 </td>
 
                 <td className="text-right">
@@ -366,7 +366,7 @@ export function InvoiceDetailPage() {
                 </td>
 
                 <td className="text-right font-medium">
-                  {formatCurrency(item.total ?? 0)}
+                  {formatCurrency(item.total ?? 0, locale)}
                 </td>
               </tr>
             ))}
@@ -374,36 +374,17 @@ export function InvoiceDetailPage() {
         </table>
       </div>
 
-      <div className="card border border-base-300 bg-base-100">
-        <div className="card-body ml-auto w-full max-w-md">
-          <div className="flex justify-between">
-            <span>Zwischensumme</span>
-            <span>{formatCurrency(invoice.subtotal)}</span>
-          </div>
-
-          <div className="flex justify-between">
-            <span>Rabatt</span>
-            <span>{invoice.discount} %</span>
-          </div>
-
-          <div className="flex justify-between">
-            <span>MwSt.</span>
-            <span>{invoice.tax} %</span>
-          </div>
-
-          <div className="divider my-1" />
-
-          <div className="flex justify-between text-lg font-bold">
-            <span>Gesamt</span>
-            <span>{formatCurrency(invoice.total)}</span>
-          </div>
-        </div>
-      </div>
+      <InvoiceSummary
+        subtotal={invoice.subtotal}
+        discount={invoice.discount}
+        tax={invoice.tax}
+        total={invoice.total}
+      />
 
       {invoice.notes && (
         <div className="card border border-base-300 bg-base-100">
           <div className="card-body">
-            <h2 className="card-title">Notizen</h2>
+            <h2 className="card-title">{t("invoices.detail.notes")}</h2>
 
             <p className="whitespace-pre-wrap">
               {invoice.notes}
