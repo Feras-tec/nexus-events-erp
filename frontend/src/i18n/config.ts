@@ -301,6 +301,19 @@ const resources = {
         loading: "Kunden werden geladen",
         loadError: "Kunden konnten nicht geladen werden.",
         noCustomers: "Keine Kunden gefunden.",
+        filters: {
+          title: "Filter",
+          type: "Kundentyp",
+          allTypes: "Alle Kundentypen",
+          status: "Status",
+          allStatuses: "Alle Status",
+          reset: "Zurücksetzen",
+        },
+        stats: {
+          total: "Alle Kunden",
+          active: "Aktive Kunden",
+          inactive: "Inaktive Kunden",
+        },
         types: {
           COMPANY: "Unternehmen",
           PERSON: "Privatperson",
@@ -1128,6 +1141,19 @@ const resources = {
         loading: "Loading customers",
         loadError: "Customers could not be loaded.",
         noCustomers: "No customers found.",
+        filters: {
+          title: "Filters",
+          type: "Customer type",
+          allTypes: "All customer types",
+          status: "Status",
+          allStatuses: "All statuses",
+          reset: "Reset",
+        },
+        stats: {
+          total: "Total customers",
+          active: "Active customers",
+          inactive: "Inactive customers",
+        },
         types: {
           COMPANY: "Company",
           PERSON: "Person",
@@ -1955,6 +1981,19 @@ const resources = {
         loading: "جاري تحميل العملاء",
         loadError: "تعذر تحميل العملاء.",
         noCustomers: "لم يتم العثور على عملاء.",
+        filters: {
+          title: "الفلاتر",
+          type: "نوع العميل",
+          allTypes: "جميع أنواع العملاء",
+          status: "الحالة",
+          allStatuses: "جميع الحالات",
+          reset: "إعادة تعيين",
+        },
+        stats: {
+          total: "إجمالي العملاء",
+          active: "العملاء النشطون",
+          inactive: "العملاء غير النشطين",
+        },
         types: {
           COMPANY: "شركة",
           PERSON: "شخص",

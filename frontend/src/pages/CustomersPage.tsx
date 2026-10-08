@@ -8,6 +8,12 @@ import { CustomerForm } from "../components/organisms/CustomerForm";
 import { CustomerTable } from "../components/organisms/CustomerTable";
 import { ListLayout } from "../components/templates/ListLayout";
 import { useCustomers } from "../features/customers/hooks/useCustomers";
+import { CustomerStats } from "../features/customers/components/CustomerStats";
+import {
+  CustomerFilters,
+  type CustomerTypeFilter,
+  type CustomerStatusFilter,
+} from "../features/customers/components/CustomerFilters";
 import { useCreateCustomer } from "../features/customers/hooks/useCreateCustomer";
 
 export function CustomersPage() {
@@ -15,6 +21,10 @@ export function CustomersPage() {
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] =
+    useState<CustomerTypeFilter>("ALL");
+  const [statusFilter, setStatusFilter] =
+    useState<CustomerStatusFilter>("ALL");
   const [showCreateForm, setShowCreateForm] = useState(false);
 
   const {
@@ -30,6 +40,18 @@ export function CustomersPage() {
   const normalizedSearch = search.trim().toLowerCase();
 
   const filteredCustomers = customers.filter((customer) => {
+    if (typeFilter !== "ALL" && customer.type !== typeFilter) {
+      return false;
+    }
+
+    if (statusFilter === "ACTIVE" && !customer.isActive) {
+      return false;
+    }
+
+    if (statusFilter === "INACTIVE" && customer.isActive) {
+      return false;
+    }
+
     if (!normalizedSearch) return true;
 
     const searchableText = [
@@ -76,6 +98,26 @@ export function CustomersPage() {
           </Button>
         }
       >
+        {!isLoading && !isError && (
+          <div className="mb-6">
+            <CustomerStats customers={customers} />
+          </div>
+        )}
+
+        <div className="mb-6">
+          <CustomerFilters
+            type={typeFilter}
+            status={statusFilter}
+            onTypeChange={setTypeFilter}
+            onStatusChange={setStatusFilter}
+            onReset={() => {
+              setSearch("");
+              setTypeFilter("ALL");
+              setStatusFilter("ALL");
+            }}
+          />
+        </div>
+
         <AnimatePresence>
           {showCreateForm && (
             <motion.div
