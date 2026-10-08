@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import type { Quote } from "../types/quote.types";
+import { QuoteMobileCards } from "./QuoteMobileCards";
 
 type QuoteTableProps = {
   quotes: Quote[];
@@ -51,8 +52,11 @@ export function QuoteTable({
   }
 
   return (
-    <div className="overflow-x-auto rounded-box border border-base-300 bg-base-100">
-      <table className="table">
+    <>
+      <QuoteMobileCards quotes={quotes} onView={onView} />
+
+      <div className="hidden overflow-x-auto rounded-box border border-base-300 bg-base-100 md:block">
+        <table className="table">
         <thead>
           <tr>
             <th>{t("quotes.table.quoteNo")}</th>
@@ -104,7 +108,8 @@ export function QuoteTable({
             </tr>
           ))}
         </tbody>
-      </table>
-    </div>
+        </table>
+      </div>
+    </>
   );
 }

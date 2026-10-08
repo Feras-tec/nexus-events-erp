@@ -6,6 +6,11 @@ import { useTranslation } from "react-i18next";
 import { ListLayout } from "../components/templates/ListLayout";
 import { QuoteForm } from "../features/quotes/components/QuoteForm";
 import { QuoteTable } from "../features/quotes/components/QuoteTable";
+import { QuoteStats } from "../features/quotes/components/QuoteStats";
+import {
+  QuoteFilters,
+  type QuoteStatusFilter,
+} from "../features/quotes/components/QuoteFilters";
 import { useCreateQuote } from "../features/quotes/hooks/useCreateQuote";
 import { useQuoteFormOptions } from "../features/quotes/hooks/useQuoteFormOptions";
 import { useQuotes } from "../features/quotes/hooks/useQuotes";
@@ -16,6 +21,10 @@ export function QuotesPage() {
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] =
+    useState<QuoteStatusFilter>("ALL");
+  const [customerFilter, setCustomerFilter] = useState("ALL");
+  const [eventFilter, setEventFilter] = useState("ALL");
   const [showForm, setShowForm] = useState(false);
 
   const {
@@ -38,9 +47,65 @@ export function QuotesPage() {
     createError,
   } = useCreateQuote();
 
+  const filterCustomers = Array.from(
+    new Map(
+      quotes.map((quote) => {
+        const customer = quote.customer;
+
+        const name =
+          customer.companyName ||
+          [customer.firstName, customer.lastName]
+            .filter(Boolean)
+            .join(" ") ||
+          customer.customerNo;
+
+        return [
+          customer.id,
+          { id: customer.id, name },
+        ] as const;
+      })
+    ).values()
+  ).sort((a, b) => a.name.localeCompare(b.name));
+
+  const filterEvents = Array.from(
+    new Map(
+      quotes
+        .filter((quote) => quote.event != null)
+        .map((quote) => {
+          const event = quote.event!;
+
+          return [
+            event.id,
+            { id: event.id, name: event.name },
+          ] as const;
+        })
+    ).values()
+  ).sort((a, b) => a.name.localeCompare(b.name));
+
   const normalizedSearch = search.trim().toLowerCase();
 
   const filteredQuotes = quotes.filter((quote) => {
+    if (
+      statusFilter !== "ALL" &&
+      quote.status !== statusFilter
+    ) {
+      return false;
+    }
+
+    if (
+      customerFilter !== "ALL" &&
+      quote.customer.id !== customerFilter
+    ) {
+      return false;
+    }
+
+    if (
+      eventFilter !== "ALL" &&
+      quote.event?.id !== eventFilter
+    ) {
+      return false;
+    }
+
     if (!normalizedSearch) return true;
 
     const customerName = quote.customer.companyName
@@ -157,6 +222,28 @@ export function QuotesPage() {
             <div role="alert" className="alert alert-error">
               {t("quotes.loadError")}
             </div>
+          )}
+
+          {!isLoading && !isError && (
+            <QuoteStats quotes={quotes} />
+          )}
+
+          {!isLoading && !isError && (
+            <QuoteFilters
+              status={statusFilter}
+              customerId={customerFilter}
+              eventId={eventFilter}
+              customers={filterCustomers}
+              events={filterEvents}
+              onStatusChange={setStatusFilter}
+              onCustomerChange={setCustomerFilter}
+              onEventChange={setEventFilter}
+              onReset={() => {
+                setStatusFilter("ALL");
+                setCustomerFilter("ALL");
+                setEventFilter("ALL");
+              }}
+            />
           )}
 
           {!isLoading && !isError && (

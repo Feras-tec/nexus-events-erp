@@ -167,6 +167,22 @@ const resources = {
         },
       },
       quotes: {
+        filters: {
+          title: "Filter",
+          status: "Status",
+          allStatuses: "Alle Status",
+          customer: "Kunde",
+          allCustomers: "Alle Kunden",
+          event: "Event",
+          allEvents: "Alle Events",
+          reset: "Zurücksetzen",
+        },
+        stats: {
+          total: "Gesamtangebote",
+          draft: "Entwürfe",
+          sent: "Gesendet",
+          accepted: "Angenommen",
+        },
         print: {
           printedAt: "Gedruckt am {{date}}",
           quote: "Angebot",
@@ -1060,6 +1076,22 @@ const resources = {
         },
       },
       quotes: {
+        filters: {
+          title: "Filters",
+          status: "Status",
+          allStatuses: "All statuses",
+          customer: "Customer",
+          allCustomers: "All customers",
+          event: "Event",
+          allEvents: "All events",
+          reset: "Reset",
+        },
+        stats: {
+          total: "Total quotes",
+          draft: "Drafts",
+          sent: "Sent",
+          accepted: "Accepted",
+        },
         print: {
           printedAt: "Printed on {{date}}",
           quote: "Quote",
@@ -1953,6 +1985,22 @@ const resources = {
         },
       },
       quotes: {
+        filters: {
+          title: "الفلاتر",
+          status: "الحالة",
+          allStatuses: "جميع الحالات",
+          customer: "العميل",
+          allCustomers: "جميع العملاء",
+          event: "الفعالية",
+          allEvents: "جميع الفعاليات",
+          reset: "إعادة تعيين",
+        },
+        stats: {
+          total: "إجمالي العروض",
+          draft: "المسودات",
+          sent: "المرسلة",
+          accepted: "المقبولة",
+        },
         print: {
           printedAt: "تاريخ الطباعة: {{date}}",
           quote: "عرض سعر",
