@@ -28,7 +28,7 @@ const emptyValues: EquipmentFormValues = {
   assetNo: "",
   manufacturerSerial: "",
   barcode: "",
-  status: "AVAILABLE",
+  status: "PENDING_REGISTRATION",
   location: "",
   purchaseDate: "",
   purchasePrice: "",

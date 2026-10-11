@@ -49,6 +49,13 @@ export async function createEquipmentMovement(req: Request, res: Response) {
       responsibleEmployeeId,
     } = result.data;
 
+    // Die Erstregistrierung darf nur über den Barcode-Scan erfolgen
+    if (inventoryItem.status === "PENDING_REGISTRATION") {
+      return res.status(409).json({
+        error: "Pending inventory registration requires the barcode receiving endpoint",
+      });
+    }
+
     // Event-Bewegungen benötigen immer eine verknüpfte Reservierung
     const eventMovementTypes = [
       "RESERVED",
@@ -237,8 +244,12 @@ export async function createEquipmentMovement(req: Request, res: Response) {
         },
       });
 
+      // Statusänderung nur bei unverändertem Ausgangsstatus erlauben
       await tx.inventoryItem.update({
-        where: { id: inventoryItemId },
+        where: {
+          id: inventoryItemId,
+          status: inventoryItem.status,
+        },
         data: {
           status: toStatus,
           ...(toLocation !== undefined ? { location: toLocation } : {}),
@@ -271,6 +282,18 @@ export async function createEquipmentMovement(req: Request, res: Response) {
 
     return res.status(201).json(movement);
   } catch (error) {
+    // Gleichzeitige Statusänderungen als Konflikt behandeln
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === "P2025"
+    ) {
+      return res.status(409).json({
+        error: "Equipment status changed concurrently",
+      });
+    }
+
     console.error("Create equipment movement error:", error);
 
     return res.status(500).json({

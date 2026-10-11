@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "InventoryItemStatus" ADD VALUE 'PENDING_REGISTRATION';

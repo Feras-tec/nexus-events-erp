@@ -23,7 +23,7 @@ export function useCreateEquipment({
         manufacturerSerial:
           data.manufacturerSerial.trim() || undefined,
         barcode: data.barcode.trim() || undefined,
-        status: data.status,
+        status: "PENDING_REGISTRATION",
         location: data.location.trim() || undefined,
         purchaseDate: data.purchaseDate || undefined,
         purchasePrice: data.purchasePrice

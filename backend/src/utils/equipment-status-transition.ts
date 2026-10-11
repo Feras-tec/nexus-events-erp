@@ -1,4 +1,5 @@
 type EquipmentStatus =
+  | "PENDING_REGISTRATION"
   | "RECEIVED"
   | "AVAILABLE"
   | "RESERVED"
@@ -16,6 +17,7 @@ type EquipmentStatus =
 
 // Erlaubte Statusübergänge für Geräte
 const allowedTransitions: Record<EquipmentStatus, EquipmentStatus[]> = {
+  PENDING_REGISTRATION: ["RECEIVED"],
   RECEIVED: ["AVAILABLE"],
   AVAILABLE: ["RESERVED", "MAINTENANCE", "LOST", "RETIRED"],
   RESERVED: ["AVAILABLE", "PICKING"],
@@ -78,6 +80,9 @@ export function isEquipmentMovementTypeValid(
       Partial<Record<EquipmentStatus, EquipmentMovementType[]>>
     >
   > = {
+    PENDING_REGISTRATION: {
+      RECEIVED: ["RECEIVED"],
+    },
     RECEIVED: {
       AVAILABLE: ["RECEIVED"],
     },

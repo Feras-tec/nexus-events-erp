@@ -22,6 +22,7 @@ export type EquipmentFormValues = {
   manufacturerSerial: string;
   barcode: string;
   status:
+    | "PENDING_REGISTRATION"
     | "RECEIVED"
     | "AVAILABLE"
     | "RESERVED"

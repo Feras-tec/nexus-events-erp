@@ -55,8 +55,22 @@ export const createInventoryItem = async (req: Request, res: Response) => {
       });
     }
 
+    // Neue Artikel dürfen nicht ohne Barcode-Scan verfügbar werden
+    if (result.data.status !== "PENDING_REGISTRATION") {
+      return res.status(409).json({
+        error: "New inventory items must start as pending registration",
+      });
+    }
+
+    // Inventarnummer als Barcode verwenden, falls keiner angegeben wurde
+    const barcode = result.data.barcode?.trim() || result.data.assetNo;
+
     const inventoryItem = await prisma.inventoryItem.create({
-      data: result.data,
+      data: {
+        ...result.data,
+        barcode,
+        status: "PENDING_REGISTRATION",
+      },
       include: {
         product: true,
         warehouse: true,
@@ -164,6 +178,27 @@ export const updateInventoryItem = async (req: Request, res: Response) => {
       });
     }
 
+    // Nicht registrierte Artikel dürfen nicht manuell freigegeben werden
+    if (
+      existingItem.status === "PENDING_REGISTRATION" &&
+      result.data.status &&
+      result.data.status !== "PENDING_REGISTRATION"
+    ) {
+      return res.status(409).json({
+        error: "Pending inventory items must be received by barcode scan",
+      });
+    }
+
+    // Der Registrierungsstatus darf nicht manuell gesetzt werden
+    if (
+      result.data.status === "PENDING_REGISTRATION" &&
+      existingItem.status !== "PENDING_REGISTRATION"
+    ) {
+      return res.status(409).json({
+        error: "Pending registration cannot be assigned manually",
+      });
+    }
+
     // Neues Lager prüfen, falls der Artikel verschoben wird
     if (result.data.warehouseId) {
       const warehouse = await prisma.warehouse.findUnique({
@@ -185,9 +220,11 @@ export const updateInventoryItem = async (req: Request, res: Response) => {
       }
     }
 
+    // Aktualisierung nur bei unverändertem Status durchführen
     const inventoryItem = await prisma.inventoryItem.update({
       where: {
         id,
+        status: existingItem.status,
       },
       data: result.data,
       include: {
@@ -200,6 +237,18 @@ export const updateInventoryItem = async (req: Request, res: Response) => {
       data: inventoryItem,
     });
   } catch (error) {
+    // Gleichzeitige Statusänderungen verhindern veraltete Updates
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === "P2025"
+    ) {
+      return res.status(409).json({
+        error: "Inventory item was modified concurrently or no longer exists",
+      });
+    }
+
     console.error("Update inventory item error:", error);
 
     return res.status(500).json({

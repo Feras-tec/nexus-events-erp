@@ -304,12 +304,17 @@ model InventoryItem {
   reservations Reservation[]
   movements    EquipmentMovement[]
 
+  barcodeBatchId String?
+  barcodeBatch   BarcodeBatch? @relation(fields: [barcodeBatchId], references: [id])
+
+  @@index([barcodeBatchId])
   @@index([productId])
   @@index([warehouseId])
   @@index([status])
 }
 
 enum InventoryItemStatus {
+  PENDING_REGISTRATION
   RECEIVED
   AVAILABLE
   RESERVED
@@ -626,4 +631,19 @@ model AppUser {
 
   @@index([role])
   @@index([isActive])
+}
+
+// Barcode-Charge zur sicheren Vermeidung doppelter Generierungsanfragen
+model BarcodeBatch {
+  id             String   @id @default(uuid())
+  idempotencyKey String   @unique
+  productId      String
+  warehouseId    String
+  quantity       Int
+  createdAt      DateTime @default(now())
+
+  inventoryItems InventoryItem[]
+
+  @@index([productId])
+  @@index([warehouseId])
 }

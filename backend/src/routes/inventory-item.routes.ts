@@ -1,3 +1,7 @@
+import {
+  bulkGenerateInventoryItems,
+  scanReceiveInventoryItem,
+} from "../controllers/inventory-barcode.controller.js";
 import { Router } from "express";
 import {
   createInventoryItem,
@@ -8,6 +12,21 @@ import {
 import { requireRole } from "../middleware/require-role.js";
 
 const router = Router();
+
+// Wareneingang durch Barcode-Scan registrieren
+router.post(
+  "/scan-receive",
+  requireRole("OWNER", "ADMIN", "WAREHOUSE_MANAGER", "WAREHOUSE_EMPLOYEE"),
+  scanReceiveInventoryItem,
+);
+
+// Mehrere Barcode-Artikel für die Lagerregistrierung erzeugen
+router.post(
+  "/bulk-generate",
+  requireRole("OWNER", "ADMIN", "WAREHOUSE_MANAGER"),
+  bulkGenerateInventoryItems,
+);
+
 
 // Alle Lagerartikel abrufen
 router.get(

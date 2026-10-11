@@ -17,6 +17,7 @@ import {
 } from "../features/equipment/components/EquipmentFilters";
 import { useEquipmentFormOptions } from "../features/equipment/hooks/useEquipmentFormOptions";
 import { useCreateEquipment } from "../features/equipment/hooks/useCreateEquipment";
+import { BarcodeGenerator } from "../features/equipment/components/BarcodeGenerator";
 
 export function EquipmentPage() {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ export function EquipmentPage() {
     useState<EquipmentStatusFilter>("ALL");
   const [warehouseFilter, setWarehouseFilter] = useState("ALL");
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showBarcodeGenerator, setShowBarcodeGenerator] = useState(false);
 
   const {
     equipment,
@@ -99,12 +101,20 @@ export function EquipmentPage() {
         searchPlaceholder={t("equipment.search")}
         onSearchChange={setSearch}
         actions={
-          <Button
-            type="button"
-            onClick={() => setShowCreateForm((current) => !current)}
-          >
-            {showCreateForm ? t("equipment.cancel") : t("equipment.new")}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              onClick={() => setShowBarcodeGenerator((current) => !current)}
+            >
+              {showBarcodeGenerator ? "Schließen" : "Barcodes generieren"}
+            </Button>
+            <Button
+              type="button"
+              onClick={() => setShowCreateForm((current) => !current)}
+            >
+              {showCreateForm ? t("equipment.cancel") : t("equipment.new")}
+            </Button>
+          </div>
         }
       >
         {!isLoading && !isError && (
@@ -127,6 +137,25 @@ export function EquipmentPage() {
             }}
           />
         </div>
+
+        {showBarcodeGenerator && (
+          <div className="mb-6">
+            {formDataLoading && (
+              <div className="loading loading-spinner" />
+            )}
+            {formDataError && (
+              <div role="alert" className="alert alert-error">
+                Produkt- oder Lagerdaten konnten nicht geladen werden.
+              </div>
+            )}
+            {!formDataLoading && !formDataError && (
+              <BarcodeGenerator
+                products={products}
+                warehouses={warehouses}
+              />
+            )}
+          </div>
+        )}
 
         <AnimatePresence>
           {showCreateForm && (
