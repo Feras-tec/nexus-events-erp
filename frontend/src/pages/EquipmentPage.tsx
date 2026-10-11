@@ -18,6 +18,7 @@ import {
 import { useEquipmentFormOptions } from "../features/equipment/hooks/useEquipmentFormOptions";
 import { useCreateEquipment } from "../features/equipment/hooks/useCreateEquipment";
 import { BarcodeGenerator } from "../features/equipment/components/BarcodeGenerator";
+import { BarcodeScanner } from "../features/equipment/components/BarcodeScanner";
 
 export function EquipmentPage() {
   const navigate = useNavigate();
@@ -29,6 +30,7 @@ export function EquipmentPage() {
   const [warehouseFilter, setWarehouseFilter] = useState("ALL");
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showBarcodeGenerator, setShowBarcodeGenerator] = useState(false);
+  const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
 
   const {
     equipment,
@@ -110,6 +112,12 @@ export function EquipmentPage() {
             </Button>
             <Button
               type="button"
+              onClick={() => setShowBarcodeScanner((current) => !current)}
+            >
+              {showBarcodeScanner ? "Scanner schließen" : "Barcode scannen"}
+            </Button>
+            <Button
+              type="button"
               onClick={() => setShowCreateForm((current) => !current)}
             >
               {showCreateForm ? t("equipment.cancel") : t("equipment.new")}
@@ -154,6 +162,12 @@ export function EquipmentPage() {
                 warehouses={warehouses}
               />
             )}
+          </div>
+        )}
+
+        {showBarcodeScanner && (
+          <div className="mb-6">
+            <BarcodeScanner />
           </div>
         )}
 
