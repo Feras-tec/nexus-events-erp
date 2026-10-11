@@ -1,4 +1,5 @@
 import { useRef, useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { BarcodeLabels } from "./BarcodeLabels";
 import type {
   ProductOption,
@@ -21,6 +22,7 @@ export function BarcodeGenerator({
   products,
   warehouses,
 }: BarcodeGeneratorProps) {
+  const { t } = useTranslation();
   const [productId, setProductId] = useState("");
   const [warehouseId, setWarehouseId] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -63,17 +65,16 @@ export function BarcodeGenerator({
   return (
     <section className="rounded-box border border-base-300 bg-base-100 p-5">
       <h2 className="mb-2 text-xl font-semibold">
-        Barcodes generieren
+        {t("barcodeGenerator.title")}
       </h2>
 
       <p className="mb-5 text-sm text-base-content/70">
-        Neue Geräte müssen vor der Verwendung per Barcode
-        im Lager eingebucht werden.
+        {t("barcodeGenerator.description")}
       </p>
 
       <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-3">
         <label className="fieldset">
-          <span className="fieldset-legend">Produkt</span>
+          <span className="fieldset-legend">{t("barcodeGenerator.product")}</span>
           <select
             className="select w-full"
             value={productId}
@@ -84,7 +85,7 @@ export function BarcodeGenerator({
             disabled={generateBarcodesMutation.isPending}
             required
           >
-            <option value="">Produkt auswählen</option>
+            <option value="">{t("barcodeGenerator.selectProduct")}</option>
             {products.filter((product) => product.isActive).map((product) => (
               <option key={product.id} value={product.id}>
                 {product.productNo} – {product.name}
@@ -94,7 +95,7 @@ export function BarcodeGenerator({
         </label>
 
         <label className="fieldset">
-          <span className="fieldset-legend">Lager</span>
+          <span className="fieldset-legend">{t("barcodeGenerator.warehouse")}</span>
           <select
             className="select w-full"
             value={warehouseId}
@@ -105,7 +106,7 @@ export function BarcodeGenerator({
             disabled={generateBarcodesMutation.isPending}
             required
           >
-            <option value="">Lager auswählen</option>
+            <option value="">{t("barcodeGenerator.selectWarehouse")}</option>
             {warehouses.filter((warehouse) => warehouse.isActive).map(
               (warehouse) => (
                 <option key={warehouse.id} value={warehouse.id}>
@@ -117,7 +118,7 @@ export function BarcodeGenerator({
         </label>
 
         <label className="fieldset">
-          <span className="fieldset-legend">Anzahl</span>
+          <span className="fieldset-legend">{t("barcodeGenerator.quantity")}</span>
           <input
             className="input w-full"
             type="number"
@@ -141,29 +142,28 @@ export function BarcodeGenerator({
             disabled={generateBarcodesMutation.isPending}
           >
             {generateBarcodesMutation.isPending
-              ? "Barcodes werden erstellt ..."
+              ? t("barcodeGenerator.generating")
               : pendingRequest.current
-                ? "Generierung erneut versuchen"
-                : "Barcodes generieren"}
+                ? t("barcodeGenerator.retry")
+                : t("barcodeGenerator.generate")}
           </button>
         </div>
       </form>
 
       {generateBarcodesMutation.isError && (
         <div role="alert" className="alert alert-error mt-4">
-          Die Generierung ist fehlgeschlagen.
-          Bitte versuchen Sie es erneut.
+          {t("barcodeGenerator.error")}
         </div>
       )}
 
       {result && (
         <div role="status" className="alert alert-success mt-4">
           <span>
-            {result.count} Barcodes erfolgreich geladen.
+            {t("barcodeGenerator.success", { count: result.count })}
             {result.reused
-              ? " Eine vorhandene Charge wurde wiederverwendet."
+              ? ` ${t("barcodeGenerator.reused")}`
               : ""}
-            {" "}Die Geräte sind noch nicht im Lager eingebucht.
+            {" "}{t("barcodeGenerator.pending")}
           </span>
         </div>
       )}

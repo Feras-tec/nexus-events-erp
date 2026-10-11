@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { BrowserMultiFormatReader } from "@zxing/browser";
 import { BarcodeFormat, DecodeHintType } from "@zxing/library";
 import { useScanReceiveBarcode } from "../hooks/useScanReceiveBarcode";
 
 // Formular für den Barcode-Wareneingang
 export function BarcodeScanner() {
+  const { t } = useTranslation();
   const [barcode, setBarcode] = useState("");
   const [lastReceived, setLastReceived] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -45,7 +47,7 @@ export function BarcodeScanner() {
     setCameraError(null);
 
     if (!navigator.mediaDevices?.getUserMedia) {
-      setCameraError("Kamera nicht verfügbar. Bitte HTTPS oder localhost verwenden.");
+      setCameraError(t("barcodeScanner.cameraUnavailable"));
       return;
     }
 
@@ -89,7 +91,7 @@ export function BarcodeScanner() {
     } catch {
       if (session !== scannerSessionRef.current) return;
 
-      setCameraError("Kamera konnte nicht gestartet werden. Bitte Berechtigung prüfen.");
+      setCameraError(t("barcodeScanner.cameraError"));
       stopCamera();
     }
   };
@@ -130,31 +132,30 @@ export function BarcodeScanner() {
 
     switch (status) {
       case "400":
-        return "Ungültiger Barcode. Bitte Eingabe überprüfen.";
+        return t("barcodeScanner.error400");
       case "401":
-        return "Bitte erneut anmelden.";
+        return t("barcodeScanner.error401");
       case "403":
-        return "Keine Berechtigung für den Wareneingang.";
+        return t("barcodeScanner.error403");
       case "404":
-        return "Barcode wurde nicht gefunden.";
+        return t("barcodeScanner.error404");
       case "409":
-        return "Dieser Artikel wurde bereits registriert oder ist nicht zur Registrierung vorgemerkt.";
+        return t("barcodeScanner.error409");
       case "500":
-        return "Serverfehler. Bitte später erneut versuchen.";
+        return t("barcodeScanner.error500");
       default:
-        return "Wareneingang fehlgeschlagen. Bitte Verbindung prüfen und erneut versuchen.";
+        return t("barcodeScanner.errorDefault");
     }
   };
 
   return (
     <section className="rounded-xl border border-base-300 bg-base-100 p-5 shadow-sm">
       <h2 className="mb-2 text-xl font-semibold">
-        Barcode-Wareneingang
+        {t("barcodeScanner.title")}
       </h2>
 
       <p className="mb-5 text-sm text-base-content/70">
-        Barcode mit der Handykamera, einem USB-Scanner oder manuell erfassen.
-        Der Artikel wird nach erfolgreicher Prüfung als verfügbar registriert.
+        {t("barcodeScanner.description")}
       </p>
 
       <div className="mb-5">
@@ -163,7 +164,7 @@ export function BarcodeScanner() {
           className="btn btn-outline"
           onClick={cameraOpen ? stopCamera : startCamera}
         >
-          {cameraOpen ? "Kamera schließen" : "Kamera öffnen"}
+          {cameraOpen ? t("barcodeScanner.closeCamera") : t("barcodeScanner.openCamera")}
         </button>
 
         {cameraOpen && (
@@ -176,7 +177,7 @@ export function BarcodeScanner() {
               playsInline
             />
             <p className="p-3 text-sm">
-              Barcode vor die Kamera halten. Die Erkennung erfolgt automatisch.
+              {t("barcodeScanner.cameraHint")}
             </p>
           </div>
         )}
@@ -191,14 +192,14 @@ export function BarcodeScanner() {
       <form onSubmit={handleReceive} className="flex flex-wrap items-end gap-3">
         <label className="form-control min-w-60 flex-1">
           <span className="mb-2 block text-sm font-medium">
-            Barcode
+            {t("barcodeScanner.barcode")}
           </span>
 
           <input
             ref={inputRef}
             type="text"
             className="input input-bordered w-full"
-            placeholder="Barcode scannen oder eingeben"
+            placeholder={t("barcodeScanner.placeholder")}
             value={barcode}
             onChange={(event) => setBarcode(event.target.value)}
             disabled={scanReceiveBarcodeMutation.isPending}
@@ -213,15 +214,14 @@ export function BarcodeScanner() {
           disabled={!barcode.trim() || scanReceiveBarcodeMutation.isPending}
         >
           {scanReceiveBarcodeMutation.isPending
-            ? "Wird registriert..."
-            : "Wareneingang bestätigen"}
+            ? t("barcodeScanner.processing")
+            : t("barcodeScanner.confirm")}
         </button>
       </form>
 
       {lastReceived && (
         <div role="status" className="alert alert-success mt-5">
-          Artikel {lastReceived} erfolgreich registriert.
-          Status: Verfügbar.
+          {t("barcodeScanner.success", { assetNo: lastReceived })}
         </div>
       )}
 

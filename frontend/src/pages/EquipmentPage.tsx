@@ -108,13 +108,13 @@ export function EquipmentPage() {
               type="button"
               onClick={() => setShowBarcodeGenerator((current) => !current)}
             >
-              {showBarcodeGenerator ? "Schließen" : "Barcodes generieren"}
+              {showBarcodeGenerator ? t("common.close") : t("barcodeActions.generate")}
             </Button>
             <Button
               type="button"
               onClick={() => setShowBarcodeScanner((current) => !current)}
             >
-              {showBarcodeScanner ? "Scanner schließen" : "Barcode scannen"}
+              {showBarcodeScanner ? t("barcodeActions.closeScanner") : t("barcodeActions.scan")}
             </Button>
             <Button
               type="button"
@@ -153,7 +153,7 @@ export function EquipmentPage() {
             )}
             {formDataError && (
               <div role="alert" className="alert alert-error">
-                Produkt- oder Lagerdaten konnten nicht geladen werden.
+                {t("barcodeActions.loadError")}
               </div>
             )}
             {!formDataLoading && !formDataError && (

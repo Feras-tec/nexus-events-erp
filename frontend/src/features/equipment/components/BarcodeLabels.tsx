@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import JsBarcode from "jsbarcode";
 import type { GeneratedBarcodeItem } from "../hooks/useGenerateBarcodes";
 
@@ -36,6 +37,8 @@ export function BarcodeLabels({
 }: {
   items: GeneratedBarcodeItem[];
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="mt-5" id="barcode-print-area">
       <div className="mb-4 flex justify-end print:hidden">
@@ -44,7 +47,7 @@ export function BarcodeLabels({
           className="btn btn-primary"
           onClick={() => window.print()}
         >
-          Etiketten drucken
+          {t("barcodeLabels.printLabels")}
         </button>
       </div>
 
