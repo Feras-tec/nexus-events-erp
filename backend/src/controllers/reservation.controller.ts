@@ -1,18 +1,46 @@
 import type { Request, Response } from "express";
 import prisma from "../lib/prisma.js";
+import type { Prisma } from "../generated/prisma/client.js";
 import {
   createReservationSchema,
   updateReservationSchema,
 } from "../schemas/reservation.schema.js";
 
+// Fachliche Fehler werden erst nach dem Transaktionsende als API-Antwort ausgegeben.
+class ReservationError extends Error {
+  constructor(public status: number, message: string) {
+    super(message);
+  }
+}
+
+// Die Gerätesperre serialisiert Anlage, Terminänderung und Reaktivierung desselben Geräts.
+// READ COMMITTED liefert nach einer Wartezeit den zuletzt bestätigten Reservierungsstand.
+// Die echte Zeilensperre schützt gleichzeitig vor parallelen Gerätestatusänderungen.
+async function lockInventoryItem(tx: Prisma.TransactionClient, id: string) {
+  const items = await tx.$queryRaw<Array<{ id: string; status: string }>>`
+    SELECT "id", "status" FROM "InventoryItem" WHERE "id" = ${id} FOR UPDATE
+  `;
+  const item = items[0];
+  if (!item) throw new ReservationError(404, "Inventory item not found");
+  return item;
+}
+
+// Andere bisher erlaubte Betriebszustände bleiben für zukünftige Buchungen zulässig.
+function requireEligibleInventory(status: string) {
+  if (["PENDING_REGISTRATION", "LOST", "RETIRED"].includes(status)) {
+    throw new ReservationError(400, "Inventory item is not available for reservation");
+  }
+}
+
 // Prüft, ob sich zwei Reservierungszeiträume überschneiden
 async function hasReservationConflict(
+  tx: Prisma.TransactionClient,
   inventoryItemId: string,
   startDate: Date,
   endDate: Date,
   excludeReservationId?: string,
 ) {
-  const conflict = await prisma.reservation.findFirst({
+  const conflict = await tx.reservation.findFirst({
     where: {
       inventoryItemId,
 
@@ -57,67 +85,31 @@ export async function createReservation(req: Request, res: Response) {
 
     const data = result.data;
 
-    // Prüfen, ob das Event existiert
-    const event = await prisma.event.findUnique({
-      where: { id: data.eventId },
-    });
+    const reservation = await prisma.$transaction(async (tx) => {
+      // Alle Prüfungen und das Speichern verwenden dieselbe Verbindung und Transaktion.
+      const event = await tx.event.findUnique({ where: { id: data.eventId } });
+      if (!event) throw new ReservationError(404, "Event not found");
 
-    if (!event) {
-      return res.status(404).json({
-        error: "Event not found",
-      });
-    }
+      const item = await lockInventoryItem(tx, data.inventoryItemId);
+      requireEligibleInventory(item.status);
 
-    // Prüfen, ob das Gerät existiert
-    const inventoryItem = await prisma.inventoryItem.findUnique({
-      where: { id: data.inventoryItemId },
-      include: {
-        product: true,
-      },
-    });
+      // Die bestehende Datums- und Statussemantik bleibt auch bei stornierten Anlagen erhalten.
+      if (await hasReservationConflict(tx, data.inventoryItemId, data.startDate, data.endDate)) {
+        throw new ReservationError(409, "Inventory item is already reserved for this period");
+      }
 
-    if (!inventoryItem) {
-      return res.status(404).json({
-        error: "Inventory item not found",
-      });
-    }
-
-    // Verlorene oder ausgemusterte Geräte dürfen nicht reserviert werden
-    if (inventoryItem.status === "RETIRED" || inventoryItem.status === "LOST") {
-      return res.status(400).json({
-        error: "Inventory item is not available for reservation",
-      });
-    }
-
-    // Prüfen, ob bereits eine Reservierung im gleichen Zeitraum existiert
-    const hasConflict = await hasReservationConflict(
-      data.inventoryItemId,
-      data.startDate,
-      data.endDate,
-    );
-
-    if (hasConflict) {
-      return res.status(409).json({
-        error: "Inventory item is already reserved for this period",
-      });
-    }
-
-    // Reservierung speichern
-    const reservation = await prisma.reservation.create({
-      data,
-      include: {
-        event: true,
-        inventoryItem: {
-          include: {
-            product: true,
-            warehouse: true,
-          },
+      return tx.reservation.create({
+        data,
+        include: {
+          event: true,
+          inventoryItem: { include: { product: true, warehouse: true } },
         },
-      },
-    });
+      });
+    }, { isolationLevel: "ReadCommitted" });
 
     return res.status(201).json(reservation);
   } catch (error) {
+    if (error instanceof ReservationError) return res.status(error.status).json({ error: error.message });
     console.error("Create reservation error:", error);
 
     return res.status(500).json({
@@ -219,61 +211,49 @@ export async function updateReservation(req: Request, res: Response) {
       });
     }
 
-    const existingReservation = await prisma.reservation.findUnique({
-      where: { id },
-    });
+    const reservation = await prisma.$transaction(async (tx) => {
+      // Die Gerätezuordnung ist über dieses API unveränderlich und dient nur zur Sperrauswahl.
+      const reference = await tx.reservation.findUnique({ where: { id } });
+      if (!reference) throw new ReservationError(404, "Reservation not found");
+      const item = await lockInventoryItem(tx, reference.inventoryItemId);
 
-    if (!existingReservation) {
-      return res.status(404).json({
-        error: "Reservation not found",
-      });
-    }
-
-    const startDate = result.data.startDate ?? existingReservation.startDate;
-
-    const endDate = result.data.endDate ?? existingReservation.endDate;
-
-    // Enddatum darf nicht vor dem Startdatum liegen
-    if (endDate < startDate) {
-      return res.status(400).json({
-        error: "End date must not be before start date",
-      });
-    }
-
-    // Bei aktiven Reservierungen auf Überschneidungen prüfen
-    const newStatus = result.data.status ?? existingReservation.status;
-
-    if (newStatus !== "CANCELLED") {
-      const hasConflict = await hasReservationConflict(
-        existingReservation.inventoryItemId,
-        startDate,
-        endDate,
-        id,
-      );
-
-      if (hasConflict) {
-        return res.status(409).json({
-          error: "Inventory item is already reserved for this period",
-        });
+      // Nach dem Warten erneut lesen, damit parallele Teiländerungen nicht verloren gehen.
+      const existingReservation = await tx.reservation.findUnique({ where: { id } });
+      if (!existingReservation) throw new ReservationError(404, "Reservation not found");
+      const startDate = result.data.startDate ?? existingReservation.startDate;
+      const endDate = result.data.endDate ?? existingReservation.endDate;
+      if (endDate < startDate) {
+        throw new ReservationError(400, "End date must not be before start date");
       }
-    }
 
-    const reservation = await prisma.reservation.update({
-      where: { id },
-      data: result.data,
-      include: {
-        event: true,
-        inventoryItem: {
-          include: {
-            product: true,
-            warehouse: true,
-          },
+      const newStatus = result.data.status ?? existingReservation.status;
+      if (newStatus !== "CANCELLED") {
+        // Reaktivierungen und Terminänderungen benötigen ein weiterhin zulässiges Gerät.
+        // Reine Notizänderungen und Abschluss bestehender Vorgänge bleiben möglich.
+        if (existingReservation.status === "CANCELLED" ||
+            result.data.startDate !== undefined || result.data.endDate !== undefined ||
+            (newStatus !== existingReservation.status && newStatus !== "COMPLETED")) {
+          requireEligibleInventory(item.status);
+        }
+        if (await hasReservationConflict(tx, item.id, startDate, endDate, id)) {
+          throw new ReservationError(409, "Inventory item is already reserved for this period");
+        }
+      }
+
+      // Stornieren bleibt auch bei inzwischen verlorenen oder ausgemusterten Geräten möglich.
+      return tx.reservation.update({
+        where: { id },
+        data: result.data,
+        include: {
+          event: true,
+          inventoryItem: { include: { product: true, warehouse: true } },
         },
-      },
-    });
+      });
+    }, { isolationLevel: "ReadCommitted" });
 
     return res.json(reservation);
   } catch (error) {
+    if (error instanceof ReservationError) return res.status(error.status).json({ error: error.message });
     console.error("Update reservation error:", error);
 
     return res.status(500).json({

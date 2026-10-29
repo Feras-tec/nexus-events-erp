@@ -3,34 +3,25 @@ import { jest } from "@jest/globals";
 
 const mockEventFindUnique = jest.fn<() => Promise<{ id: string } | null>>();
 
-const mockInventoryItemFindUnique = jest.fn<
-  () => Promise<{
-    id: string;
-    status: string;
-    product: {
-      id: string;
-    };
-  } | null>
->();
-
 const mockReservationFindFirst =
   jest.fn<() => Promise<{ id: string } | null>>();
 
 const mockReservationCreate = jest.fn<() => Promise<{ id: string }>>();
 
-jest.unstable_mockModule("../src/lib/prisma.js", () => ({
-  default: {
-    event: {
-      findUnique: mockEventFindUnique,
-    },
-    inventoryItem: {
-      findUnique: mockInventoryItemFindUnique,
-    },
-    reservation: {
-      findFirst: mockReservationFindFirst,
-      create: mockReservationCreate,
-    },
+const tx = {
+  event: {
+    findUnique: mockEventFindUnique,
   },
+  reservation: {
+    findFirst: mockReservationFindFirst,
+    create: mockReservationCreate,
+  },
+  $queryRaw: jest.fn<() => Promise<Array<{ id: string; status: string }>>>(),
+};
+
+// Die Transaktion wird ohne externe Datenbank ausgeführt; echte Sperren prüfen separate Integrationstests.
+jest.unstable_mockModule("../src/lib/prisma.js", () => ({
+  default: { $transaction: async (callback: (client: typeof tx) => Promise<unknown>) => callback(tx) },
 }));
 
 const { createReservation } =
@@ -38,20 +29,13 @@ const { createReservation } =
 
 describe("Reservation Conflict", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
+    tx.$queryRaw.mockResolvedValue([{ id: "22222222-2222-4222-8222-222222222222", status: "AVAILABLE" }]);
   });
 
   it("sollte eine überlappende Reservierung ablehnen", async () => {
     mockEventFindUnique.mockResolvedValue({
       id: "11111111-1111-4111-8111-111111111111",
-    });
-
-    mockInventoryItemFindUnique.mockResolvedValue({
-      id: "22222222-2222-4222-8222-222222222222",
-      status: "AVAILABLE",
-      product: {
-        id: "33333333-3333-4333-8333-333333333333",
-      },
     });
 
     // Eine bestehende Reservierung überschneidet sich mit dem Zeitraum
@@ -95,14 +79,6 @@ describe("Reservation Conflict", () => {
       id: "11111111-1111-4111-8111-111111111111",
     });
 
-    mockInventoryItemFindUnique.mockResolvedValue({
-      id: "22222222-2222-4222-8222-222222222222",
-      status: "AVAILABLE",
-      product: {
-        id: "33333333-3333-4333-8333-333333333333",
-      },
-    });
-
     // Keine aktive Reservierung blockiert diesen Zeitraum
     mockReservationFindFirst.mockResolvedValue(null);
 
@@ -142,5 +118,24 @@ describe("Reservation Conflict", () => {
     expect(mockReservationCreate).toHaveBeenCalledTimes(1);
     expect(status).toHaveBeenCalledWith(201);
     expect(json).toHaveBeenCalledWith(createdReservation);
+  });
+});
+
+// Jeder gesperrte Gerätestatus muss denselben bisherigen Fehlervertrag liefern.
+describe.each(["PENDING_REGISTRATION", "LOST", "RETIRED"])("Unzulässiger Gerätestatus %s", (status) => {
+  it("verhindert das Anlegen einer Reservierung", async () => {
+    mockEventFindUnique.mockResolvedValue({ id: "11111111-1111-4111-8111-111111111111" });
+    tx.$queryRaw.mockResolvedValue([{ id: "22222222-2222-4222-8222-222222222222", status }]);
+    mockReservationCreate.mockClear();
+    const json = jest.fn();
+    const responseStatus = jest.fn(() => ({ json }));
+    await createReservation({ body: {
+      startDate: "2026-11-12T10:00:00.000Z", endDate: "2026-11-12T18:00:00.000Z",
+      eventId: "11111111-1111-4111-8111-111111111111",
+      inventoryItemId: "22222222-2222-4222-8222-222222222222",
+    } } as Request, { status: responseStatus } as unknown as Response);
+    expect(responseStatus).toHaveBeenCalledWith(400);
+    expect(json).toHaveBeenCalledWith({ error: "Inventory item is not available for reservation" });
+    expect(mockReservationCreate).not.toHaveBeenCalled();
   });
 });
