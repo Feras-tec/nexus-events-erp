@@ -3,8 +3,7 @@ import { createRoot } from "react-dom/client";
 import { ClerkProvider } from "@clerk/react";
 import "./index.css";
 import "./i18n/config";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient } from "./lib/queryClient";
+import { AuthQueryProvider } from "./components/providers/AuthQueryProvider";
 import { RouterProvider } from "@tanstack/react-router";
 import { router } from "./router";
 import {
@@ -23,9 +22,9 @@ applyTheme(getThemePreference());
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ClerkProvider publishableKey={publishableKey}>
-      <QueryClientProvider client={queryClient}>
+      <AuthQueryProvider>
         <RouterProvider router={router} />
-      </QueryClientProvider>
+      </AuthQueryProvider>
     </ClerkProvider>
   </StrictMode>,
 );
