@@ -647,3 +647,38 @@ model BarcodeBatch {
   @@index([productId])
   @@index([warehouseId])
 }
+
+// Geschäftsprotokolle bleiben unabhängig von Auth-V2-Sicherheitsereignissen und Benutzerlöschungen.
+model AuditLog {
+  id                 String   @id @default(uuid())
+  sourceKey          String?
+  originalDocumentId String?
+  userId             String?
+  action             String
+  entityType         String
+  entityId           String?
+  details            Json?
+  ipAddress          String?
+  createdAt          DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime @default(now()) @db.Timestamptz(3)
+  importedAt         DateTime? @db.Timestamptz(3)
+  sourceHash         String?
+  originalDocument   Json?
+
+  @@unique([sourceKey, originalDocumentId])
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+  @@index([entityType, entityId, createdAt])
+}
+
+// Ein transaktionaler Kontrollpunkt verhindert Überspringen fehlgeschlagener Importseiten.
+model AuditLogTransfer {
+  sourceKey       String   @id
+  snapshotUpperId String?
+  expectedCount   Int
+  lastId          String?
+  processedCount  Int      @default(0)
+  status          String   @default("COPYING")
+  createdAt       DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime @updatedAt @db.Timestamptz(3)
+}

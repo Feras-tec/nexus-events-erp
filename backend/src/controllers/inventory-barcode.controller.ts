@@ -3,6 +3,8 @@ import type { Request, Response } from "express";
 import { getAuth } from "@clerk/express";
 import prisma from "../lib/prisma.js";
 import { createAuditLog } from "../services/audit-log.service.js";
+import { getBusinessAuditMode } from "../modules/audit-postgres/mode.js";
+import { persistPostgresAudit } from "../modules/audit-postgres/persistence.js";
 import {
   bulkGenerateInventoryItemsSchema,
   scanReceiveInventoryItemSchema,
@@ -76,6 +78,10 @@ export async function bulkGenerateInventoryItems(req: Request, res: Response) {
       });
     }
 
+    // Identität und Modus einmal pro Anfrage ermitteln; keine Umschaltung mitten in der Transaktion.
+    const auditMode = getBusinessAuditMode();
+    const { userId } = getAuth(req);
+
     // Charge und Inventarartikel gemeinsam atomar speichern
     const batch = await prisma.$transaction(async (tx) => {
       const created = await tx.barcodeBatch.create({
@@ -97,16 +103,23 @@ export async function bulkGenerateInventoryItems(req: Request, res: Response) {
 
       await tx.inventoryItem.createMany({ data });
 
-      return tx.barcodeBatch.findUniqueOrThrow({
+      const completed = await tx.barcodeBatch.findUniqueOrThrow({
         where: { id: created.id },
         include: { inventoryItems: { orderBy: { assetNo: "asc" } } },
       });
+
+      // Audit und Charge werden gemeinsam bestätigt oder vollständig zurückgerollt.
+      if (auditMode === "postgresql") await persistPostgresAudit(tx, {
+        eventId: `barcode-batch:${completed.id}`, ...(userId ? { userId } : {}),
+        action: "INVENTORY_BARCODES_BULK_GENERATED", entityType: "BarcodeBatch", entityId: completed.id,
+        details: { productId, warehouseId, quantity, assetNumbers: completed.inventoryItems.map(item => item.assetNo) },
+        ...(req.ip ? { ipAddress: req.ip } : {}),
+      });
+      return completed;
     });
 
     // Erfolgreiche Erstellung zusätzlich protokollieren
-    const { userId } = getAuth(req);
-
-    await createAuditLog({
+    if (auditMode === "mongodb") await createAuditLog({
       ...(userId ? { userId } : {}),
       action: "INVENTORY_BARCODES_BULK_GENERATED",
       entityType: "BarcodeBatch",
@@ -205,6 +218,9 @@ export async function scanReceiveInventoryItem(req: Request, res: Response) {
       });
     }
 
+    const auditMode = getBusinessAuditMode();
+    const { userId } = getAuth(req);
+
     // Statusänderung und Wareneingang gemeinsam speichern
     const received = await prisma.$transaction(async (tx) => {
       const updated = await tx.inventoryItem.updateMany({
@@ -222,7 +238,7 @@ export async function scanReceiveInventoryItem(req: Request, res: Response) {
         return false;
       }
 
-      await tx.equipmentMovement.create({
+      const receipt = await tx.equipmentMovement.create({
         data: {
           type: "RECEIVED",
           fromStatus: "PENDING_REGISTRATION",
@@ -234,6 +250,13 @@ export async function scanReceiveInventoryItem(req: Request, res: Response) {
         },
       });
 
+      // Ein wiederholter Scan verändert nichts und erzeugt deshalb auch keinen neuen Audit-Eintrag.
+      if (auditMode === "postgresql") await persistPostgresAudit(tx, {
+        eventId: `barcode-receipt:${receipt.id}`, ...(userId ? { userId } : {}),
+        action: "INVENTORY_BARCODE_RECEIVED", entityType: "InventoryItem", entityId: item.id,
+        details: { barcode, warehouseId: item.warehouseId, responsibleEmployeeId },
+        ...(req.ip ? { ipAddress: req.ip } : {}),
+      });
       return true;
     });
 
@@ -245,9 +268,7 @@ export async function scanReceiveInventoryItem(req: Request, res: Response) {
     }
 
     // Angemeldeten Benutzer zusätzlich im Audit-Log dokumentieren
-    const { userId } = getAuth(req);
-
-    await createAuditLog({
+    if (auditMode === "mongodb") await createAuditLog({
       ...(userId ? { userId } : {}),
       action: "INVENTORY_BARCODE_RECEIVED",
       entityType: "InventoryItem",

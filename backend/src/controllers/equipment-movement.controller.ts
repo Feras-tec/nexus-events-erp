@@ -7,6 +7,8 @@ import {
 } from "../utils/equipment-status-transition.js";
 import { getAuth } from "@clerk/express";
 import { createAuditLog } from "../services/audit-log.service.js";
+import { getBusinessAuditMode } from "../modules/audit-postgres/mode.js";
+import { persistPostgresAudit } from "../modules/audit-postgres/persistence.js";
 
 // Neue Bewegung erstellen und aktuellen Gerätestatus aktualisieren
 export async function createEquipmentMovement(req: Request, res: Response) {
@@ -220,6 +222,10 @@ export async function createEquipmentMovement(req: Request, res: Response) {
       });
     }
 
+    // Identität und Modus einmal pro Anfrage ermitteln; keine Umschaltung mitten in der Transaktion.
+    const auditMode = getBusinessAuditMode();
+    const { userId } = getAuth(req);
+
     // Bewegung und Statusänderung gemeinsam speichern
     const movement = await prisma.$transaction(async (tx) => {
       const createdMovement = await tx.equipmentMovement.create({
@@ -259,12 +265,17 @@ export async function createEquipmentMovement(req: Request, res: Response) {
         },
       });
 
+      // Kein erfolgreicher Geschäftsabschluss ohne den zugehörigen PostgreSQL-Audit-Eintrag.
+      if (auditMode === "postgresql") await persistPostgresAudit(tx, {
+        eventId: `equipment-movement:${createdMovement.id}`, ...(userId ? { userId } : {}),
+        action: "EQUIPMENT_MOVEMENT_CREATED", entityType: "InventoryItem", entityId: inventoryItemId,
+        details: { movementId: createdMovement.id, type, fromStatus: inventoryItem.status, toStatus, fromLocation: inventoryItem.location, toLocation },
+        ...(req.ip ? { ipAddress: req.ip } : {}),
+      });
       return createdMovement;
     });
     // Wichtige Gerätebewegung im Audit-Log speichern
-    const { userId } = getAuth(req);
-
-    await createAuditLog({
+    if (auditMode === "mongodb") await createAuditLog({
       ...(userId ? { userId } : {}),
       action: "EQUIPMENT_MOVEMENT_CREATED",
       entityType: "InventoryItem",
