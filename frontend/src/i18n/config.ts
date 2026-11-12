@@ -4,6 +4,597 @@ import { initReactI18next } from "react-i18next";
 const resources = {
   de: {
     translation: {
+      authV2: {
+        brand: {
+          product: "Nexus Events",
+          management: "ERP-Management-System",
+          markLabel: "Nexus Events",
+          eyebrow: "Sichere Unternehmensanmeldung",
+          headline: "Ihr Betrieb. Ein sicherer Zugang.",
+          description:
+            "Verwalten Sie Veranstaltungen, Teams und Ressourcen in einer zentralen Plattform – geschützt durch moderne Authentifizierung und vollständige Auditierbarkeit.",
+          securityNote:
+            "Sitzungstoken verbleiben in HttpOnly-Cookies und sind für JavaScript nicht lesbar. Dieses Modul ist standardmäßig deaktiviert.",
+          features: {
+            security: {
+              title: "Gehärtete Sicherheit",
+              text: "Argon2id, Same-Origin-Schutz und kurzlebige Sitzungen.",
+            },
+            mfa: {
+              title: "Mehrstufige Anmeldung",
+              text: "TOTP und einmalige Wiederherstellungscodes für sensible Konten.",
+            },
+            audit: {
+              title: "Revisionssicherheit",
+              text: "Sicherheitsereignisse und Sitzungswechsel nachvollziehbar.",
+            },
+          },
+        },
+        shell: {
+          footer: "© 2026 Nexus Events ERP",
+          mobileFooter: "Sichere Anmeldung für Nexus Events ERP",
+          protectedFooter: "Geschützter Bereich · Auth V2",
+        },
+        common: {
+          loading: "Wird geladen …",
+          retry: "Erneut versuchen",
+          refresh: "Aktualisieren",
+          cancel: "Abbrechen",
+          confirm: "Bestätigen",
+          close: "Schließen",
+          save: "Speichern",
+          saving: "Wird gespeichert …",
+          backToSignIn: "Zur Anmeldung",
+          signOut: "Abmelden",
+          signIn: "Anmelden",
+          showPassword: "Passwort anzeigen",
+          hidePassword: "Passwort verbergen",
+          copy: "Kopieren",
+          copied: "Kopiert",
+          copyFailed: "Kopieren nicht möglich. Bitte Codes manuell notieren.",
+          required: "Erforderlich",
+          optional: "Optional",
+          active: "Aktiv",
+          inactive: "Inaktiv",
+          status: "Status",
+          role: "Rolle",
+          unknown: "Unbekannt",
+          errorCode: "Fehlercode",
+          secureDialog: "Sichere Bestätigung",
+          secureArea: "Geschützter Bereich",
+          unavailableTitle: "Verbindung nicht möglich",
+          unavailableText:
+            "Die Sitzung konnte nicht geprüft werden. Bitte erneut versuchen.",
+          notAvailable: "Nicht verfügbar",
+        },
+        language: { label: "Sprache" },
+        theme: {
+          toDark: "Dunkles Design aktivieren",
+          toLight: "Helles Design aktivieren",
+        },
+        validation: {
+          required: "Dieses Feld ist erforderlich.",
+          emailInvalid: "Bitte eine gültige E-Mail-Adresse eingeben.",
+          passwordTooShort: "Das Passwort muss mindestens 12 Zeichen lang sein.",
+          passwordTooLong: "Das Passwort darf höchstens 128 Zeichen lang sein.",
+          passwordMismatch: "Die Passwörter stimmen nicht überein.",
+          nameTooLong: "Der Name ist zu lang.",
+          codeInvalid: "Bitte einen gültigen 6-stelligen Code eingeben.",
+          tokenMissing: "Der Einladungslink ist unvollständig.",
+        },
+        errors: {
+          generic: "Die Anfrage ist fehlgeschlagen. Bitte erneut versuchen.",
+          network: "Der Server ist nicht erreichbar. Bitte Verbindung prüfen.",
+          server: "Der Server konnte die Anfrage nicht verarbeiten.",
+          sessionExpired: "Die Sitzung ist abgelaufen.",
+          unauthenticated: "Sie sind nicht angemeldet.",
+          absoluteExpired:
+            "Die maximale Sitzungsdauer wurde erreicht. Bitte erneut anmelden.",
+          idleExpired: "Die Sitzung wurde wegen Inaktivität beendet.",
+          accountInactive:
+            "Dieses Konto ist deaktiviert. Bitte an die Administration wenden.",
+          mfaEnrollmentRequired:
+            "Für dieses Konto ist die Mehrfachauthentifizierung verpflichtend.",
+          reauthRequired:
+            "Diese Aktion erfordert eine erneute Bestätigung Ihrer Identität.",
+          insufficientPermissions:
+            "Sie haben keine Berechtigung für diese Aktion.",
+          invalidOrigin:
+            "Die Sicherheitsprüfung der Anfrage ist fehlgeschlagen (Origin). Bitte Seite neu laden und erneut versuchen.",
+          securityTitle: "Sicherheitsprüfung fehlgeschlagen",
+          rateLimited:
+            "Zu viele Versuche. Bitte in {{seconds}} Sekunden erneut versuchen.",
+          rateLimitedTitle: "Zu viele Versuche",
+          invalidCredentials: "E-Mail-Adresse oder Passwort ist falsch.",
+          invalidRequest: "Die Anfrage ist unvollständig.",
+          passwordRequired: "Bitte das Passwort eingeben.",
+          invalidInvitation: "Die Einladung ist ungültig.",
+          invitationRevoked: "Die Einladung wurde zurückgezogen.",
+          invitationAlreadyUsed: "Die Einladung wurde bereits verwendet.",
+          invitationExpired: "Die Einladung ist abgelaufen.",
+          emailInUse:
+            "Für diese E-Mail-Adresse existiert bereits ein Konto.",
+          invitationAlreadyPending:
+            "Für diese E-Mail-Adresse liegt bereits eine offene Einladung vor.",
+          invitationNotFound: "Die Einladung wurde nicht gefunden.",
+          invalidEmail: "Ungültige E-Mail-Adresse.",
+          invalidRole: "Ungültige Rolle.",
+          weakPassword:
+            "Das Passwort erfüllt die Mindestanforderungen nicht.",
+          invalidActiveFlag: "Ungültiger Aktivierungsstatus.",
+          noChanges: "Es wurden keine Änderungen übermittelt.",
+          selfModificationForbidden:
+            "Das eigene Konto kann nicht auf diese Weise geändert werden.",
+          lastOwnerProtection:
+            "Der letzte aktive Eigentümer kann nicht entfernt werden.",
+          targetInactive: "Das Zielkonto ist deaktiviert.",
+          targetRequired: "Bitte ein Zielkonto auswählen.",
+          userNotFound: "Das Benutzerkonto wurde nicht gefunden.",
+          sessionNotFound: "Die Sitzung wurde nicht gefunden.",
+          invalidToken: "Der Link ist ungültig oder abgelaufen.",
+          passwordTooShort: "Das Passwort ist zu kurz.",
+          passwordTooLong: "Das Passwort ist zu lang.",
+          invalidPassword: "Das aktuelle Passwort ist falsch.",
+          invalidCode: "Der Code ist ungültig oder abgelaufen.",
+          twoFactorLocked:
+            "Zu viele fehlgeschlagene Versuche. Die Zwei-Faktor-Anmeldung ist vorübergehend gesperrt.",
+        },
+        login: {
+          eyebrow: "Willkommen zurück",
+          title: "Bei Nexus Events anmelden",
+          subtitle:
+            "Melden Sie sich mit Ihrem persönlichen Firmenkonto an.",
+          emailLabel: "E-Mail-Adresse",
+          emailPlaceholder: "name@unternehmen.de",
+          passwordLabel: "Passwort",
+          passwordPlaceholder: "Ihr Passwort",
+          submit: "Anmelden",
+          submitting: "Anmeldung läuft …",
+          forgotPassword: "Passwort vergessen?",
+          invitationOnly:
+            "Zugänge werden ausschließlich von der Administration per Einladung vergeben. Eine Selbstregistrierung ist nicht möglich.",
+          securityNote:
+            "Geschützt durch HttpOnly-Sitzungscookies und Origin-Prüfung.",
+          needHelp: "Kein Zugang?",
+          contactAdmin: "Administration kontaktieren",
+          supportEmail: "admin@nexus-events.de",
+        },
+        twoFactor: {
+          eyebrow: "Zwei-Faktor-Anmeldung",
+          title: "Bestätigung erforderlich",
+          subtitle:
+            "Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein.",
+          useTotp: "Authenticator",
+          useRecoveryCode: "Wiederherstellungscode",
+          codeLabel: "Bestätigungscode",
+          totpHint: "Der Code erneuert sich alle 30 Sekunden.",
+          recoveryLabel: "Wiederherstellungscode",
+          recoveryPlaceholder: "xxxxx-xxxxx",
+          recoveryHint: "Jeder Code ist nur einmal gültig.",
+          submit: "Bestätigen",
+          submitting: "Wird geprüft …",
+          securityNote:
+            "Der Code wird ausschließlich zur Prüfung an den Server gesendet und nicht gespeichert.",
+          back: "Zurück zur Anmeldung",
+          lostAccess:
+            "Kein Zugriff mehr? Bitte die Administration kontaktieren.",
+          digitLabel: "Ziffer {{index}} von {{total}}",
+        },
+        mfa: {
+          eyebrow: "Kontosicherheit",
+          title: "Mehrfachauthentifizierung einrichten",
+          subtitle:
+            "Schützen Sie Ihr Konto mit einer Authenticator-App und einmaligen Wiederherstellungscodes.",
+          introAuthenticator:
+            "Scannen Sie den QR-Code mit einer TOTP-App wie 1Password, Authy oder Google Authenticator.",
+          introRecovery:
+            "Bewahren Sie die Wiederherstellungscodes sicher auf. Sie werden nur einmal angezeigt.",
+          passwordLabel: "Aktuelles Passwort",
+          passwordHint: "Erforderlich, um die Einrichtung zu starten.",
+          start: "Einrichtung starten",
+          starting: "Wird gestartet …",
+          requiredBannerTitle: "Mehrfachauthentifizierung erforderlich",
+          requiredBannerText:
+            "Ihre Administration verlangt die Einrichtung der Mehrfachauthentifizierung.",
+          requiredNote:
+            "Ohne Einrichtung wird der Zugriff nach Ablauf der Frist gesperrt.",
+          scanTitle: "Authenticator verbinden",
+          scanText:
+            "Scannen Sie den QR-Code oder geben Sie den Schlüssel manuell ein.",
+          qrAlt: "QR-Code für die Authenticator-App",
+          qrHint:
+            "Der QR-Code enthält Ihr TOTP-Geheimnis und wird ausschließlich lokal erzeugt.",
+          qrError:
+            "Der QR-Code konnte nicht erzeugt werden. Verwenden Sie den manuellen Schlüssel.",
+          manualKey: "Manueller Schlüssel",
+          showKey: "Anzeigen",
+          hideKey: "Verbergen",
+          secretUnavailable: "Der Schlüssel konnte nicht gelesen werden.",
+          backupTitle: "Wiederherstellungscodes",
+          backupHint: "Jeder Code ist einmal gültig. Nicht erneut abrufbar.",
+          backupWarning:
+            "Diese Codes werden nur jetzt angezeigt. Notieren Sie sie und bewahren Sie sie getrennt vom Gerät auf.",
+          backupAcknowledge:
+            "Ich habe die Wiederherstellungscodes sicher gespeichert.",
+          verifyTitle: "Code bestätigen",
+          verifyText:
+            "Geben Sie den aktuellen Code aus Ihrer Authenticator-App ein, um die Einrichtung abzuschließen.",
+          verify: "Einrichtung abschließen",
+          verifying: "Wird bestätigt …",
+          restart: "Einrichtung neu starten",
+          successTitle: "Mehrfachauthentifizierung aktiv",
+          successText:
+            "Ihr Konto ist jetzt durch einen zweiten Faktor geschützt.",
+          goToSecurity: "Zur Kontosicherheit",
+          alreadyEnabledTitle: "Mehrfachauthentifizierung ist aktiv",
+          alreadyEnabledText:
+            "Ihr Konto ist bereits geschützt. Verwalten Sie die Einstellungen in der Kontosicherheit.",
+        },
+        forgot: {
+          eyebrow: "Passwort zurücksetzen",
+          title: "Passwort vergessen?",
+          subtitle:
+            "Geben Sie Ihre E-Mail-Adresse ein. Wir senden einen Link zum Zurücksetzen, sofern ein Konto existiert.",
+          emailLabel: "E-Mail-Adresse",
+          emailPlaceholder: "name@unternehmen.de",
+          submit: "Link anfordern",
+          sending: "Wird gesendet …",
+          note:
+            "Aus Sicherheitsgründen wird nicht angezeigt, ob eine E-Mail-Adresse registriert ist.",
+          successTitle: "Anfrage erhalten",
+          successText:
+            "Wenn ein Konto mit dieser Adresse existiert, wurde ein Link zum Zurücksetzen versendet.",
+          successHint:
+            "Der Link ist eine Stunde gültig und kann nur einmal verwendet werden.",
+          tryAnother: "Andere E-Mail-Adresse verwenden",
+        },
+        reset: {
+          eyebrow: "Neues Passwort",
+          title: "Passwort zurücksetzen",
+          subtitle: "Wählen Sie ein neues Passwort für Ihr Konto.",
+          newPassword: "Neues Passwort",
+          confirmPassword: "Passwort bestätigen",
+          passwordHint: "Mindestens {{min}} und höchstens {{max}} Zeichen.",
+          submit: "Passwort speichern",
+          submitting: "Wird gespeichert …",
+          note:
+            "Nach dem Zurücksetzen werden alle bestehenden Sitzungen beendet.",
+          invalidTitle: "Link ungültig oder abgelaufen",
+          invalidText:
+            "Der Link zum Zurücksetzen ist nicht mehr gültig oder wurde bereits verwendet.",
+          requestNew: "Neuen Link anfordern",
+          strength: {
+            weak: "Schwach",
+            fair: "Ausreichend",
+            good: "Gut",
+            strong: "Stark",
+            veryStrong: "Sehr stark",
+          },
+          requirements: {
+            length: "Mindestens {{min}} Zeichen",
+            maxLength: "Höchstens {{max}} Zeichen",
+          },
+        },
+        invite: {
+          eyebrow: "Einladung",
+          title: "Konto aktivieren",
+          subtitle:
+            "Legen Sie Ihr Passwort fest, um die Einladung anzunehmen.",
+          nameLabel: "Vollständiger Name (optional)",
+          namePlaceholder: "Vor- und Nachname",
+          nameHint: "Wird in der Anwendung angezeigt.",
+          passwordLabel: "Passwort",
+          passwordHint: "Mindestens {{min}} und höchstens {{max}} Zeichen.",
+          confirmPassword: "Passwort bestätigen",
+          submit: "Konto aktivieren",
+          submitting: "Wird aktiviert …",
+          note:
+            "Ihre Rolle wird von der Administration festgelegt. Die Einladung ist nur einmal gültig.",
+          successTitle: "Konto aktiviert",
+          successText:
+            "Ihr Zugang wurde eingerichtet. Sie können sich jetzt anmelden.",
+          goToSignIn: "Zur Anmeldung",
+          invalidTitle: "Einladung nicht gültig",
+          tokenMissing: "Der Einladungslink ist unvollständig.",
+          contactAdmin:
+            "Bitte wenden Sie sich an die Administration, um eine neue Einladung zu erhalten.",
+        },
+        security: {
+          eyebrow: "Kontosicherheit",
+          title: "Sicherheit und Anmeldung",
+          subtitle:
+            "Verwalten Sie Passwort, Mehrfachauthentifizierung und sicherheitsrelevante Aktivitäten.",
+          manageSessions: "Sitzungen verwalten",
+          passwordTitle: "Passwort ändern",
+          passwordText:
+            "Verwenden Sie ein einzigartiges Passwort mit mindestens 12 Zeichen.",
+          currentPassword: "Aktuelles Passwort",
+          currentPasswordRequired: "Bitte das aktuelle Passwort eingeben.",
+          newPassword: "Neues Passwort",
+          confirmNewPassword: "Neues Passwort bestätigen",
+          passwordHint: "{{min}}–{{max}} Zeichen.",
+          revokeOthers: "Andere Sitzungen beenden",
+          revokeOthersHint: "Empfohlen: meldet alle anderen Geräte ab.",
+          changePassword: "Passwort ändern",
+          changing: "Wird geändert …",
+          passwordChanged:
+            "Ihr Passwort wurde geändert. Andere Sitzungen wurden wie gewählt beendet.",
+          mfaTitle: "Mehrfachauthentifizierung",
+          mfaText: "Schützt die Anmeldung mit einem zweiten Faktor.",
+          mfaEnabled: "Aktiv",
+          mfaDisabled: "Inaktiv",
+          mfaEnabledText:
+            "Ihr Konto ist durch eine Authenticator-App geschützt.",
+          mfaRequiredText:
+            "Ihre Administration verlangt die Einrichtung der Mehrfachauthentifizierung.",
+          mfaOptionalText:
+            "Aktivieren Sie einen zweiten Faktor für zusätzlichen Schutz.",
+          mfaDeadline: "Einrichtung erforderlich bis {{date}}.",
+          mfaOverdue:
+            "Die Frist ist abgelaufen. Bitte richten Sie die Mehrfachauthentifizierung umgehend ein.",
+          enroll: "Jetzt einrichten",
+          backupCodesNote:
+            "Wiederherstellungscodes können nach der Einrichtung nicht erneut angezeigt werden. Bewahren Sie Ihre Kopie sicher auf.",
+          disable: "Mehrfachauthentifizierung deaktivieren",
+          disableTitle: "Mehrfachauthentifizierung deaktivieren",
+          disableText:
+            "Bestätigen Sie Ihr Passwort, um den zweiten Faktor zu entfernen. Das Konto ist danach weniger geschützt.",
+          disablePassword: "Passwort bestätigen",
+          mfaChanged: "Die Mehrfachauthentifizierung wurde aktualisiert.",
+          profileTitle: "Konto",
+          profileText:
+            "Ihre Profildaten werden von der Administration verwaltet.",
+          readOnlyNote:
+            "Name, E-Mail-Adresse und Rolle können hier nicht geändert werden. Wenden Sie sich an die Administration.",
+          stepUpTitle: "Identität bestätigen",
+          stepUpText:
+            "Sensible Aktionen erfordern eine kürzlich erfolgte Anmeldung.",
+          stepUpButton: "Identität bestätigen",
+          stepUpDialogTitle: "Identität bestätigen",
+          stepUpDialogText:
+            "Geben Sie Ihr Passwort ein, um sensible Aktionen für die nächsten fünf Minuten freizugeben.",
+          stepUpSuccess: "Ihre Identität wurde bestätigt.",
+          reauthValid: "Kürzlich bestätigt",
+          reauthExpired: "Bestätigung abgelaufen",
+          lastVerified: "Letzte Bestätigung: {{date}}",
+          eventsTitle: "Sicherheitsereignisse",
+          eventsText:
+            "Die letzten 100 Ereignisse (nur für Eigentümer sichtbar).",
+          eventsEmpty: "Keine Sicherheitsereignisse vorhanden.",
+          eventTypes: {
+            LOGIN_SUCCESS: "Anmeldung erfolgreich",
+            LOGIN_FAILED: "Anmeldung fehlgeschlagen",
+            LOGIN_RATE_LIMITED: "Anmeldung gedrosselt",
+            STEP_UP_SUCCESS: "Identität bestätigt",
+            STEP_UP_FAILED: "Bestätigung fehlgeschlagen",
+            SESSION_REVOKED: "Sitzung beendet",
+            OTHER_SESSIONS_REVOKED: "Andere Sitzungen beendet",
+            MFA_POLICY_CHANGED: "MFA-Richtlinie geändert",
+            INVITATION_CREATED: "Einladung erstellt",
+            INVITATION_ACCEPTED: "Einladung angenommen",
+            INVITATION_REVOKED: "Einladung zurückgezogen",
+            USER_SECURITY_CHANGE: "Sicherheitsrelevante Kontenänderung",
+            USER_UPDATE: "Konto aktualisiert",
+            OWNER_TRANSFER: "Eigentümerschaft übertragen",
+            SESSIONS_REVOKED: "Sitzungen beendet",
+            PASSWORD_RESET_COMPLETED: "Passwort zurückgesetzt",
+            LOGIN_BLOCKED_MFA_REQUIRED:
+              "Anmeldung wegen MFA-Pflicht blockiert",
+          },
+        },
+        sessions: {
+          eyebrow: "Sitzungen",
+          title: "Aktive Geräte",
+          subtitle:
+            "Überprüfen und beenden Sie Sitzungen auf Ihren Geräten.",
+          listTitle: "Angemeldete Geräte",
+          listText:
+            "Der Sitzungsschlüssel ist ausschließlich in einem HttpOnly-Cookie gespeichert und wird hier nie angezeigt.",
+          currentBadge: "Dieses Gerät",
+          expiredBadge: "Abgelaufen",
+          unknownDevice: "Unbekanntes Gerät",
+          created: "Erstellt",
+          lastSeen: "Zuletzt aktiv",
+          expires: "Läuft ab",
+          ip: "IP-Adresse",
+          revoke: "Sitzung beenden",
+          revokeTitle: "Sitzung beenden",
+          revokeText:
+            "Die Sitzung wird sofort ungültig. Das Gerät muss sich erneut anmelden.",
+          revokeSuccess: "Die Sitzung wurde beendet.",
+          revokeOthers: "Alle anderen beenden",
+          revokeOthersTitle: "Alle anderen Sitzungen beenden",
+          revokeOthersText:
+            "Alle Sitzungen außer diesem Gerät werden sofort beendet.",
+          revokeOthersSuccess:
+            "{{count}} weitere Sitzung(en) wurden beendet.",
+          signOutCurrent: "Abmelden",
+          signOutCurrentTitle: "Von diesem Gerät abmelden",
+          signOutCurrentText:
+            "Die Sitzung wird sicher beendet und das Sitzungscookie gelöscht.",
+          empty: "Keine aktiven Sitzungen gefunden.",
+          securityNote:
+            "Sitzungstoken werden niemals an JavaScript übergeben. Alle Aktionen laufen über Same-Origin-Cookies.",
+        },
+        admin: {
+          eyebrow: "Administration",
+          title: "Mitarbeiterkonten",
+          subtitle:
+            "Verwalten Sie Rollen, Kontostatus, MFA-Pflicht und Einladungen.",
+          accessDeniedTitle: "Keine Berechtigung",
+          accessDeniedText:
+            "Diese Ansicht ist Eigentümern und Administratoren vorbehalten. Die Backend-Autorisierung bleibt maßgeblich.",
+          stats: {
+            total: "Konten",
+            active: "Aktiv",
+            inactive: "Inaktiv",
+            mfaRequired: "MFA-Pflicht",
+          },
+          usersTitle: "Konten",
+          usersText:
+            "Rollen- und Statusänderungen beenden bestehende Sitzungen des Zielkontos.",
+          searchPlaceholder: "Name oder E-Mail suchen",
+          roleFilter: "Rolle",
+          statusFilter: "Status",
+          allRoles: "Alle Rollen",
+          allStatuses: "Alle Status",
+          noResults: "Keine Konten gefunden.",
+          table: {
+            user: "Mitarbeiter",
+            role: "Rolle",
+            status: "Status",
+            mfa: "MFA",
+            created: "Erstellt",
+            actions: "Aktionen",
+          },
+          self: "Sie",
+          noAccess: "Keine Berechtigung",
+          protected: "Geschützt",
+          edit: "Bearbeiten",
+          editTitle: "Konto bearbeiten",
+          editText:
+            "Änderungen an Rolle oder Status beenden alle Sitzungen des Kontos.",
+          roleLabel: "Rolle",
+          activeLabel: "Konto aktiv",
+          editWarning:
+            "Rollen- und Statusänderungen werden protokolliert und beenden bestehende Sitzungen.",
+          save: "Änderungen speichern",
+          updated: "Das Konto wurde aktualisiert.",
+          mfaAction: "MFA-Pflicht",
+          mfaUpdated: "Die MFA-Richtlinie wurde aktualisiert.",
+          requireMfa: "MFA verpflichtend",
+          removeMfa: "MFA-Pflicht entfernen",
+          requireMfaTitle: "MFA verpflichtend machen",
+          requireMfaText:
+            "Das Konto muss die Mehrfachauthentifizierung innerhalb der Kulanzfrist einrichten.",
+          removeMfaTitle: "MFA-Pflicht entfernen",
+          removeMfaText:
+            "Das Konto kann sich künftig ohne zweiten Faktor anmelden.",
+          revokeSessions: "Sitzungen beenden",
+          revokeSessionsTitle: "Alle Sitzungen beenden",
+          revokeSessionsText:
+            "Alle aktiven Sitzungen dieses Kontos werden sofort beendet.",
+          revokeSessionsConfirm: "Alle Sitzungen beenden",
+          sessionsRevoked: "{{count}} Sitzung(en) wurden beendet.",
+          reauthTitle: "Erneute Bestätigung erforderlich",
+          reauthText:
+            "Diese Aktion erfordert eine kürzlich erfolgte Anmeldung. Bestätigen Sie Ihre Identität und wiederholen Sie die Aktion.",
+          reauthButton: "Identität bestätigen",
+          reauthSuccess:
+            "Ihre Identität wurde bestätigt. Bitte wiederholen Sie die Aktion.",
+          inviteTitle: "Mitarbeiter einladen",
+          inviteText:
+            "Die Einladung wird per E-Mail versendet. Ein Rohlink wird aus Sicherheitsgründen nicht angezeigt.",
+          inviteEmail: "E-Mail-Adresse",
+          inviteEmailPlaceholder: "name@unternehmen.de",
+          inviteRole: "Rolle",
+          inviteSubmit: "Einladung senden",
+          inviting: "Wird gesendet …",
+          inviteSuccessEmail: "Einladung an {{email}} versendet.",
+          inviteSuccessOutbox:
+            "Einladung für {{email}} wurde im lokalen Outbox abgelegt (E-Mail-Versand deaktiviert).",
+          inviteLinkUnavailable:
+            "Der Einladungslink kann in der Oberfläche nicht angezeigt werden; er wird ausschließlich per E-Mail/Outbox zugestellt.",
+          invitationsTitle: "Einladungen",
+          invitationsText:
+            "Offene und abgeschlossene Einladungen der letzten 100 Einträge.",
+          invitationsEmpty: "Keine Einladungen vorhanden.",
+          invitationStatus: {
+            pending: "Offen",
+            accepted: "Angenommen",
+            revoked: "Zurückgezogen",
+            expired: "Abgelaufen",
+          },
+          invitationExpires: "Läuft ab",
+          revokeInvitation: "Zurückziehen",
+          revokeInvitationTitle: "Einladung zurückziehen",
+          revokeInvitationText:
+            "Die Einladung kann danach nicht mehr verwendet werden.",
+          invitationRevoked: "Die Einladung wurde zurückgezogen.",
+          ownerTransferTitle: "Eigentümerschaft übertragen",
+          ownerTransferText:
+            "Diese irreversible Aktion überträgt die Eigentümerrolle und beendet alle Sitzungen beider Konten.",
+          ownerTransferWarning:
+            "Nur im Notfall verwenden. Der Vorgang wird protokolliert und kann nicht rückgängig gemacht werden.",
+          ownerTransferTarget: "Zielkonto",
+          ownerTransferSelect: "Konto auswählen",
+          ownerTransferButton: "Eigentümerschaft übertragen",
+          ownerTransferConfirmTitle: "Übertragung bestätigen",
+          ownerTransferConfirmText:
+            "Geben Sie die E-Mail-Adresse des Zielkontos exakt ein, um die Übertragung freizugeben.",
+          ownerTransferConfirmLabel: "E-Mail-Adresse bestätigen",
+          ownerTransferConfirmHint:
+            "Zur Bestätigung {{email}} eingeben.",
+        },
+        roles: {
+          OWNER: "Eigentümer",
+          ADMIN: "Administrator",
+          HR_MANAGER: "HR-Manager",
+          ACCOUNTANT: "Buchhaltung",
+          SALES_MANAGER: "Vertriebsleitung",
+          PROJECT_MANAGER: "Projektleitung",
+          DEPARTMENT_MANAGER: "Abteilungsleitung",
+          WAREHOUSE_MANAGER: "Lagerleitung",
+          TECHNICIAN: "Technik",
+          WAREHOUSE_EMPLOYEE: "Lager",
+          SALES_EMPLOYEE: "Vertrieb",
+          EMPLOYEE: "Mitarbeiter",
+        },
+        nav: {
+          label: "Bereichsnavigation",
+          security: "Sicherheit",
+          sessions: "Sitzungen",
+          employees: "Mitarbeiter",
+        },
+        signedOut: {
+          securityNote:
+            "Die Sitzung wurde serverseitig beendet. Sitzungscookies wurden gelöscht; es verbleiben keine Anmeldedaten im Browser.",
+          signInAgain: "Erneut anmelden",
+          logout: {
+            eyebrow: "Abmeldung",
+            title: "Sicher abgemeldet",
+            text: "Ihre Sitzung wurde beendet. Sie können sich jederzeit wieder anmelden.",
+          },
+          "password-reset": {
+            eyebrow: "Passwort",
+            title: "Passwort aktualisiert",
+            text: "Ihr neues Passwort wurde gespeichert. Alle bestehenden Sitzungen wurden beendet.",
+          },
+          "invitation-accepted": {
+            eyebrow: "Einladung",
+            title: "Konto aktiviert",
+            text: "Ihr Konto wurde erfolgreich eingerichtet.",
+          },
+          "owner-transferred": {
+            eyebrow: "Eigentümerschaft",
+            title: "Übertragung abgeschlossen",
+            text: "Die Eigentümerrolle wurde übertragen. Alle Sitzungen beider Konten wurden beendet.",
+          },
+        },
+        expired: {
+          eyebrow: "Sitzung beendet",
+          title: "Ihre Sitzung ist abgelaufen",
+          text: "Aus Sicherheitsgründen wurde die Sitzung beendet. Bitte melden Sie sich erneut an.",
+          reasonLabel: "Grund",
+          signIn: "Erneut anmelden",
+          reasons: {
+            generic: "Die Sitzung ist nicht mehr gültig.",
+            unauthenticated: "Es wurde keine gültige Sitzung gefunden.",
+            absoluteExpired:
+              "Die maximale Sitzungsdauer von acht Stunden wurde erreicht.",
+            idleExpired:
+              "Die Sitzung wurde nach längerer Inaktivität beendet.",
+            accountInactive: "Das Konto wurde deaktiviert.",
+            mfaEnrollmentRequired:
+              "Die verpflichtende Mehrfachauthentifizierung wurde nicht rechtzeitig eingerichtet.",
+          },
+        },
+        notFound: {
+          eyebrow: "Nicht gefunden",
+          title: "Seite nicht gefunden",
+          text: "Die aufgerufene Auth-V2-Seite existiert nicht.",
+        },
+      },
       barcodeLabels: { printLabels: "Etiketten drucken" },
       barcodeGenerator: {
         title: "Barcodes generieren",
@@ -67,6 +658,9 @@ const resources = {
         today: "heute",
         irreversible: "Dieser Vorgang kann nicht rückgängig gemacht werden.",
         deletePermanently: "Endgültig löschen",
+        accessDenied: "Keine Berechtigung für diesen Bereich.",
+        pendingActivation:
+          "Dieses Benutzerkonto ist noch nicht freigegeben. Bitte wenden Sie sich an den Eigentümer.",
       },
       navigation: {
         dashboard: "Dashboard",
@@ -158,6 +752,8 @@ const resources = {
           loadDetail: "Rechnung konnte nicht geladen werden",
           create: "Rechnung konnte nicht erstellt werden",
           update: "Rechnung konnte nicht aktualisiert werden",
+          duplicateQuote:
+            "Für dieses Angebot existiert bereits eine aktive Rechnung.",
         },
         itemTypes: {
           EQUIPMENT: "Ausrüstung",
@@ -722,6 +1318,8 @@ const resources = {
         form: {
           save: "Änderungen speichern",
           create: "Gerät anlegen",
+          warehouseEditHint:
+            "Der Lagerort kann nur über einen Lagertransfer geändert werden.",
         },
         table: {
           empty: "Keine Geräte gefunden.",
@@ -974,6 +1572,593 @@ const resources = {
 
   en: {
     translation: {
+      authV2: {
+        brand: {
+          product: "Nexus Events",
+          management: "ERP Management System",
+          markLabel: "Nexus Events",
+          eyebrow: "Secure enterprise sign-in",
+          headline: "Your operation. One secure access.",
+          description:
+            "Manage events, teams and resources on a single platform, protected by modern authentication and full auditability.",
+          securityNote:
+            "Session tokens stay in HttpOnly cookies and are unreadable by JavaScript. This module is disabled by default.",
+          features: {
+            security: {
+              title: "Hardened security",
+              text: "Argon2id, same-origin protection and short-lived sessions.",
+            },
+            mfa: {
+              title: "Multi-step sign-in",
+              text: "TOTP and one-time recovery codes for sensitive accounts.",
+            },
+            audit: {
+              title: "Audit readiness",
+              text: "Security events and session changes remain traceable.",
+            },
+          },
+        },
+        shell: {
+          footer: "© 2026 Nexus Events ERP",
+          mobileFooter: "Secure sign-in for Nexus Events ERP",
+          protectedFooter: "Protected area · Auth V2",
+        },
+        common: {
+          loading: "Loading …",
+          retry: "Try again",
+          refresh: "Refresh",
+          cancel: "Cancel",
+          confirm: "Confirm",
+          close: "Close",
+          save: "Save",
+          saving: "Saving …",
+          backToSignIn: "Back to sign-in",
+          signOut: "Sign out",
+          signIn: "Sign in",
+          showPassword: "Show password",
+          hidePassword: "Hide password",
+          copy: "Copy",
+          copied: "Copied",
+          copyFailed: "Could not copy. Please note the codes manually.",
+          required: "Required",
+          optional: "Optional",
+          active: "Active",
+          inactive: "Inactive",
+          status: "Status",
+          role: "Role",
+          unknown: "Unknown",
+          errorCode: "Error code",
+          secureDialog: "Secure confirmation",
+          secureArea: "Protected area",
+          unavailableTitle: "Unable to connect",
+          unavailableText:
+            "The session could not be verified. Please try again.",
+          notAvailable: "Not available",
+        },
+        language: { label: "Language" },
+        theme: {
+          toDark: "Enable dark theme",
+          toLight: "Enable light theme",
+        },
+        validation: {
+          required: "This field is required.",
+          emailInvalid: "Please enter a valid email address.",
+          passwordTooShort: "The password must be at least 12 characters long.",
+          passwordTooLong: "The password must not exceed 128 characters.",
+          passwordMismatch: "The passwords do not match.",
+          nameTooLong: "The name is too long.",
+          codeInvalid: "Please enter a valid 6-digit code.",
+          tokenMissing: "The invitation link is incomplete.",
+        },
+        errors: {
+          generic: "The request failed. Please try again.",
+          network: "The server is unreachable. Please check your connection.",
+          server: "The server could not process the request.",
+          sessionExpired: "The session has expired.",
+          unauthenticated: "You are not signed in.",
+          absoluteExpired:
+            "The maximum session duration was reached. Please sign in again.",
+          idleExpired: "The session ended due to inactivity.",
+          accountInactive:
+            "This account is deactivated. Please contact your administrator.",
+          mfaEnrollmentRequired:
+            "Multi-factor authentication is mandatory for this account.",
+          reauthRequired:
+            "This action requires you to confirm your identity again.",
+          insufficientPermissions:
+            "You do not have permission for this action.",
+          invalidOrigin:
+            "The request security check failed (origin). Please reload the page and try again.",
+          securityTitle: "Security check failed",
+          rateLimited:
+            "Too many attempts. Please try again in {{seconds}} seconds.",
+          rateLimitedTitle: "Too many attempts",
+          invalidCredentials: "The email address or password is incorrect.",
+          invalidRequest: "The request is incomplete.",
+          passwordRequired: "Please enter your password.",
+          invalidInvitation: "The invitation is invalid.",
+          invitationRevoked: "The invitation was revoked.",
+          invitationAlreadyUsed: "The invitation was already used.",
+          invitationExpired: "The invitation has expired.",
+          emailInUse: "An account already exists for this email address.",
+          invitationAlreadyPending:
+            "An open invitation already exists for this email address.",
+          invitationNotFound: "The invitation was not found.",
+          invalidEmail: "Invalid email address.",
+          invalidRole: "Invalid role.",
+          weakPassword: "The password does not meet the minimum requirements.",
+          invalidActiveFlag: "Invalid activation status.",
+          noChanges: "No changes were submitted.",
+          selfModificationForbidden:
+            "Your own account cannot be changed in this way.",
+          lastOwnerProtection:
+            "The last active owner cannot be removed.",
+          targetInactive: "The target account is deactivated.",
+          targetRequired: "Please select a target account.",
+          userNotFound: "The user account was not found.",
+          sessionNotFound: "The session was not found.",
+          invalidToken: "The link is invalid or has expired.",
+          passwordTooShort: "The password is too short.",
+          passwordTooLong: "The password is too long.",
+          invalidPassword: "The current password is incorrect.",
+          invalidCode: "The code is invalid or has expired.",
+          twoFactorLocked:
+            "Too many failed attempts. Two-factor sign-in is temporarily locked.",
+        },
+        login: {
+          eyebrow: "Welcome back",
+          title: "Sign in to Nexus Events",
+          subtitle: "Sign in with your personal company account.",
+          emailLabel: "Email address",
+          emailPlaceholder: "name@company.com",
+          passwordLabel: "Password",
+          passwordPlaceholder: "Your password",
+          submit: "Sign in",
+          submitting: "Signing in …",
+          forgotPassword: "Forgot password?",
+          invitationOnly:
+            "Access is granted exclusively by invitation from your administrator. Self-registration is not possible.",
+          securityNote:
+            "Protected by HttpOnly session cookies and origin verification.",
+          needHelp: "No access?",
+          contactAdmin: "Contact your administrator",
+          supportEmail: "admin@nexus-events.de",
+        },
+        twoFactor: {
+          eyebrow: "Two-factor sign-in",
+          title: "Verification required",
+          subtitle:
+            "Enter the 6-digit code from your authenticator app.",
+          useTotp: "Authenticator",
+          useRecoveryCode: "Recovery code",
+          codeLabel: "Verification code",
+          totpHint: "The code refreshes every 30 seconds.",
+          recoveryLabel: "Recovery code",
+          recoveryPlaceholder: "xxxxx-xxxxx",
+          recoveryHint: "Each code can be used only once.",
+          submit: "Verify",
+          submitting: "Verifying …",
+          securityNote:
+            "The code is sent to the server for verification only and is never stored.",
+          back: "Back to sign-in",
+          lostAccess: "Lost access? Please contact your administrator.",
+          digitLabel: "Digit {{index}} of {{total}}",
+        },
+        mfa: {
+          eyebrow: "Account security",
+          title: "Set up multi-factor authentication",
+          subtitle:
+            "Protect your account with an authenticator app and one-time recovery codes.",
+          introAuthenticator:
+            "Scan the QR code with a TOTP app such as 1Password, Authy or Google Authenticator.",
+          introRecovery:
+            "Store the recovery codes safely. They are shown only once.",
+          passwordLabel: "Current password",
+          passwordHint: "Required to start the setup.",
+          start: "Start setup",
+          starting: "Starting …",
+          requiredBannerTitle: "Multi-factor authentication required",
+          requiredBannerText:
+            "Your administrator requires multi-factor authentication to be set up.",
+          requiredNote:
+            "Without setup, access will be blocked once the deadline passes.",
+          scanTitle: "Connect authenticator",
+          scanText:
+            "Scan the QR code or enter the key manually.",
+          qrAlt: "QR code for the authenticator app",
+          qrHint:
+            "The QR code contains your TOTP secret and is generated locally only.",
+          qrError:
+            "The QR code could not be generated. Use the manual key instead.",
+          manualKey: "Manual key",
+          showKey: "Show",
+          hideKey: "Hide",
+          secretUnavailable: "The key could not be read.",
+          backupTitle: "Recovery codes",
+          backupHint: "Each code is valid once. It cannot be retrieved again.",
+          backupWarning:
+            "These codes are shown now only. Write them down and keep them separate from the device.",
+          backupAcknowledge:
+            "I have stored the recovery codes securely.",
+          verifyTitle: "Verify code",
+          verifyText:
+            "Enter the current code from your authenticator app to complete the setup.",
+          verify: "Complete setup",
+          verifying: "Verifying …",
+          restart: "Restart setup",
+          successTitle: "Multi-factor authentication active",
+          successText:
+            "Your account is now protected by a second factor.",
+          goToSecurity: "Go to account security",
+          alreadyEnabledTitle: "Multi-factor authentication is active",
+          alreadyEnabledText:
+            "Your account is already protected. Manage the settings under account security.",
+        },
+        forgot: {
+          eyebrow: "Reset password",
+          title: "Forgot password?",
+          subtitle:
+            "Enter your email address. We will send a reset link if an account exists.",
+          emailLabel: "Email address",
+          emailPlaceholder: "name@company.com",
+          submit: "Request link",
+          sending: "Sending …",
+          note:
+            "For security reasons, we do not reveal whether an email address is registered.",
+          successTitle: "Request received",
+          successText:
+            "If an account exists for this address, a reset link has been sent.",
+          successHint:
+            "The link is valid for one hour and can be used only once.",
+          tryAnother: "Use another email address",
+        },
+        reset: {
+          eyebrow: "New password",
+          title: "Reset password",
+          subtitle: "Choose a new password for your account.",
+          newPassword: "New password",
+          confirmPassword: "Confirm password",
+          passwordHint: "At least {{min}} and at most {{max}} characters.",
+          submit: "Save password",
+          submitting: "Saving …",
+          note:
+            "After the reset, all existing sessions are terminated.",
+          invalidTitle: "Link invalid or expired",
+          invalidText:
+            "The reset link is no longer valid or has already been used.",
+          requestNew: "Request a new link",
+          strength: {
+            weak: "Weak",
+            fair: "Fair",
+            good: "Good",
+            strong: "Strong",
+            veryStrong: "Very strong",
+          },
+          requirements: {
+            length: "At least {{min}} characters",
+            maxLength: "At most {{max}} characters",
+          },
+        },
+        invite: {
+          eyebrow: "Invitation",
+          title: "Activate account",
+          subtitle:
+            "Set your password to accept the invitation.",
+          nameLabel: "Full name (optional)",
+          namePlaceholder: "First and last name",
+          nameHint: "Shown inside the application.",
+          passwordLabel: "Password",
+          passwordHint: "At least {{min}} and at most {{max}} characters.",
+          confirmPassword: "Confirm password",
+          submit: "Activate account",
+          submitting: "Activating …",
+          note:
+            "Your role is assigned by your administrator. The invitation can be used only once.",
+          successTitle: "Account activated",
+          successText:
+            "Your access has been set up. You can sign in now.",
+          goToSignIn: "Go to sign-in",
+          invalidTitle: "Invitation not valid",
+          tokenMissing: "The invitation link is incomplete.",
+          contactAdmin:
+            "Please contact your administrator to receive a new invitation.",
+        },
+        security: {
+          eyebrow: "Account security",
+          title: "Security and sign-in",
+          subtitle:
+            "Manage password, multi-factor authentication and security-relevant activity.",
+          manageSessions: "Manage sessions",
+          passwordTitle: "Change password",
+          passwordText:
+            "Use a unique password with at least 12 characters.",
+          currentPassword: "Current password",
+          currentPasswordRequired: "Please enter your current password.",
+          newPassword: "New password",
+          confirmNewPassword: "Confirm new password",
+          passwordHint: "{{min}}–{{max}} characters.",
+          revokeOthers: "End other sessions",
+          revokeOthersHint: "Recommended: signs out all other devices.",
+          changePassword: "Change password",
+          changing: "Changing …",
+          passwordChanged:
+            "Your password was changed. Other sessions were ended as selected.",
+          mfaTitle: "Multi-factor authentication",
+          mfaText: "Protects sign-in with a second factor.",
+          mfaEnabled: "Active",
+          mfaDisabled: "Inactive",
+          mfaEnabledText:
+            "Your account is protected by an authenticator app.",
+          mfaRequiredText:
+            "Your administrator requires multi-factor authentication to be set up.",
+          mfaOptionalText:
+            "Enable a second factor for additional protection.",
+          mfaDeadline: "Setup required by {{date}}.",
+          mfaOverdue:
+            "The deadline has passed. Please set up multi-factor authentication immediately.",
+          enroll: "Set up now",
+          backupCodesNote:
+            "Recovery codes cannot be shown again after setup. Keep your copy safe.",
+          disable: "Disable multi-factor authentication",
+          disableTitle: "Disable multi-factor authentication",
+          disableText:
+            "Confirm your password to remove the second factor. The account will be less protected afterwards.",
+          disablePassword: "Confirm password",
+          mfaChanged: "Multi-factor authentication was updated.",
+          profileTitle: "Account",
+          profileText:
+            "Your profile data is managed by your administrator.",
+          readOnlyNote:
+            "Name, email address and role cannot be changed here. Please contact your administrator.",
+          stepUpTitle: "Confirm identity",
+          stepUpText:
+            "Sensitive actions require a recent sign-in.",
+          stepUpButton: "Confirm identity",
+          stepUpDialogTitle: "Confirm identity",
+          stepUpDialogText:
+            "Enter your password to unlock sensitive actions for the next five minutes.",
+          stepUpSuccess: "Your identity has been confirmed.",
+          reauthValid: "Recently confirmed",
+          reauthExpired: "Confirmation expired",
+          lastVerified: "Last confirmation: {{date}}",
+          eventsTitle: "Security events",
+          eventsText:
+            "The last 100 events (visible to owners only).",
+          eventsEmpty: "No security events found.",
+          eventTypes: {
+            LOGIN_SUCCESS: "Sign-in successful",
+            LOGIN_FAILED: "Sign-in failed",
+            LOGIN_RATE_LIMITED: "Sign-in throttled",
+            STEP_UP_SUCCESS: "Identity confirmed",
+            STEP_UP_FAILED: "Confirmation failed",
+            SESSION_REVOKED: "Session ended",
+            OTHER_SESSIONS_REVOKED: "Other sessions ended",
+            MFA_POLICY_CHANGED: "MFA policy changed",
+            INVITATION_CREATED: "Invitation created",
+            INVITATION_ACCEPTED: "Invitation accepted",
+            INVITATION_REVOKED: "Invitation revoked",
+            USER_SECURITY_CHANGE: "Security-relevant account change",
+            USER_UPDATE: "Account updated",
+            OWNER_TRANSFER: "Ownership transferred",
+            SESSIONS_REVOKED: "Sessions ended",
+            PASSWORD_RESET_COMPLETED: "Password reset completed",
+            LOGIN_BLOCKED_MFA_REQUIRED:
+              "Sign-in blocked due to MFA requirement",
+          },
+        },
+        sessions: {
+          eyebrow: "Sessions",
+          title: "Active devices",
+          subtitle:
+            "Review and end sessions on your devices.",
+          listTitle: "Signed-in devices",
+          listText:
+            "The session key is stored only in an HttpOnly cookie and is never shown here.",
+          currentBadge: "This device",
+          expiredBadge: "Expired",
+          unknownDevice: "Unknown device",
+          created: "Created",
+          lastSeen: "Last active",
+          expires: "Expires",
+          ip: "IP address",
+          revoke: "End session",
+          revokeTitle: "End session",
+          revokeText:
+            "The session becomes invalid immediately. The device must sign in again.",
+          revokeSuccess: "The session was ended.",
+          revokeOthers: "End all others",
+          revokeOthersTitle: "End all other sessions",
+          revokeOthersText:
+            "All sessions except this device will be ended immediately.",
+          revokeOthersSuccess:
+            "{{count}} other session(s) were ended.",
+          signOutCurrent: "Sign out",
+          signOutCurrentTitle: "Sign out from this device",
+          signOutCurrentText:
+            "The session is ended securely and the session cookie is deleted.",
+          empty: "No active sessions found.",
+          securityNote:
+            "Session tokens are never handed to JavaScript. All actions run through same-origin cookies.",
+        },
+        admin: {
+          eyebrow: "Administration",
+          title: "Employee accounts",
+          subtitle:
+            "Manage roles, account status, MFA requirements and invitations.",
+          accessDeniedTitle: "No permission",
+          accessDeniedText:
+            "This view is reserved for owners and administrators. Backend authorization remains authoritative.",
+          stats: {
+            total: "Accounts",
+            active: "Active",
+            inactive: "Inactive",
+            mfaRequired: "MFA required",
+          },
+          usersTitle: "Accounts",
+          usersText:
+            "Role and status changes end the target account's existing sessions.",
+          searchPlaceholder: "Search name or email",
+          roleFilter: "Role",
+          statusFilter: "Status",
+          allRoles: "All roles",
+          allStatuses: "All statuses",
+          noResults: "No accounts found.",
+          table: {
+            user: "Employee",
+            role: "Role",
+            status: "Status",
+            mfa: "MFA",
+            created: "Created",
+            actions: "Actions",
+          },
+          self: "You",
+          noAccess: "No permission",
+          protected: "Protected",
+          edit: "Edit",
+          editTitle: "Edit account",
+          editText:
+            "Changes to role or status end all sessions for the account.",
+          roleLabel: "Role",
+          activeLabel: "Account active",
+          editWarning:
+            "Role and status changes are logged and end existing sessions.",
+          save: "Save changes",
+          updated: "The account was updated.",
+          mfaAction: "MFA requirement",
+          mfaUpdated: "The MFA policy was updated.",
+          requireMfa: "Require MFA",
+          removeMfa: "Remove MFA requirement",
+          requireMfaTitle: "Require MFA",
+          requireMfaText:
+            "The account must set up multi-factor authentication within the grace period.",
+          removeMfaTitle: "Remove MFA requirement",
+          removeMfaText:
+            "The account may sign in without a second factor in future.",
+          revokeSessions: "End sessions",
+          revokeSessionsTitle: "End all sessions",
+          revokeSessionsText:
+            "All active sessions for this account will be ended immediately.",
+          revokeSessionsConfirm: "End all sessions",
+          sessionsRevoked: "{{count}} session(s) were ended.",
+          reauthTitle: "Confirmation required again",
+          reauthText:
+            "This action requires a recent sign-in. Confirm your identity and repeat the action.",
+          reauthButton: "Confirm identity",
+          reauthSuccess:
+            "Your identity was confirmed. Please repeat the action.",
+          inviteTitle: "Invite employee",
+          inviteText:
+            "The invitation is sent by email. A raw link is not shown for security reasons.",
+          inviteEmail: "Email address",
+          inviteEmailPlaceholder: "name@company.com",
+          inviteRole: "Role",
+          inviteSubmit: "Send invitation",
+          inviting: "Sending …",
+          inviteSuccessEmail: "Invitation sent to {{email}}.",
+          inviteSuccessOutbox:
+            "Invitation for {{email}} was stored in the local outbox (email delivery disabled).",
+          inviteLinkUnavailable:
+            "The invitation link cannot be displayed in the interface; it is delivered only by email/outbox.",
+          invitationsTitle: "Invitations",
+          invitationsText:
+            "Open and completed invitations from the last 100 entries.",
+          invitationsEmpty: "No invitations found.",
+          invitationStatus: {
+            pending: "Pending",
+            accepted: "Accepted",
+            revoked: "Revoked",
+            expired: "Expired",
+          },
+          invitationExpires: "Expires",
+          revokeInvitation: "Revoke",
+          revokeInvitationTitle: "Revoke invitation",
+          revokeInvitationText:
+            "The invitation can no longer be used afterwards.",
+          invitationRevoked: "The invitation was revoked.",
+          ownerTransferTitle: "Transfer ownership",
+          ownerTransferText:
+            "This irreversible action transfers the owner role and ends all sessions for both accounts.",
+          ownerTransferWarning:
+            "Use only in an emergency. The operation is logged and cannot be undone.",
+          ownerTransferTarget: "Target account",
+          ownerTransferSelect: "Select account",
+          ownerTransferButton: "Transfer ownership",
+          ownerTransferConfirmTitle: "Confirm transfer",
+          ownerTransferConfirmText:
+            "Enter the target account's email address exactly to authorise the transfer.",
+          ownerTransferConfirmLabel: "Confirm email address",
+          ownerTransferConfirmHint:
+            "Enter {{email}} to confirm.",
+        },
+        roles: {
+          OWNER: "Owner",
+          ADMIN: "Administrator",
+          HR_MANAGER: "HR Manager",
+          ACCOUNTANT: "Accounting",
+          SALES_MANAGER: "Sales Manager",
+          PROJECT_MANAGER: "Project Manager",
+          DEPARTMENT_MANAGER: "Department Manager",
+          WAREHOUSE_MANAGER: "Warehouse Manager",
+          TECHNICIAN: "Technician",
+          WAREHOUSE_EMPLOYEE: "Warehouse",
+          SALES_EMPLOYEE: "Sales",
+          EMPLOYEE: "Employee",
+        },
+        nav: {
+          label: "Section navigation",
+          security: "Security",
+          sessions: "Sessions",
+          employees: "Employees",
+        },
+        signedOut: {
+          securityNote:
+            "The session was ended on the server. Session cookies were deleted; no credentials remain in the browser.",
+          signInAgain: "Sign in again",
+          logout: {
+            eyebrow: "Sign-out",
+            title: "Signed out securely",
+            text: "Your session was ended. You can sign in again at any time.",
+          },
+          "password-reset": {
+            eyebrow: "Password",
+            title: "Password updated",
+            text: "Your new password was saved. All existing sessions were ended.",
+          },
+          "invitation-accepted": {
+            eyebrow: "Invitation",
+            title: "Account activated",
+            text: "Your account was set up successfully.",
+          },
+          "owner-transferred": {
+            eyebrow: "Ownership",
+            title: "Transfer completed",
+            text: "The owner role was transferred. All sessions for both accounts were ended.",
+          },
+        },
+        expired: {
+          eyebrow: "Session ended",
+          title: "Your session has expired",
+          text: "For security reasons the session was ended. Please sign in again.",
+          reasonLabel: "Reason",
+          signIn: "Sign in again",
+          reasons: {
+            generic: "The session is no longer valid.",
+            unauthenticated: "No valid session was found.",
+            absoluteExpired:
+              "The maximum session duration of eight hours was reached.",
+            idleExpired:
+              "The session was ended after a period of inactivity.",
+            accountInactive: "The account was deactivated.",
+            mfaEnrollmentRequired:
+              "Mandatory multi-factor authentication was not set up in time.",
+          },
+        },
+        notFound: {
+          eyebrow: "Not found",
+          title: "Page not found",
+          text: "The requested Auth V2 page does not exist.",
+        },
+      },
       barcodeLabels: { printLabels: "Print Labels" },
       barcodeGenerator: {
         title: "Generate Barcodes",
@@ -1037,6 +2222,9 @@ const resources = {
         today: "today",
         irreversible: "This action cannot be undone.",
         deletePermanently: "Delete permanently",
+        accessDenied: "You do not have permission to access this area.",
+        pendingActivation:
+          "This user account has not been approved yet. Please contact the owner.",
       },
       navigation: {
         dashboard: "Dashboard",
@@ -1128,6 +2316,8 @@ const resources = {
           loadDetail: "Invoice could not be loaded",
           create: "Invoice could not be created",
           update: "Invoice could not be updated",
+          duplicateQuote:
+            "An active invoice already exists for this quote.",
         },
         itemTypes: {
           EQUIPMENT: "Equipment",
@@ -1692,6 +2882,8 @@ const resources = {
         form: {
           save: "Save changes",
           create: "Create equipment item",
+          warehouseEditHint:
+            "The warehouse can only be changed through a warehouse transfer.",
         },
         table: {
           empty: "No equipment found.",
@@ -1944,6 +3136,555 @@ const resources = {
 
   ar: {
     translation: {
+      authV2: {
+        brand: {
+          product: "نكسس إيفنتس",
+          management: "نظام إدارة الموارد المؤسسية",
+          markLabel: "نكسس إيفنتس",
+          eyebrow: "تسجيل دخول مؤسسي آمن",
+          headline: "عملياتك. وصول آمن واحد.",
+          description:
+            "أدر الفعاليات والفرق والموارد عبر منصة واحدة، محمية بمصادقة حديثة وقابلية تدقيق كاملة.",
+          securityNote:
+            "تبقى رموز الجلسة داخل كوكيز HttpOnly ولا يمكن لجافاسكربت قراءتها. هذه الوحدة معطّلة افتراضيًا.",
+          features: {
+            security: {
+              title: "أمان معزّز",
+              text: "Argon2id وحماية النطاق نفسه وجلسات قصيرة العمر.",
+            },
+            mfa: {
+              title: "تسجيل دخول متعدد الخطوات",
+              text: "رموز TOTP وأكواد استرداد لمرة واحدة للحسابات الحساسة.",
+            },
+            audit: {
+              title: "جاهزية للتدقيق",
+              text: "إمكانية تتبع أحداث الأمان وتغييرات الجلسات.",
+            },
+          },
+        },
+        shell: {
+          footer: "© 2026 Nexus Events ERP",
+          mobileFooter: "تسجيل دخول آمن إلى Nexus Events ERP",
+          protectedFooter: "منطقة محمية · Auth V2",
+        },
+        common: {
+          loading: "جارٍ التحميل …",
+          retry: "إعادة المحاولة",
+          refresh: "تحديث",
+          cancel: "إلغاء",
+          confirm: "تأكيد",
+          close: "إغلاق",
+          save: "حفظ",
+          saving: "جارٍ الحفظ …",
+          backToSignIn: "العودة إلى تسجيل الدخول",
+          signOut: "تسجيل الخروج",
+          signIn: "تسجيل الدخول",
+          showPassword: "إظهار كلمة المرور",
+          hidePassword: "إخفاء كلمة المرور",
+          copy: "نسخ",
+          copied: "تم النسخ",
+          copyFailed: "تعذّر النسخ. يرجى تدوين الأكواد يدويًا.",
+          required: "مطلوب",
+          optional: "اختياري",
+          active: "نشط",
+          inactive: "غير نشط",
+          status: "الحالة",
+          role: "الدور",
+          unknown: "غير معروف",
+          errorCode: "رمز الخطأ",
+          secureDialog: "تأكيد آمن",
+          secureArea: "منطقة محمية",
+          unavailableTitle: "تعذّر الاتصال",
+          unavailableText: "تعذّر التحقق من الجلسة. يرجى المحاولة مجددًا.",
+          notAvailable: "غير متاح",
+        },
+        language: { label: "اللغة" },
+        theme: {
+          toDark: "تفعيل الوضع الداكن",
+          toLight: "تفعيل الوضع الفاتح",
+        },
+        validation: {
+          required: "هذا الحقل مطلوب.",
+          emailInvalid: "يرجى إدخال بريد إلكتروني صالح.",
+          passwordTooShort: "يجب أن تتكوّن كلمة المرور من 12 حرفًا على الأقل.",
+          passwordTooLong: "يجب ألا تتجاوز كلمة المرور 128 حرفًا.",
+          passwordMismatch: "كلمتا المرور غير متطابقتين.",
+          nameTooLong: "الاسم طويل جدًا.",
+          codeInvalid: "يرجى إدخال رمز صالح مكوّن من 6 أرقام.",
+          tokenMissing: "رابط الدعوة غير مكتمل.",
+        },
+        errors: {
+          generic: "فشل الطلب. يرجى المحاولة مجددًا.",
+          network: "تعذّر الوصول إلى الخادم. يرجى التحقق من الاتصال.",
+          server: "تعذّر على الخادم معالجة الطلب.",
+          sessionExpired: "انتهت صلاحية الجلسة.",
+          unauthenticated: "أنت غير مسجّل الدخول.",
+          absoluteExpired:
+            "تم بلوغ الحد الأقصى لمدة الجلسة. يرجى تسجيل الدخول مجددًا.",
+          idleExpired: "أُنهيت الجلسة بسبب عدم النشاط.",
+          accountInactive: "هذا الحساب معطّل. يرجى التواصل مع الإدارة.",
+          mfaEnrollmentRequired:
+            "المصادقة متعددة العوامل إلزامية لهذا الحساب.",
+          reauthRequired: "يتطلب هذا الإجراء تأكيد هويتك مجددًا.",
+          insufficientPermissions: "ليس لديك صلاحية لهذا الإجراء.",
+          invalidOrigin:
+            "فشل فحص أمان الطلب (المصدر). يرجى إعادة تحميل الصفحة والمحاولة مجددًا.",
+          securityTitle: "فشل فحص الأمان",
+          rateLimited:
+            "محاولات كثيرة جدًا. يرجى المحاولة بعد {{seconds}} ثانية.",
+          rateLimitedTitle: "محاولات كثيرة جدًا",
+          invalidCredentials: "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+          invalidRequest: "الطلب غير مكتمل.",
+          passwordRequired: "يرجى إدخال كلمة المرور.",
+          invalidInvitation: "الدعوة غير صالحة.",
+          invitationRevoked: "تم سحب الدعوة.",
+          invitationAlreadyUsed: "تم استخدام الدعوة مسبقًا.",
+          invitationExpired: "انتهت صلاحية الدعوة.",
+          emailInUse: "يوجد حساب بالفعل لهذا البريد الإلكتروني.",
+          invitationAlreadyPending:
+            "توجد دعوة مفتوحة بالفعل لهذا البريد الإلكتروني.",
+          invitationNotFound: "لم يتم العثور على الدعوة.",
+          invalidEmail: "بريد إلكتروني غير صالح.",
+          invalidRole: "دور غير صالح.",
+          weakPassword: "كلمة المرور لا تستوفي الحد الأدنى من المتطلبات.",
+          invalidActiveFlag: "حالة التفعيل غير صالحة.",
+          noChanges: "لم يتم إرسال أي تغييرات.",
+          selfModificationForbidden: "لا يمكن تعديل حسابك بهذه الطريقة.",
+          lastOwnerProtection: "لا يمكن إزالة آخر مالك نشط.",
+          targetInactive: "الحساب المستهدف معطّل.",
+          targetRequired: "يرجى اختيار حساب مستهدف.",
+          userNotFound: "لم يتم العثور على حساب المستخدم.",
+          sessionNotFound: "لم يتم العثور على الجلسة.",
+          invalidToken: "الرابط غير صالح أو منتهي الصلاحية.",
+          passwordTooShort: "كلمة المرور قصيرة جدًا.",
+          passwordTooLong: "كلمة المرور طويلة جدًا.",
+          invalidPassword: "كلمة المرور الحالية غير صحيحة.",
+          invalidCode: "الرمز غير صالح أو منتهي الصلاحية.",
+          twoFactorLocked:
+            "محاولات فاشلة كثيرة. تم قفل تسجيل الدخول الثنائي مؤقتًا.",
+        },
+        login: {
+          eyebrow: "مرحبًا بعودتك",
+          title: "تسجيل الدخول إلى Nexus Events",
+          subtitle: "سجّل الدخول باستخدام حساب الشركة الشخصي.",
+          emailLabel: "البريد الإلكتروني",
+          emailPlaceholder: "name@company.com",
+          passwordLabel: "كلمة المرور",
+          passwordPlaceholder: "كلمة المرور",
+          submit: "تسجيل الدخول",
+          submitting: "جارٍ تسجيل الدخول …",
+          forgotPassword: "هل نسيت كلمة المرور؟",
+          invitationOnly:
+            "يُمنح الوصول حصريًا بدعوة من الإدارة. التسجيل الذاتي غير متاح.",
+          securityNote: "محمي بكوكيز جلسة HttpOnly والتحقق من المصدر.",
+          needHelp: "لا تملك وصولًا؟",
+          contactAdmin: "تواصل مع الإدارة",
+          supportEmail: "admin@nexus-events.de",
+        },
+        twoFactor: {
+          eyebrow: "تسجيل دخول ثنائي العوامل",
+          title: "التحقق مطلوب",
+          subtitle: "أدخل الرمز المكوّن من 6 أرقام من تطبيق المصادقة.",
+          useTotp: "تطبيق المصادقة",
+          useRecoveryCode: "رمز الاسترداد",
+          codeLabel: "رمز التحقق",
+          totpHint: "يتجدد الرمز كل 30 ثانية.",
+          recoveryLabel: "رمز الاسترداد",
+          recoveryPlaceholder: "xxxxx-xxxxx",
+          recoveryHint: "كل رمز صالح لمرة واحدة فقط.",
+          submit: "تحقق",
+          submitting: "جارٍ التحقق …",
+          securityNote: "يُرسل الرمز إلى الخادم للتحقق فقط ولا يُخزَّن.",
+          back: "العودة إلى تسجيل الدخول",
+          lostAccess: "فقدت الوصول؟ يرجى التواصل مع الإدارة.",
+          digitLabel: "الرقم {{index}} من {{total}}",
+        },
+        mfa: {
+          eyebrow: "أمان الحساب",
+          title: "إعداد المصادقة متعددة العوامل",
+          subtitle: "احمِ حسابك بتطبيق مصادقة وأكواد استرداد لمرة واحدة.",
+          introAuthenticator:
+            "امسح رمز QR باستخدام تطبيق TOTP مثل 1Password أو Authy أو Google Authenticator.",
+          introRecovery:
+            "احفظ أكواد الاسترداد في مكان آمن. تُعرض مرة واحدة فقط.",
+          passwordLabel: "كلمة المرور الحالية",
+          passwordHint: "مطلوبة لبدء الإعداد.",
+          start: "بدء الإعداد",
+          starting: "جارٍ البدء …",
+          requiredBannerTitle: "المصادقة متعددة العوامل مطلوبة",
+          requiredBannerText: "تتطلب إدارتك إعداد المصادقة متعددة العوامل.",
+          requiredNote: "بدون الإعداد، سيُحظر الوصول بعد انتهاء المهلة.",
+          scanTitle: "ربط تطبيق المصادقة",
+          scanText: "امسح رمز QR أو أدخل المفتاح يدويًا.",
+          qrAlt: "رمز QR لتطبيق المصادقة",
+          qrHint: "يحتوي رمز QR على سرّ TOTP ويُولَّد محليًا فقط.",
+          qrError: "تعذّر إنشاء رمز QR. استخدم المفتاح اليدوي بدلًا منه.",
+          manualKey: "المفتاح اليدوي",
+          showKey: "إظهار",
+          hideKey: "إخفاء",
+          secretUnavailable: "تعذّرت قراءة المفتاح.",
+          backupTitle: "أكواد الاسترداد",
+          backupHint: "كل رمز صالح مرة واحدة. لا يمكن استرجاعه مجددًا.",
+          backupWarning:
+            "تُعرض هذه الأكواد الآن فقط. دوّنها واحفظها منفصلة عن الجهاز.",
+          backupAcknowledge: "لقد حفظت أكواد الاسترداد بأمان.",
+          verifyTitle: "تأكيد الرمز",
+          verifyText: "أدخل الرمز الحالي من تطبيق المصادقة لإتمام الإعداد.",
+          verify: "إتمام الإعداد",
+          verifying: "جارٍ التحقق …",
+          restart: "إعادة بدء الإعداد",
+          successTitle: "المصادقة متعددة العوامل مفعّلة",
+          successText: "حسابك محمي الآن بعامل ثانٍ.",
+          goToSecurity: "الانتقال إلى أمان الحساب",
+          alreadyEnabledTitle: "المصادقة متعددة العوامل مفعّلة",
+          alreadyEnabledText:
+            "حسابك محمي بالفعل. يمكنك إدارة الإعدادات من أمان الحساب.",
+        },
+        forgot: {
+          eyebrow: "إعادة تعيين كلمة المرور",
+          title: "هل نسيت كلمة المرور؟",
+          subtitle:
+            "أدخل بريدك الإلكتروني. سنرسل رابط إعادة التعيين إن وُجد حساب.",
+          emailLabel: "البريد الإلكتروني",
+          emailPlaceholder: "name@company.com",
+          submit: "طلب الرابط",
+          sending: "جارٍ الإرسال …",
+          note: "لأسباب أمنية، لا نكشف ما إذا كان البريد الإلكتروني مسجّلًا.",
+          successTitle: "تم استلام الطلب",
+          successText:
+            "إذا وُجد حساب لهذا العنوان، فقد أُرسل رابط إعادة التعيين.",
+          successHint: "الرابط صالح لمدة ساعة ويمكن استخدامه مرة واحدة فقط.",
+          tryAnother: "استخدام بريد إلكتروني آخر",
+        },
+        reset: {
+          eyebrow: "كلمة مرور جديدة",
+          title: "إعادة تعيين كلمة المرور",
+          subtitle: "اختر كلمة مرور جديدة لحسابك.",
+          newPassword: "كلمة المرور الجديدة",
+          confirmPassword: "تأكيد كلمة المرور",
+          passwordHint: "من {{min}} إلى {{max}} حرفًا.",
+          submit: "حفظ كلمة المرور",
+          submitting: "جارٍ الحفظ …",
+          note: "بعد إعادة التعيين، تُنهى جميع الجلسات الحالية.",
+          invalidTitle: "الرابط غير صالح أو منتهي الصلاحية",
+          invalidText:
+            "رابط إعادة التعيين لم يعد صالحًا أو تم استخدامه مسبقًا.",
+          requestNew: "طلب رابط جديد",
+          strength: {
+            weak: "ضعيفة",
+            fair: "مقبولة",
+            good: "جيدة",
+            strong: "قوية",
+            veryStrong: "قوية جدًا",
+          },
+          requirements: {
+            length: "{{min}} حرفًا على الأقل",
+            maxLength: "{{max}} حرفًا كحد أقصى",
+          },
+        },
+        invite: {
+          eyebrow: "دعوة",
+          title: "تفعيل الحساب",
+          subtitle: "عيّن كلمة المرور لقبول الدعوة.",
+          nameLabel: "الاسم الكامل (اختياري)",
+          namePlaceholder: "الاسم الأول واسم العائلة",
+          nameHint: "يظهر داخل التطبيق.",
+          passwordLabel: "كلمة المرور",
+          passwordHint: "من {{min}} إلى {{max}} حرفًا.",
+          confirmPassword: "تأكيد كلمة المرور",
+          submit: "تفعيل الحساب",
+          submitting: "جارٍ التفعيل …",
+          note: "يُحدَّد دورك من قِبل الإدارة. الدعوة صالحة لمرة واحدة فقط.",
+          successTitle: "تم تفعيل الحساب",
+          successText: "تم إعداد وصولك. يمكنك تسجيل الدخول الآن.",
+          goToSignIn: "الانتقال إلى تسجيل الدخول",
+          invalidTitle: "الدعوة غير صالحة",
+          tokenMissing: "رابط الدعوة غير مكتمل.",
+          contactAdmin:
+            "يرجى التواصل مع الإدارة للحصول على دعوة جديدة.",
+        },
+        security: {
+          eyebrow: "أمان الحساب",
+          title: "الأمان وتسجيل الدخول",
+          subtitle:
+            "أدر كلمة المرور والمصادقة متعددة العوامل والأنشطة الأمنية.",
+          manageSessions: "إدارة الجلسات",
+          passwordTitle: "تغيير كلمة المرور",
+          passwordText: "استخدم كلمة مرور فريدة من 12 حرفًا على الأقل.",
+          currentPassword: "كلمة المرور الحالية",
+          currentPasswordRequired: "يرجى إدخال كلمة المرور الحالية.",
+          newPassword: "كلمة المرور الجديدة",
+          confirmNewPassword: "تأكيد كلمة المرور الجديدة",
+          passwordHint: "{{min}}–{{max}} حرفًا.",
+          revokeOthers: "إنهاء الجلسات الأخرى",
+          revokeOthersHint: "موصى به: يسجّل الخروج من جميع الأجهزة الأخرى.",
+          changePassword: "تغيير كلمة المرور",
+          changing: "جارٍ التغيير …",
+          passwordChanged:
+            "تم تغيير كلمة المرور. أُنهيت الجلسات الأخرى حسب اختيارك.",
+          mfaTitle: "المصادقة متعددة العوامل",
+          mfaText: "تحمي تسجيل الدخول بعامل ثانٍ.",
+          mfaEnabled: "مفعّلة",
+          mfaDisabled: "غير مفعّلة",
+          mfaEnabledText: "حسابك محمي بتطبيق مصادقة.",
+          mfaRequiredText:
+            "تتطلب إدارتك إعداد المصادقة متعددة العوامل.",
+          mfaOptionalText: "فعّل عاملًا ثانيًا لحماية إضافية.",
+          mfaDeadline: "الإعداد مطلوب بحلول {{date}}.",
+          mfaOverdue:
+            "انتهت المهلة. يرجى إعداد المصادقة متعددة العوامل فورًا.",
+          enroll: "إعداد الآن",
+          backupCodesNote:
+            "لا يمكن عرض أكواد الاسترداد مجددًا بعد الإعداد. احفظ نسختك بأمان.",
+          disable: "تعطيل المصادقة متعددة العوامل",
+          disableTitle: "تعطيل المصادقة متعددة العوامل",
+          disableText:
+            "أكّد كلمة المرور لإزالة العامل الثاني. سيصبح الحساب أقل حماية بعد ذلك.",
+          disablePassword: "تأكيد كلمة المرور",
+          mfaChanged: "تم تحديث المصادقة متعددة العوامل.",
+          profileTitle: "الحساب",
+          profileText: "تُدار بيانات ملفك الشخصي من قِبل الإدارة.",
+          readOnlyNote:
+            "لا يمكن تغيير الاسم أو البريد الإلكتروني أو الدور هنا. يرجى التواصل مع الإدارة.",
+          stepUpTitle: "تأكيد الهوية",
+          stepUpText: "تتطلب الإجراءات الحساسة تسجيل دخول حديثًا.",
+          stepUpButton: "تأكيد الهوية",
+          stepUpDialogTitle: "تأكيد الهوية",
+          stepUpDialogText:
+            "أدخل كلمة المرور لفتح الإجراءات الحساسة للدقائق الخمس القادمة.",
+          stepUpSuccess: "تم تأكيد هويتك.",
+          reauthValid: "تم التأكيد مؤخرًا",
+          reauthExpired: "انتهت صلاحية التأكيد",
+          lastVerified: "آخر تأكيد: {{date}}",
+          eventsTitle: "أحداث الأمان",
+          eventsText: "آخر 100 حدث (مرئية للمالك فقط).",
+          eventsEmpty: "لا توجد أحداث أمان.",
+          eventTypes: {
+            LOGIN_SUCCESS: "نجح تسجيل الدخول",
+            LOGIN_FAILED: "فشل تسجيل الدخول",
+            LOGIN_RATE_LIMITED: "تم تقييد تسجيل الدخول",
+            STEP_UP_SUCCESS: "تم تأكيد الهوية",
+            STEP_UP_FAILED: "فشل التأكيد",
+            SESSION_REVOKED: "أُنهيت الجلسة",
+            OTHER_SESSIONS_REVOKED: "أُنهيت الجلسات الأخرى",
+            MFA_POLICY_CHANGED: "تم تغيير سياسة المصادقة",
+            INVITATION_CREATED: "أُنشئت دعوة",
+            INVITATION_ACCEPTED: "قُبلت الدعوة",
+            INVITATION_REVOKED: "سُحبت الدعوة",
+            USER_SECURITY_CHANGE: "تغيير أمني في الحساب",
+            USER_UPDATE: "تم تحديث الحساب",
+            OWNER_TRANSFER: "تم نقل الملكية",
+            SESSIONS_REVOKED: "أُنهيت الجلسات",
+            PASSWORD_RESET_COMPLETED: "اكتملت إعادة تعيين كلمة المرور",
+            LOGIN_BLOCKED_MFA_REQUIRED:
+              "حُظر تسجيل الدخول بسبب إلزامية المصادقة",
+          },
+        },
+        sessions: {
+          eyebrow: "الجلسات",
+          title: "الأجهزة النشطة",
+          subtitle: "راجع الجلسات على أجهزتك وأنهِها.",
+          listTitle: "الأجهزة المسجّلة",
+          listText:
+            "يُخزَّن مفتاح الجلسة في كوكي HttpOnly فقط ولا يُعرض هنا أبدًا.",
+          currentBadge: "هذا الجهاز",
+          expiredBadge: "منتهية",
+          unknownDevice: "جهاز غير معروف",
+          created: "أُنشئت",
+          lastSeen: "آخر نشاط",
+          expires: "تنتهي",
+          ip: "عنوان IP",
+          revoke: "إنهاء الجلسة",
+          revokeTitle: "إنهاء الجلسة",
+          revokeText:
+            "تصبح الجلسة غير صالحة فورًا. يجب على الجهاز تسجيل الدخول مجددًا.",
+          revokeSuccess: "تم إنهاء الجلسة.",
+          revokeOthers: "إنهاء جميع الجلسات الأخرى",
+          revokeOthersTitle: "إنهاء جميع الجلسات الأخرى",
+          revokeOthersText:
+            "ستُنهى جميع الجلسات باستثناء هذا الجهاز فورًا.",
+          revokeOthersSuccess: "تم إنهاء {{count}} جلسة أخرى.",
+          signOutCurrent: "تسجيل الخروج",
+          signOutCurrentTitle: "تسجيل الخروج من هذا الجهاز",
+          signOutCurrentText: "تُنهى الجلسة بأمان ويُحذف كوكي الجلسة.",
+          empty: "لم يتم العثور على جلسات نشطة.",
+          securityNote:
+            "لا تُسلَّم رموز الجلسة إلى جافاسكربت أبدًا. تُنفَّذ جميع الإجراءات عبر كوكيز النطاق نفسه.",
+        },
+        admin: {
+          eyebrow: "الإدارة",
+          title: "حسابات الموظفين",
+          subtitle:
+            "أدر الأدوار وحالة الحساب وإلزامية المصادقة والدعوات.",
+          accessDeniedTitle: "لا توجد صلاحية",
+          accessDeniedText:
+            "هذا العرض مخصص للمالكين والمشرفين. تظل صلاحية الخادم هي المرجع.",
+          stats: {
+            total: "الحسابات",
+            active: "نشط",
+            inactive: "غير نشط",
+            mfaRequired: "مصادقة إلزامية",
+          },
+          usersTitle: "الحسابات",
+          usersText:
+            "تغييرات الدور أو الحالة تُنهي الجلسات الحالية للحساب المستهدف.",
+          searchPlaceholder: "البحث بالاسم أو البريد الإلكتروني",
+          roleFilter: "الدور",
+          statusFilter: "الحالة",
+          allRoles: "كل الأدوار",
+          allStatuses: "كل الحالات",
+          noResults: "لم يتم العثور على حسابات.",
+          table: {
+            user: "الموظف",
+            role: "الدور",
+            status: "الحالة",
+            mfa: "المصادقة",
+            created: "أُنشئ",
+            actions: "الإجراءات",
+          },
+          self: "أنت",
+          noAccess: "لا توجد صلاحية",
+          protected: "محمي",
+          edit: "تعديل",
+          editTitle: "تعديل الحساب",
+          editText: "تغييرات الدور أو الحالة تُنهي جميع جلسات الحساب.",
+          roleLabel: "الدور",
+          activeLabel: "الحساب نشط",
+          editWarning:
+            "تُسجَّل تغييرات الدور والحالة وتُنهي الجلسات الحالية.",
+          save: "حفظ التغييرات",
+          updated: "تم تحديث الحساب.",
+          mfaAction: "إلزامية المصادقة",
+          mfaUpdated: "تم تحديث سياسة المصادقة.",
+          requireMfa: "إلزام المصادقة",
+          removeMfa: "إزالة إلزامية المصادقة",
+          requireMfaTitle: "إلزام المصادقة",
+          requireMfaText:
+            "يجب على الحساب إعداد المصادقة متعددة العوامل خلال فترة السماح.",
+          removeMfaTitle: "إزالة إلزامية المصادقة",
+          removeMfaText:
+            "يمكن للحساب تسجيل الدخول دون عامل ثانٍ مستقبلًا.",
+          revokeSessions: "إنهاء الجلسات",
+          revokeSessionsTitle: "إنهاء جميع الجلسات",
+          revokeSessionsText:
+            "ستُنهى جميع الجلسات النشطة لهذا الحساب فورًا.",
+          revokeSessionsConfirm: "إنهاء جميع الجلسات",
+          sessionsRevoked: "تم إنهاء {{count}} جلسة.",
+          reauthTitle: "التأكيد مطلوب مجددًا",
+          reauthText:
+            "يتطلب هذا الإجراء تسجيل دخول حديثًا. أكّد هويتك وكرّر الإجراء.",
+          reauthButton: "تأكيد الهوية",
+          reauthSuccess: "تم تأكيد هويتك. يرجى تكرار الإجراء.",
+          inviteTitle: "دعوة موظف",
+          inviteText:
+            "تُرسل الدعوة عبر البريد الإلكتروني. لا يُعرض الرابط الخام لأسباب أمنية.",
+          inviteEmail: "البريد الإلكتروني",
+          inviteEmailPlaceholder: "name@company.com",
+          inviteRole: "الدور",
+          inviteSubmit: "إرسال الدعوة",
+          inviting: "جارٍ الإرسال …",
+          inviteSuccessEmail: "أُرسلت الدعوة إلى {{email}}.",
+          inviteSuccessOutbox:
+            "حُفظت دعوة {{email}} في صندوق الصادر المحلي (إرسال البريد معطّل).",
+          inviteLinkUnavailable:
+            "لا يمكن عرض رابط الدعوة في الواجهة؛ يُسلَّم عبر البريد الإلكتروني/الصادر فقط.",
+          invitationsTitle: "الدعوات",
+          invitationsText:
+            "الدعوات المفتوحة والمكتملة من آخر 100 سجل.",
+          invitationsEmpty: "لا توجد دعوات.",
+          invitationStatus: {
+            pending: "معلّقة",
+            accepted: "مقبولة",
+            revoked: "مسحوبة",
+            expired: "منتهية",
+          },
+          invitationExpires: "تنتهي",
+          revokeInvitation: "سحب",
+          revokeInvitationTitle: "سحب الدعوة",
+          revokeInvitationText: "لن يمكن استخدام الدعوة بعد ذلك.",
+          invitationRevoked: "تم سحب الدعوة.",
+          ownerTransferTitle: "نقل الملكية",
+          ownerTransferText:
+            "هذا الإجراء غير قابل للتراجع وينقل دور المالك ويُنهي جميع جلسات الحسابين.",
+          ownerTransferWarning:
+            "استخدمه في حالات الطوارئ فقط. تُسجَّل العملية ولا يمكن التراجع عنها.",
+          ownerTransferTarget: "الحساب المستهدف",
+          ownerTransferSelect: "اختر حسابًا",
+          ownerTransferButton: "نقل الملكية",
+          ownerTransferConfirmTitle: "تأكيد النقل",
+          ownerTransferConfirmText:
+            "أدخل البريد الإلكتروني للحساب المستهدف بدقة لتفويض النقل.",
+          ownerTransferConfirmLabel: "تأكيد البريد الإلكتروني",
+          ownerTransferConfirmHint: "أدخل {{email}} للتأكيد.",
+        },
+        roles: {
+          OWNER: "المالك",
+          ADMIN: "مشرف",
+          HR_MANAGER: "مدير الموارد البشرية",
+          ACCOUNTANT: "المحاسبة",
+          SALES_MANAGER: "مدير المبيعات",
+          PROJECT_MANAGER: "مدير المشاريع",
+          DEPARTMENT_MANAGER: "مدير القسم",
+          WAREHOUSE_MANAGER: "مدير المستودع",
+          TECHNICIAN: "فني",
+          WAREHOUSE_EMPLOYEE: "المستودع",
+          SALES_EMPLOYEE: "المبيعات",
+          EMPLOYEE: "موظف",
+        },
+        nav: {
+          label: "تنقل الأقسام",
+          security: "الأمان",
+          sessions: "الجلسات",
+          employees: "الموظفون",
+        },
+        signedOut: {
+          securityNote:
+            "أُنهيت الجلسة على الخادم. حُذفت كوكيز الجلسة؛ لا تبقى أي بيانات اعتماد في المتصفح.",
+          signInAgain: "تسجيل الدخول مجددًا",
+          logout: {
+            eyebrow: "تسجيل الخروج",
+            title: "تم تسجيل الخروج بأمان",
+            text: "أُنهيت جلستك. يمكنك تسجيل الدخول مجددًا في أي وقت.",
+          },
+          "password-reset": {
+            eyebrow: "كلمة المرور",
+            title: "تم تحديث كلمة المرور",
+            text: "حُفظت كلمة المرور الجديدة. أُنهيت جميع الجلسات الحالية.",
+          },
+          "invitation-accepted": {
+            eyebrow: "دعوة",
+            title: "تم تفعيل الحساب",
+            text: "تم إعداد حسابك بنجاح.",
+          },
+          "owner-transferred": {
+            eyebrow: "الملكية",
+            title: "اكتمل النقل",
+            text: "تم نقل دور المالك. أُنهيت جميع جلسات الحسابين.",
+          },
+        },
+        expired: {
+          eyebrow: "انتهت الجلسة",
+          title: "انتهت صلاحية جلستك",
+          text: "لأسباب أمنية أُنهيت الجلسة. يرجى تسجيل الدخول مجددًا.",
+          reasonLabel: "السبب",
+          signIn: "تسجيل الدخول مجددًا",
+          reasons: {
+            generic: "الجلسة لم تعد صالحة.",
+            unauthenticated: "لم يتم العثور على جلسة صالحة.",
+            absoluteExpired:
+              "تم بلوغ الحد الأقصى لمدة الجلسة وهو ثماني ساعات.",
+            idleExpired: "أُنهيت الجلسة بعد فترة من عدم النشاط.",
+            accountInactive: "تم تعطيل الحساب.",
+            mfaEnrollmentRequired:
+              "لم يتم إعداد المصادقة متعددة العوامل الإلزامية في الوقت المحدد.",
+          },
+        },
+        notFound: {
+          eyebrow: "غير موجود",
+          title: "الصفحة غير موجودة",
+          text: "صفحة Auth V2 المطلوبة غير موجودة.",
+        },
+      },
       barcodeLabels: { printLabels: "طباعة الملصقات" },
       barcodeGenerator: {
         title: "إنشاء الباركود",
@@ -2007,6 +3748,9 @@ const resources = {
         today: "اليوم",
         irreversible: "لا يمكن التراجع عن هذا الإجراء.",
         deletePermanently: "حذف نهائيًا",
+        accessDenied: "لا تملك صلاحية الوصول إلى هذا القسم.",
+        pendingActivation:
+          "لم يتم تفعيل حساب المستخدم هذا بعد. يرجى التواصل مع المالك.",
       },
       navigation: {
         dashboard: "لوحة التحكم",
@@ -2098,6 +3842,8 @@ const resources = {
           loadDetail: "تعذر تحميل الفاتورة",
           create: "تعذر إنشاء الفاتورة",
           update: "تعذر تحديث الفاتورة",
+          duplicateQuote:
+            "توجد بالفعل فاتورة نشطة مرتبطة بعرض السعر هذا.",
         },
         itemTypes: {
           EQUIPMENT: "معدات",
@@ -2662,6 +4408,8 @@ const resources = {
         form: {
           save: "حفظ التعديلات",
           create: "إضافة الجهاز",
+          warehouseEditHint:
+            "لا يمكن تغيير المستودع إلا من خلال نقل المعدات بين المستودعات.",
         },
         table: {
           empty: "لم يتم العثور على معدات.",

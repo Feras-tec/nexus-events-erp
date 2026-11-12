@@ -9,7 +9,9 @@
     "build": "prisma generate && tsc",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit -p tsconfig.test.json",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand",
+    "test:auth-v2": "node --import tsx --test --test-concurrency=1 \"auth-v2-tests/*.test.ts\"",
+    "lint": "oxlint src tests"
   },
   "keywords": [
     "events",
@@ -21,8 +23,10 @@
   "license": "ISC",
   "dependencies": {
     "@clerk/express": "^2.1.74",
+    "@node-rs/argon2": "2.2.2",
     "@prisma/adapter-pg": "7.10.1",
     "@prisma/client": "7.10.1",
+    "better-auth": "1.7.17",
     "cors": "^2.8.5",
     "dotenv": "^18.0.4",
     "express": "^5.2.1",
@@ -42,6 +46,7 @@
     "@types/pg": "^8.23.1",
     "@types/supertest": "^7.2.1",
     "jest": "^30.5.2",
+    "oxlint": "^1.92.0",
     "prisma": "7.10.1",
     "supertest": "^7.3.0",
     "ts-jest": "^29.4.14",

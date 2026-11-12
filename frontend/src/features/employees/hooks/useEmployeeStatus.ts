@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { apiFetch } from "../../../services/api";
@@ -14,7 +14,7 @@ export function useEmployeeStatus({
   onDeactivateSuccess,
   onActivateSuccess,
 }: UseEmployeeStatusParams) {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
   const queryClient = useQueryClient();
 
   const invalidateEmployeeQueries = async () => {

@@ -7,6 +7,7 @@ import { Button } from "../components/atoms/Button";
 import { CustomerForm } from "../components/organisms/CustomerForm";
 import { CustomerTable } from "../components/organisms/CustomerTable";
 import { ListLayout } from "../components/templates/ListLayout";
+import { can } from "../features/auth/permissions";
 import { useCustomers } from "../features/customers/hooks/useCustomers";
 import { CustomerStats } from "../features/customers/components/CustomerStats";
 import {
@@ -15,10 +16,17 @@ import {
   type CustomerStatusFilter,
 } from "../features/customers/components/CustomerFilters";
 import { useCreateCustomer } from "../features/customers/hooks/useCreateCustomer";
+import { useAppUser } from "../features/users/context/AppUserContext";
 
 export function CustomersPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const currentUser = useAppUser();
+  const canCreate = can(
+    currentUser?.role,
+    "customers",
+    "create",
+  );
 
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] =
@@ -86,16 +94,18 @@ export function CustomersPage() {
         searchPlaceholder={t("customers.searchPlaceholder")}
         onSearchChange={setSearch}
         actions={
-          <Button
-            type="button"
-            onClick={() =>
-              setShowCreateForm((current) => !current)
-            }
-          >
-            {showCreateForm
-              ? t("common.cancel")
-              : t("customers.newCustomer")}
-          </Button>
+          canCreate ? (
+            <Button
+              type="button"
+              onClick={() =>
+                setShowCreateForm((current) => !current)
+              }
+            >
+              {showCreateForm
+                ? t("common.cancel")
+                : t("customers.newCustomer")}
+            </Button>
+          ) : undefined
         }
       >
         {!isLoading && !isError && (
@@ -119,7 +129,7 @@ export function CustomersPage() {
         </div>
 
         <AnimatePresence>
-          {showCreateForm && (
+          {canCreate && showCreateForm && (
             <motion.div
               initial={{ opacity: 0, y: -12 }}
               animate={{ opacity: 1, y: 0 }}

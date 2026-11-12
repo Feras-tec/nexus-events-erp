@@ -39,6 +39,9 @@ export const updateInventoryItemSchema = createInventoryItemSchema
   .omit({
     assetNo: true,
     productId: true,
+    // Status- und Lagerortwechsel dürfen nur über EquipmentMovement erfolgen.
+    status: true,
+    warehouseId: true,
   })
   .partial();
 

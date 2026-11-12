@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useQuery } from "@tanstack/react-query";
 
 import type {
@@ -15,11 +15,18 @@ type WarehousesResponse = {
   data: WarehouseOption[];
 };
 
-export function useEquipmentFormOptions() {
-  const { getToken } = useAuth();
+type UseEquipmentFormOptionsOptions = {
+  enabled?: boolean;
+};
+
+export function useEquipmentFormOptions({
+  enabled = true,
+}: UseEquipmentFormOptionsOptions = {}) {
+  const { getToken } = useAppAuth();
 
   const productsQuery = useQuery({
     queryKey: ["products"],
+    enabled,
     queryFn: async () => {
       const token = await getToken();
 
@@ -32,6 +39,7 @@ export function useEquipmentFormOptions() {
 
   const warehousesQuery = useQuery({
     queryKey: ["warehouses"],
+    enabled,
     queryFn: async () => {
       const token = await getToken();
 

@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { apiFetch } from "../../../services/api";
@@ -29,7 +29,7 @@ export type GenerateBarcodesResponse = {
 
 // Erstellt Barcode-Chargen und aktualisiert die Inventarliste
 export function useGenerateBarcodes() {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
   const queryClient = useQueryClient();
 
   const generateBarcodesMutation = useMutation({

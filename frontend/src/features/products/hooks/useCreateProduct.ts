@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { ProductFormValues } from "../../../components/organisms/ProductForm";
@@ -11,7 +11,7 @@ type UseCreateProductParams = {
 export function useCreateProduct({
   onSuccess,
 }: UseCreateProductParams = {}) {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
   const queryClient = useQueryClient();
 
   const createProductMutation = useMutation({

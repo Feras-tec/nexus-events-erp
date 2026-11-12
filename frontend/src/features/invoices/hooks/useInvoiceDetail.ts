@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useQuery } from "@tanstack/react-query";
 
 import i18n from "../../../i18n/config";
@@ -6,7 +6,7 @@ import { apiFetch } from "../../../services/api";
 import type { Invoice } from "../types/invoice.types";
 
 export function useInvoiceDetail(invoiceId: string) {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
 
   const query = useQuery({
     queryKey: ["invoices", invoiceId],

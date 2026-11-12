@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useQuery } from "@tanstack/react-query";
 
 import type { EventItem } from "../../../components/organisms/EventTable";
@@ -8,11 +8,16 @@ type EventsResponse = {
   data: EventItem[];
 };
 
-export function useEvents() {
-  const { getToken } = useAuth();
+type UseEventsOptions = {
+  enabled?: boolean;
+};
+
+export function useEvents({ enabled = true }: UseEventsOptions = {}) {
+  const { getToken } = useAppAuth();
 
   const query = useQuery({
     queryKey: ["events"],
+    enabled,
     queryFn: async () => {
       const token = await getToken();
 

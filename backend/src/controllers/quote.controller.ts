@@ -43,6 +43,10 @@ export async function createQuote(req: Request, res: Response) {
           error: "Event not found",
         });
       }
+      // Keine widersprüchliche Kunden-/Event-Verknüpfung speichern.
+      if (event.customerId !== data.customerId) {
+        return res.status(400).json({ error: "Event does not belong to this customer" });
+      }
     }
 
     // Produkt-IDs prüfen
@@ -151,8 +155,17 @@ export async function createQuote(req: Request, res: Response) {
   }
 }
 // Alle Angebote abrufen
-export async function getQuotes(_req: Request, res: Response) {
+export async function getQuotes(req: Request, res: Response) {
   try {
+    const skip = req.query.skip !== undefined ? Number(req.query.skip) : undefined;
+    const take = req.query.take !== undefined ? Number(req.query.take) : undefined;
+    if (skip !== undefined && (!Number.isInteger(skip) || skip < 0)) {
+      return res.status(400).json({ error: "Invalid skip value" });
+    }
+    if (take !== undefined && (!Number.isInteger(take) || take < 1)) {
+      return res.status(400).json({ error: "Invalid take value" });
+    }
+
     const quotes = await prisma.quote.findMany({
       include: {
         customer: true,
@@ -163,9 +176,9 @@ export async function getQuotes(_req: Request, res: Response) {
           },
         },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      ...(skip !== undefined ? { skip } : {}),
+      ...(take !== undefined ? { take } : {}),
     });
 
     return res.json(quotes);
@@ -266,15 +279,20 @@ export async function updateQuote(req: Request, res: Response) {
     }
 
     // Event prüfen, falls geändert
-    if (data.eventId) {
+    const effectiveEventId = data.eventId ?? existingQuote.eventId;
+    if (effectiveEventId && (data.eventId !== undefined || data.customerId !== undefined)) {
       const event = await prisma.event.findUnique({
-        where: { id: data.eventId },
+        where: { id: effectiveEventId },
       });
 
       if (!event) {
         return res.status(404).json({
           error: "Event not found",
         });
+      }
+      // Auch ein alleiniger Kundenwechsel muss zum bereits verknüpften Event passen.
+      if (event.customerId !== (data.customerId ?? existingQuote.customerId)) {
+        return res.status(400).json({ error: "Event does not belong to this customer" });
       }
     }
 
@@ -436,7 +454,7 @@ export async function updateQuote(req: Request, res: Response) {
             tax: data.tax,
           }),
 
-          ...(totalsUpdate && totalsUpdate),
+          ...totalsUpdate,
 
           ...(calculatedItems && {
             items: {

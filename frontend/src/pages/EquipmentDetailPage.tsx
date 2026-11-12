@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import type { EquipmentFormValues } from "../components/organisms/EquipmentForm";
 import { Button } from "../components/atoms/Button";
 import { DetailLayout } from "../components/templates/DetailLayout";
+import { can } from "../features/auth/permissions";
 import { useEquipmentDetail } from "../features/equipment/hooks/useEquipmentDetail";
 import { useEquipmentMovements } from "../features/equipment/hooks/useEquipmentMovements";
 import { useEquipmentDetailWorkflow } from "../features/equipment/hooks/useEquipmentDetailWorkflow";
@@ -22,10 +23,17 @@ import { EquipmentOverview } from "../features/equipment/components/EquipmentOve
 import { EquipmentProductWarehouse } from "../features/equipment/components/EquipmentProductWarehouse";
 import { EquipmentReservationStart } from "../features/equipment/components/EquipmentReservationStart";
 import { EquipmentEditPanel } from "../features/equipment/components/EquipmentEditPanel";
+import { useAppUser } from "../features/users/context/AppUserContext";
 
 export function EquipmentDetailPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const currentUser = useAppUser();
+  const canUpdate = can(
+    currentUser?.role,
+    "inventory",
+    "update",
+  );
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -130,32 +138,37 @@ export function EquipmentDetailPage() {
               {t("equipment.detail.back")}
             </Button>
 
-            <Button
-              type="button"
-              onClick={() => setIsEditing((current) => !current)}
-            >
-              {isEditing ? t("equipment.cancel") : t("equipment.detail.edit")}
-            </Button>
+            {canUpdate && (
+              <Button
+                type="button"
+                onClick={() => setIsEditing((current) => !current)}
+              >
+                {isEditing ? t("equipment.cancel") : t("equipment.detail.edit")}
+              </Button>
+            )}
           </>
         }
       >
-        <EquipmentEditPanel
-          isEditing={isEditing}
-          initialValues={initialValues}
-          products={products}
-          warehouses={warehouses}
-          dataLoading={formDataLoading}
-          dataError={formDataError}
-          loading={updateEquipmentMutation.isPending}
-          updateError={updateEquipmentMutation.isError}
-          onSubmit={(data) => updateEquipmentMutation.mutate(data)}
-        />
+        {canUpdate && (
+          <EquipmentEditPanel
+            isEditing={isEditing}
+            initialValues={initialValues}
+            products={products}
+            warehouses={warehouses}
+            dataLoading={formDataLoading}
+            dataError={formDataError}
+            loading={updateEquipmentMutation.isPending}
+            updateError={updateEquipmentMutation.isError}
+            onSubmit={(data) => updateEquipmentMutation.mutate(data)}
+          />
+        )}
 
-        <EquipmentTransfer
-
-          equipmentId={equipmentId}
-          equipment={equipment}
-        />
+        {canUpdate && (
+          <EquipmentTransfer
+            equipmentId={equipmentId}
+            equipment={equipment}
+          />
+        )}
 
         <div className="grid gap-6 lg:grid-cols-2">
           <EquipmentOverview
@@ -166,18 +179,22 @@ export function EquipmentDetailPage() {
 
           <EquipmentProductWarehouse equipment={equipment} />
 
-          <EquipmentMaintenance
-            equipmentId={equipmentId}
-            equipment={equipment}
-          />
+          {canUpdate && (
+            <EquipmentMaintenance
+              equipmentId={equipmentId}
+              equipment={equipment}
+            />
+          )}
 
-          <EquipmentLifecycle
-            equipmentId={equipmentId}
-            equipment={equipment}
-            activeReservation={activeMovementReservation}
-          />
+          {canUpdate && (
+            <EquipmentLifecycle
+              equipmentId={equipmentId}
+              equipment={equipment}
+              activeReservation={activeMovementReservation}
+            />
+          )}
 
-          {equipment.status === "INSPECTION" && (
+          {canUpdate && equipment.status === "INSPECTION" && (
             <EquipmentInspection
               equipmentId={equipmentId}
               equipment={equipment}
@@ -185,13 +202,16 @@ export function EquipmentDetailPage() {
             />
           )}
 
-          <EquipmentEventWorkflow
-            equipmentId={equipmentId}
-            equipment={equipment}
-            activeReservation={activeMovementReservation}
-          />
+          {canUpdate && (
+            <EquipmentEventWorkflow
+              equipmentId={equipmentId}
+              equipment={equipment}
+              activeReservation={activeMovementReservation}
+            />
+          )}
 
-          {equipment.status === "AVAILABLE" && (
+          {canUpdate &&
+            equipment.status === "AVAILABLE" && (
             <EquipmentReservationStart
               equipmentId={equipmentId}
               movements={movements}

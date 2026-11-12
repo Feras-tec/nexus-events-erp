@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useQuery } from "@tanstack/react-query";
 
 import type { Customer } from "../../../components/organisms/CustomerTable";
@@ -6,11 +6,18 @@ import type { EventItem } from "../../../components/organisms/EventTable";
 import type { ProductTableItem } from "../../../components/organisms/ProductTable";
 import { apiFetch } from "../../../services/api";
 
-export function useQuoteFormOptions() {
-  const { getToken } = useAuth();
+type UseQuoteFormOptionsOptions = {
+  enabled?: boolean;
+};
+
+export function useQuoteFormOptions({
+  enabled = true,
+}: UseQuoteFormOptionsOptions = {}) {
+  const { getToken } = useAppAuth();
 
   const customersQuery = useQuery({
     queryKey: ["customers"],
+    enabled,
     queryFn: async () => {
       const token = await getToken();
       const response = await apiFetch("/api/customers", token);
@@ -29,6 +36,7 @@ export function useQuoteFormOptions() {
 
   const eventsQuery = useQuery({
     queryKey: ["events"],
+    enabled,
     queryFn: async () => {
       const token = await getToken();
       const response = await apiFetch("/api/events", token);
@@ -47,6 +55,7 @@ export function useQuoteFormOptions() {
 
   const productsQuery = useQuery({
     queryKey: ["products"],
+    enabled,
     queryFn: async () => {
       const token = await getToken();
       const response = await apiFetch("/api/products", token);

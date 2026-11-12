@@ -618,19 +618,154 @@ enum UserRole {
   EMPLOYEE
 }
 
-// Anwendungsbenutzer mit Clerk-Identität und interner Rolle
+// Anwendungsbenutzer mit Clerk-Identität und interner Rolle.
+//
+// Auth-v2 (Phase 2D) reuses this row as the better-auth user model (ADR-001).
+// The new columns are additive. `clerkUserId` becomes nullable so locally
+// invited users can exist during the dual-run; it is never dropped here.
 model AppUser {
   id          String   @id @default(uuid())
-  clerkUserId String   @unique
-  email       String?
+  clerkUserId String?  @unique
+  email       String?  @unique
   role        UserRole @default(EMPLOYEE)
   isActive    Boolean  @default(true)
+
+  // Auth-v2 additive columns (disabled in the running application).
+  emailVerified       Boolean   @default(false)
+  name                String    @default("")
+  image               String?
+  twoFactorEnabled    Boolean   @default(false)
+  // Administrative MFA enforcement. When required, the account has a grace
+  // period after `twoFactorEnforcedAt` to finish enrollment.
+  twoFactorRequired   Boolean   @default(false)
+  twoFactorEnforcedAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  sessions       Session[]
+  accounts       Account[]
+  actorEvents    SecurityEvent[] @relation("AuthActor")
+  targetEvents   SecurityEvent[] @relation("AuthTarget")
+  invitations    Invitation[]    @relation("InvitationInviter")
+  twoFactor      TwoFactor[]
+
   @@index([role])
   @@index([isActive])
+}
+
+// better-auth session. `token` stores only "v1:<sha256-hex>".
+model Session {
+  id        String   @id
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Auth-v2 policy columns.
+  reauthenticatedAt DateTime?
+  lastSeenAt        DateTime?
+
+  user AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Account {
+  id                    String    @id @default(uuid())
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id @default(uuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+}
+
+// Two-factor secrets and backup codes are stored encrypted by better-auth.
+model TwoFactor {
+  id                     String    @id @default(uuid())
+  userId                 String
+  secret                 String
+  backupCodes            String
+  verified               Boolean   @default(true)
+  failedVerificationCount Int      @default(0)
+  lockedUntil            DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// Append-only security audit trail for auth-v2. Metadata is sanitised by the
+// application before it is written.
+model SecurityEvent {
+  id        String   @id @default(uuid())
+  eventType String
+  actorId   String?
+  targetId  String?
+  ip        String?
+  userAgent String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  actor  AppUser? @relation("AuthActor", fields: [actorId], references: [id], onDelete: SetNull)
+  target AppUser? @relation("AuthTarget", fields: [targetId], references: [id], onDelete: SetNull)
+
+  @@index([eventType])
+  @@index([createdAt])
+  @@index([actorId])
+  @@index([targetId])
+}
+
+// Invitation-only onboarding. Only the SHA-256 digest of the token is stored.
+model Invitation {
+  id              String    @id @default(uuid())
+  email           String
+  normalizedEmail String
+  role            UserRole
+  tokenHash       String    @unique
+  invitedById     String
+  expiresAt       DateTime
+  acceptedAt      DateTime?
+  revokedAt       DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  invitedBy AppUser @relation("InvitationInviter", fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@index([normalizedEmail])
+  @@index([expiresAt])
 }
 
 // Barcode-Charge zur sicheren Vermeidung doppelter Generierungsanfragen

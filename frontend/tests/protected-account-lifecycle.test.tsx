@@ -4,16 +4,35 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthQueryProvider } from "../src/components/providers/AuthQueryProvider";
 import { ProtectedDashboardLayout } from "../src/components/templates/ProtectedDashboardLayout";
 import { useAppUser } from "../src/features/users/context/AppUserContext";
+import "../src/i18n/config";
 
 // Geschützte Kontoprüfung und Cache-Grenze gemeinsam ohne externe Anmeldedienste testen.
 const mocks = vi.hoisted(() => ({
   auth: { isLoaded: true, isSignedIn: true, userId: "A" as string | null, sessionId: "session-A" as string | null, getToken: vi.fn(async () => "token") },
   apiFetch: vi.fn(),
+  pathname: "/dashboard",
 }));
 vi.mock("@clerk/react", () => ({ useAuth: () => mocks.auth }));
+vi.mock("../src/features/auth/AppAuthProvider", () => ({
+  useAppAuth: () => ({
+    mode: "clerk",
+    isLoaded: mocks.auth.isLoaded,
+    isAuthenticated: Boolean(mocks.auth.isSignedIn && mocks.auth.userId),
+    userId: mocks.auth.userId,
+    getToken: mocks.auth.getToken,
+    logout: vi.fn(async () => {}),
+    user: null,
+    authV2Status: null,
+    authV2Reason: null,
+  }),
+}));
 vi.mock("../src/services/api", () => ({ apiFetch: mocks.apiFetch }));
 vi.mock("../src/components/templates/DashboardLayout", () => ({ DashboardLayout: ({ children }: { children: ReactNode }) => children }));
-vi.mock("@tanstack/react-router", () => ({ Navigate: () => <div>signed-out</div> }));
+vi.mock("@tanstack/react-router", () => ({
+  Navigate: () => <div>signed-out</div>,
+  useRouterState: ({ select }: { select: (state: { location: { pathname: string } }) => unknown }) =>
+    select({ location: { pathname: mocks.pathname } }),
+}));
 
 function Account() {
   const account = useAppUser();
@@ -22,13 +41,18 @@ function Account() {
 function tree() {
   return <AuthQueryProvider><ProtectedDashboardLayout><Account /></ProtectedDashboardLayout></AuthQueryProvider>;
 }
-function response(id: string) {
-  return { json: async () => ({ user: { id, clerkUserId: id, role: "EMPLOYEE", isActive: true } }) };
+function response(
+  id: string,
+  role = "EMPLOYEE",
+  isActive = true,
+) {
+  return { json: async () => ({ user: { id, clerkUserId: id, role, isActive } }) };
 }
 beforeEach(() => {
   vi.resetAllMocks();
   Object.assign(mocks.auth, { isLoaded: true, isSignedIn: true, userId: "A", sessionId: "session-A" });
   mocks.auth.getToken.mockResolvedValue("token");
+  mocks.pathname = "/dashboard";
 });
 afterEach(cleanup);
 
@@ -74,5 +98,37 @@ describe("Geschützte Routen beim Kontowechsel", () => {
     await waitFor(() => expect(screen.getByTestId("account").textContent).toBe("B:EMPLOYEE"));
     await act(async () => { resolve(response("A")); await pending; });
     expect(screen.getByTestId("account").textContent).toBe("B:EMPLOYEE");
+  });
+
+  it("zeigt nicht freigegebenen Benutzern keinen geschützten Inhalt", async () => {
+    mocks.apiFetch.mockResolvedValue(response("A", "EMPLOYEE", false));
+    render(tree());
+    await waitFor(() =>
+      expect(screen.getByRole("alert").textContent).toContain(
+        "noch nicht freigegeben",
+      ),
+    );
+    expect(screen.queryByTestId("account")).toBeNull();
+  });
+
+  it("verweigert den Zugriff auf Bereiche ohne Leserecht", async () => {
+    mocks.pathname = "/users";
+    mocks.apiFetch.mockResolvedValue(response("A", "EMPLOYEE"));
+    render(tree());
+    await waitFor(() =>
+      expect(screen.getByRole("alert").textContent).toContain(
+        "Keine Berechtigung",
+      ),
+    );
+    expect(screen.queryByTestId("account")).toBeNull();
+  });
+
+  it("erlaubt OWNER den Zugriff auf die Benutzerverwaltung", async () => {
+    mocks.pathname = "/users";
+    mocks.apiFetch.mockResolvedValue(response("A", "OWNER"));
+    render(tree());
+    await waitFor(() =>
+      expect(screen.getByTestId("account").textContent).toBe("A:OWNER"),
+    );
   });
 });

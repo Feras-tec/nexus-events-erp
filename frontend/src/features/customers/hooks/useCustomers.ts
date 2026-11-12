@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useQuery } from "@tanstack/react-query";
 
 import type { Customer } from "../../../components/organisms/CustomerTable";
@@ -8,11 +8,16 @@ type CustomersResponse = {
   data: Customer[];
 };
 
-export function useCustomers() {
-  const { getToken } = useAuth();
+type UseCustomersOptions = {
+  enabled?: boolean;
+};
+
+export function useCustomers({ enabled = true }: UseCustomersOptions = {}) {
+  const { getToken } = useAppAuth();
 
   const query = useQuery({
     queryKey: ["customers"],
+    enabled,
     queryFn: async () => {
       const token = await getToken();
 

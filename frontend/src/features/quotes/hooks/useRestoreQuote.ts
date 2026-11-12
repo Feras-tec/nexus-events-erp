@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import {
   useMutation,
   useQueryClient,
@@ -8,7 +8,7 @@ import { apiFetch } from "../../../services/api";
 import type { Quote } from "../types/quote.types";
 
 export function useRestoreQuote() {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({

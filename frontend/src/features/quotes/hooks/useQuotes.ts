@@ -1,11 +1,11 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useQuery } from "@tanstack/react-query";
 
 import { apiFetch } from "../../../services/api";
 import type { Quote } from "../types/quote.types";
 
 export function useQuotes() {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
 
   const query = useQuery({
     queryKey: ["quotes"],

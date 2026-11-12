@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { ReservationFormData } from "../../../components/organisms/ReservationForm";
@@ -16,7 +16,7 @@ export function useUpdateReservation({
   onSuccess,
   onError,
 }: UseUpdateReservationParams) {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
   const queryClient = useQueryClient();
 
   const updateReservationMutation = useMutation({

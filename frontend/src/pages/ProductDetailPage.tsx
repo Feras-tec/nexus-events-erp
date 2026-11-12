@@ -10,16 +10,29 @@ import {
   type ProductFormValues,
 } from "../components/organisms/ProductForm";
 import { DetailLayout } from "../components/templates/DetailLayout";
+import { can } from "../features/auth/permissions";
 import { ProductOverview } from "../features/products/components/ProductOverview";
 import { ProductEquipmentList } from "../features/products/components/ProductEquipmentList";
 import { useProductDetail } from "../features/products/hooks/useProductDetail";
 import { useUpdateProduct } from "../features/products/hooks/useUpdateProduct";
 import { useDeactivateProduct } from "../features/products/hooks/useDeactivateProduct";
 import { useActivateProduct } from "../features/products/hooks/useActivateProduct";
+import { useAppUser } from "../features/users/context/AppUserContext";
 
 export function ProductDetailPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const currentUser = useAppUser();
+  const canUpdate = can(
+    currentUser?.role,
+    "products",
+    "update",
+  );
+  const canDeactivate = can(
+    currentUser?.role,
+    "products",
+    "deactivate",
+  );
 
   const [isEditing, setIsEditing] = useState(false);
   const [showDeactivateDialog, setShowDeactivateDialog] =
@@ -107,16 +120,18 @@ export function ProductDetailPage() {
               {t("products.detail.back")}
             </Button>
 
-            <Button
-              type="button"
-              onClick={() =>
-                setIsEditing((current) => !current)
-              }
-            >
-              {isEditing ? t("products.cancel") : t("products.detail.edit")}
-            </Button>
+            {canUpdate && (
+              <Button
+                type="button"
+                onClick={() =>
+                  setIsEditing((current) => !current)
+                }
+              >
+                {isEditing ? t("products.cancel") : t("products.detail.edit")}
+              </Button>
+            )}
 
-            {product.isActive ? (
+            {canDeactivate && product.isActive && (
               <button
                 type="button"
                 className="btn btn-error"
@@ -124,7 +139,9 @@ export function ProductDetailPage() {
               >
                 {t("products.detail.deactivate")}
               </button>
-            ) : (
+            )}
+
+            {canUpdate && !product.isActive && (
               <button
                 type="button"
                 className="btn btn-success"

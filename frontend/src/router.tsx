@@ -1,4 +1,5 @@
-import { lazy, Suspense } from "react";
+import { APP_AUTH_MODE } from "./features/auth/mode";
+import { lazy, Suspense, useEffect } from "react";
 
 import {
   createRootRoute,
@@ -9,6 +10,15 @@ import {
 } from "@tanstack/react-router";
 
 import { ProtectedDashboardLayout } from "./components/templates/ProtectedDashboardLayout";
+
+const AUTH_V2_MODE = APP_AUTH_MODE === "auth-v2";
+
+function AuthV2SignInRedirect() {
+  useEffect(() => {
+    window.location.assign("/auth-v2/sign-in");
+  }, []);
+  return null;
+}
 const DashboardPage = lazy(() => import("./pages/DashboardPage").then((module) => ({ default: module.DashboardPage })));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage").then((module) => ({ default: module.NotFoundPage })));
 const EventsPage = lazy(() => import("./pages/EventsPage").then((module) => ({ default: module.EventsPage })));
@@ -47,11 +57,14 @@ const indexRoute = createRoute({
 const signInRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/sign-in",
-  component: () => (
-    <Suspense fallback={null}>
-      <SignInPage />
-    </Suspense>
-  ),
+  component: () =>
+    AUTH_V2_MODE ? (
+      <AuthV2SignInRedirect />
+    ) : (
+      <Suspense fallback={null}>
+        <SignInPage />
+      </Suspense>
+    ),
 });
 
 const appRoute = createRoute({
@@ -178,12 +191,25 @@ const invoiceDetailRoute = createRoute({
   component: InvoiceDetailPage,
 });
 
+// Bestehende Auth-V2-Seiten im vorhandenen Dashboard und dessen Auth-/Query-Kontext wiederverwenden.
+const AuthAccountsPage = lazy(() => import("./features/auth-v2/pages/EmployeeAccountsPage").then(m => ({ default: m.EmployeeAccountsPage })));
+const AccountSecurityPage = lazy(() => import("./features/auth-v2/pages/AccountSecurityPage").then(m => ({ default: m.AccountSecurityPage })));
+const AccountSessionsPage = lazy(() => import("./features/auth-v2/pages/SessionsPage").then(m => ({ default: m.SessionsPage })));
 const UsersPage = lazy(() => import("./pages/UsersPage"));
 
 const usersRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/users",
-  component: UsersPage,
+  component: AUTH_V2_MODE ? AuthAccountsPage : UsersPage,
+});
+
+const accountSecurityRoute = createRoute({
+  getParentRoute: () => appRoute, path: "/account/security",
+  component: () => AUTH_V2_MODE ? <AccountSecurityPage /> : <Navigate to="/dashboard" replace />,
+});
+const accountSessionsRoute = createRoute({
+  getParentRoute: () => appRoute, path: "/account/sessions",
+  component: () => AUTH_V2_MODE ? <AccountSessionsPage /> : <Navigate to="/dashboard" replace />,
 });
 
 const routeTree = rootRoute.addChildren([
@@ -192,6 +218,8 @@ const routeTree = rootRoute.addChildren([
   appRoute.addChildren([
     dashboardRoute,
     usersRoute,
+    accountSecurityRoute,
+    accountSessionsRoute,
     eventsRoute,
     eventDetailRoute,
     employeesRoute,

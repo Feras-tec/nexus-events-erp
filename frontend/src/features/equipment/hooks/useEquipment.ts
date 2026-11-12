@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useQuery } from "@tanstack/react-query";
 
 import { apiFetch } from "../../../services/api";
@@ -32,7 +32,7 @@ type EquipmentResponse = {
 };
 
 export function useEquipment() {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
 
   const query = useQuery({
     queryKey: ["equipment"],

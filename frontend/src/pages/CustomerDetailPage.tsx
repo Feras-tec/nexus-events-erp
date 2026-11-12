@@ -10,16 +10,29 @@ import {
   type CustomerFormData,
 } from "../components/organisms/CustomerForm";
 import { DetailLayout } from "../components/templates/DetailLayout";
+import { can } from "../features/auth/permissions";
 import { CustomerOverview } from "../features/customers/components/CustomerOverview";
 import { useCustomerDetail } from "../features/customers/hooks/useCustomerDetail";
 import { useUpdateCustomer } from "../features/customers/hooks/useUpdateCustomer";
 import { useDeactivateCustomer } from "../features/customers/hooks/useDeactivateCustomer";
 import { useActivateCustomer } from "../features/customers/hooks/useActivateCustomer";
 import { getCustomerName } from "../features/customers/utils/customer-formatters";
+import { useAppUser } from "../features/users/context/AppUserContext";
 
 export function CustomerDetailPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const currentUser = useAppUser();
+  const canUpdate = can(
+    currentUser?.role,
+    "customers",
+    "update",
+  );
+  const canDeactivate = can(
+    currentUser?.role,
+    "customers",
+    "deactivate",
+  );
 
   const [isEditing, setIsEditing] = useState(false);
   const [showDeactivateDialog, setShowDeactivateDialog] =
@@ -109,18 +122,22 @@ export function CustomerDetailPage() {
               ← {t("common.back")}
             </Button>
 
-            <Button
-              type="button"
-              onClick={() =>
-                setIsEditing((current) => !current)
-              }
-            >
-              {isEditing
-                ? t("common.cancel")
-                : t("common.edit")}
-            </Button>
+            {canUpdate && (
+              <Button
+                type="button"
+                onClick={() =>
+                  setIsEditing((current) => !current)
+                }
+              >
+                {isEditing
+                  ? t("common.cancel")
+                  : t("common.edit")}
+              </Button>
+            )}
 
-            {customer.isActive && !isEditing && (
+            {canDeactivate &&
+              customer.isActive &&
+              !isEditing && (
               <Button
                 type="button"
                 variant="error"
@@ -132,7 +149,9 @@ export function CustomerDetailPage() {
               </Button>
             )}
 
-            {!customer.isActive && !isEditing && (
+            {canUpdate &&
+              !customer.isActive &&
+              !isEditing && (
               <Button
                 type="button"
                 onClick={() =>

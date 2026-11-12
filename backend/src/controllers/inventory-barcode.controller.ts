@@ -1,9 +1,7 @@
 import { randomBytes } from "node:crypto";
 import type { Request, Response } from "express";
-import { getAuth } from "@clerk/express";
+import { resolveAuthenticatedUser } from "../middleware/require-role.js";
 import prisma from "../lib/prisma.js";
-import { createAuditLog } from "../services/audit-log.service.js";
-import { getBusinessAuditMode } from "../modules/audit-postgres/mode.js";
 import { persistPostgresAudit } from "../modules/audit-postgres/persistence.js";
 import {
   bulkGenerateInventoryItemsSchema,
@@ -78,10 +76,8 @@ export async function bulkGenerateInventoryItems(req: Request, res: Response) {
       });
     }
 
-    // Identität und Modus einmal pro Anfrage ermitteln; keine Umschaltung mitten in der Transaktion.
-    const auditMode = getBusinessAuditMode();
-    const { userId } = getAuth(req);
-
+    const resolved = await resolveAuthenticatedUser(req);
+    const userId = resolved?.auditUserId;
     // Charge und Inventarartikel gemeinsam atomar speichern
     const batch = await prisma.$transaction(async (tx) => {
       const created = await tx.barcodeBatch.create({
@@ -107,30 +103,14 @@ export async function bulkGenerateInventoryItems(req: Request, res: Response) {
         where: { id: created.id },
         include: { inventoryItems: { orderBy: { assetNo: "asc" } } },
       });
-
       // Audit und Charge werden gemeinsam bestätigt oder vollständig zurückgerollt.
-      if (auditMode === "postgresql") await persistPostgresAudit(tx, {
-        eventId: `barcode-batch:${completed.id}`, ...(userId ? { userId } : {}),
+      await persistPostgresAudit(tx, {
+        eventId: `barcode-batch:${completed.id}`, userId,
         action: "INVENTORY_BARCODES_BULK_GENERATED", entityType: "BarcodeBatch", entityId: completed.id,
         details: { productId, warehouseId, quantity, assetNumbers: completed.inventoryItems.map(item => item.assetNo) },
         ...(req.ip ? { ipAddress: req.ip } : {}),
       });
       return completed;
-    });
-
-    // Erfolgreiche Erstellung zusätzlich protokollieren
-    if (auditMode === "mongodb") await createAuditLog({
-      ...(userId ? { userId } : {}),
-      action: "INVENTORY_BARCODES_BULK_GENERATED",
-      entityType: "BarcodeBatch",
-      entityId: batch.id,
-      details: {
-        productId,
-        warehouseId,
-        quantity,
-        assetNumbers: batch.inventoryItems.map((item) => item.assetNo),
-      },
-      ...(req.ip ? { ipAddress: req.ip } : {}),
     });
 
     return res.status(201).json({
@@ -218,9 +198,8 @@ export async function scanReceiveInventoryItem(req: Request, res: Response) {
       });
     }
 
-    const auditMode = getBusinessAuditMode();
-    const { userId } = getAuth(req);
-
+    const resolved = await resolveAuthenticatedUser(req);
+    const userId = resolved?.auditUserId;
     // Statusänderung und Wareneingang gemeinsam speichern
     const received = await prisma.$transaction(async (tx) => {
       const updated = await tx.inventoryItem.updateMany({
@@ -251,8 +230,8 @@ export async function scanReceiveInventoryItem(req: Request, res: Response) {
       });
 
       // Ein wiederholter Scan verändert nichts und erzeugt deshalb auch keinen neuen Audit-Eintrag.
-      if (auditMode === "postgresql") await persistPostgresAudit(tx, {
-        eventId: `barcode-receipt:${receipt.id}`, ...(userId ? { userId } : {}),
+      await persistPostgresAudit(tx, {
+        eventId: `barcode-receipt:${receipt.id}`, userId,
         action: "INVENTORY_BARCODE_RECEIVED", entityType: "InventoryItem", entityId: item.id,
         details: { barcode, warehouseId: item.warehouseId, responsibleEmployeeId },
         ...(req.ip ? { ipAddress: req.ip } : {}),
@@ -266,20 +245,6 @@ export async function scanReceiveInventoryItem(req: Request, res: Response) {
         assetNo: item.assetNo,
       });
     }
-
-    // Angemeldeten Benutzer zusätzlich im Audit-Log dokumentieren
-    if (auditMode === "mongodb") await createAuditLog({
-      ...(userId ? { userId } : {}),
-      action: "INVENTORY_BARCODE_RECEIVED",
-      entityType: "InventoryItem",
-      entityId: item.id,
-      details: {
-        barcode,
-        warehouseId: item.warehouseId,
-        responsibleEmployeeId,
-      },
-      ...(req.ip ? { ipAddress: req.ip } : {}),
-    });
 
     return res.status(200).json({
       success: true,

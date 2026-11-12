@@ -44,7 +44,7 @@ describe("requireRole Middleware", () => {
     const res = { status } as unknown as Response;
     const next = jest.fn() as NextFunction;
 
-    await requireRole("OWNER")({} as Request, res, next);
+    await requireRole("OWNER")({ method: "GET" } as Request, res, next);
 
     expect(status).toHaveBeenCalledWith(403);
     expect(next).not.toHaveBeenCalled();
@@ -61,7 +61,7 @@ describe("requireRole Middleware", () => {
     const res = { status } as unknown as Response;
     const next = jest.fn() as NextFunction;
 
-    await requireRole("OWNER")({} as Request, res, next);
+    await requireRole("OWNER")({ method: "GET" } as Request, res, next);
 
     expect(status).toHaveBeenCalledWith(401);
     expect(mockFindUnique).not.toHaveBeenCalled();
@@ -85,7 +85,7 @@ describe("requireRole Middleware", () => {
       isActive: true,
     });
 
-    const req = {} as Request;
+    const req = { method: "GET" } as Request;
 
     const json = jest.fn();
     const status = jest.fn(() => ({ json }));
@@ -119,7 +119,7 @@ describe("requireRole Middleware", () => {
       isActive: false,
     });
 
-    const req = {} as Request;
+    const req = { method: "GET" } as Request;
 
     const json = jest.fn();
     const status = jest.fn(() => ({ json }));
@@ -153,7 +153,7 @@ describe("requireRole Middleware", () => {
       isActive: true,
     });
 
-    const req = {} as Request;
+    const req = { method: "GET" } as Request;
 
     const res = {
       status: jest.fn(),

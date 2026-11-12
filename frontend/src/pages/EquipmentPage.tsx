@@ -9,6 +9,7 @@ import {
 } from "../components/organisms/EquipmentForm";
 import { EquipmentTable } from "../components/organisms/EquipmentTable";
 import { ListLayout } from "../components/templates/ListLayout";
+import { can } from "../features/auth/permissions";
 import { useEquipment } from "../features/equipment/hooks/useEquipment";
 import { EquipmentStats } from "../features/equipment/components/EquipmentStats";
 import {
@@ -19,10 +20,23 @@ import { useEquipmentFormOptions } from "../features/equipment/hooks/useEquipmen
 import { useCreateEquipment } from "../features/equipment/hooks/useCreateEquipment";
 import { BarcodeGenerator } from "../features/equipment/components/BarcodeGenerator";
 import { BarcodeScanner } from "../features/equipment/components/BarcodeScanner";
+import { useAppUser } from "../features/users/context/AppUserContext";
 
 export function EquipmentPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const currentUser = useAppUser();
+  const canCreate = can(
+    currentUser?.role,
+    "inventory",
+    "create",
+  );
+  // Wareneingang per Scan ist auch für Lager-Mitarbeiter erlaubt.
+  const canReceive = can(
+    currentUser?.role,
+    "inventory",
+    "update",
+  );
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] =
@@ -103,26 +117,34 @@ export function EquipmentPage() {
         searchPlaceholder={t("equipment.search")}
         onSearchChange={setSearch}
         actions={
-          <div className="flex flex-wrap gap-2">
-            <Button
-              type="button"
-              onClick={() => setShowBarcodeGenerator((current) => !current)}
-            >
-              {showBarcodeGenerator ? t("common.close") : t("barcodeActions.generate")}
-            </Button>
-            <Button
-              type="button"
-              onClick={() => setShowBarcodeScanner((current) => !current)}
-            >
-              {showBarcodeScanner ? t("barcodeActions.closeScanner") : t("barcodeActions.scan")}
-            </Button>
-            <Button
-              type="button"
-              onClick={() => setShowCreateForm((current) => !current)}
-            >
-              {showCreateForm ? t("equipment.cancel") : t("equipment.new")}
-            </Button>
-          </div>
+          canCreate || canReceive ? (
+            <div className="flex flex-wrap gap-2">
+              {canCreate && (
+                <Button
+                  type="button"
+                  onClick={() => setShowBarcodeGenerator((current) => !current)}
+                >
+                  {showBarcodeGenerator ? t("common.close") : t("barcodeActions.generate")}
+                </Button>
+              )}
+              {canReceive && (
+                <Button
+                  type="button"
+                  onClick={() => setShowBarcodeScanner((current) => !current)}
+                >
+                  {showBarcodeScanner ? t("barcodeActions.closeScanner") : t("barcodeActions.scan")}
+                </Button>
+              )}
+              {canCreate && (
+                <Button
+                  type="button"
+                  onClick={() => setShowCreateForm((current) => !current)}
+                >
+                  {showCreateForm ? t("equipment.cancel") : t("equipment.new")}
+                </Button>
+              )}
+            </div>
+          ) : undefined
         }
       >
         {!isLoading && !isError && (
@@ -146,7 +168,7 @@ export function EquipmentPage() {
           />
         </div>
 
-        {showBarcodeGenerator && (
+        {canCreate && showBarcodeGenerator && (
           <div className="mb-6">
             {formDataLoading && (
               <div className="loading loading-spinner" />
@@ -165,14 +187,14 @@ export function EquipmentPage() {
           </div>
         )}
 
-        {showBarcodeScanner && (
+        {canReceive && showBarcodeScanner && (
           <div className="mb-6">
             <BarcodeScanner />
           </div>
         )}
 
         <AnimatePresence>
-          {showCreateForm && (
+          {canCreate && showCreateForm && (
             <motion.div
               initial={{ opacity: 0, y: -12 }}
               animate={{ opacity: 1, y: 0 }}

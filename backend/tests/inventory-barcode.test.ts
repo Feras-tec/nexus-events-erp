@@ -36,10 +36,6 @@ jest.unstable_mockModule("@clerk/express", () => ({
   getAuth: jest.fn(() => ({ userId: "test-user" })),
 }));
 
-jest.unstable_mockModule("../src/services/audit-log.service.js", () => ({
-  createAuditLog: jest.fn(),
-}));
-
 const { bulkGenerateInventoryItems, scanReceiveInventoryItem } =
   await import("../src/controllers/inventory-barcode.controller.js");
 
@@ -159,6 +155,9 @@ describe("Inventory Barcode", () => {
         equipmentMovement: {
           create: mockEquipmentMovementCreate,
         },
+        auditLog: {
+          create: jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue({ id: "audit-1" }),
+        },
       })
     );
 
@@ -227,6 +226,9 @@ describe("Inventory Barcode", () => {
         },
         equipmentMovement: {
           create: mockEquipmentMovementCreate,
+        },
+        auditLog: {
+          create: jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue({ id: "audit-1" }),
         },
       })
     );
@@ -338,6 +340,9 @@ describe("Inventory Barcode", () => {
         },
         inventoryItem: {
           createMany: mockInventoryItemCreateMany,
+        },
+        auditLog: {
+          create: jest.fn<(...args: any[]) => Promise<any>>().mockResolvedValue({ id: "audit-1" }),
         },
       })
     );

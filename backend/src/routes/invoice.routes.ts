@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   createInvoice,
+  getInvoiceFormOptions,
   getInvoices,
   getInvoiceById,
   updateInvoice,
@@ -21,6 +22,19 @@ router.get(
     "PROJECT_MANAGER",
   ),
   getInvoices,
+);
+
+// Minimale Auswahldaten für das Rechnungsformular
+router.get(
+  "/form-options",
+  requireRole(
+    "OWNER",
+    "ADMIN",
+    "ACCOUNTANT",
+    "SALES_MANAGER",
+    "PROJECT_MANAGER",
+  ),
+  getInvoiceFormOptions,
 );
 
 // Einzelne Rechnung abrufen

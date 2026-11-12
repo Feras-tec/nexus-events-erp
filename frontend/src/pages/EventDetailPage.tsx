@@ -10,6 +10,7 @@ import {
   type EventFormData,
 } from "../components/organisms/EventForm";
 import { DetailLayout } from "../components/templates/DetailLayout";
+import { can } from "../features/auth/permissions";
 import { useEventDetail } from "../features/events/hooks/useEventDetail";
 import { useEventCustomers } from "../features/events/hooks/useEventCustomers";
 import { useUpdateEvent } from "../features/events/hooks/useUpdateEvent";
@@ -17,10 +18,13 @@ import { useCancelEvent } from "../features/events/hooks/useCancelEvent";
 import { EventOverview } from "../features/events/components/EventOverview";
 import { EventCustomerCard } from "../features/events/components/EventCustomerCard";
 import { toDateTimeLocal } from "../features/events/utils/event-formatters";
+import { useAppUser } from "../features/users/context/AppUserContext";
 
 export function EventDetailPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const currentUser = useAppUser();
+  const canUpdate = can(currentUser?.role, "events", "update");
 
   const [isEditing, setIsEditing] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
@@ -38,7 +42,7 @@ export function EventDetailPage() {
   const {
     data: customers = [],
     isLoading: customersLoading,
-  } = useEventCustomers();
+  } = useEventCustomers({ enabled: canUpdate });
 
   const { updateEventMutation } = useUpdateEvent({
     eventId,
@@ -107,7 +111,7 @@ export function EventDetailPage() {
               ← {t("common.back")}
             </Button>
 
-            {event.status !== "CANCELLED" && (
+            {canUpdate && event.status !== "CANCELLED" && (
               <Button
                 type="button"
                 variant="error"
@@ -119,16 +123,18 @@ export function EventDetailPage() {
               </Button>
             )}
 
-            <Button
-              type="button"
-              onClick={() => {
-                setIsEditing((current) => !current);
-              }}
-            >
-              {isEditing
-                ? t("common.cancel")
-                : t("common.edit")}
-            </Button>
+            {canUpdate && (
+              <Button
+                type="button"
+                onClick={() => {
+                  setIsEditing((current) => !current);
+                }}
+              >
+                {isEditing
+                  ? t("common.cancel")
+                  : t("common.edit")}
+              </Button>
+            )}
           </>
         }
         sidebar={

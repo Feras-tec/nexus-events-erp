@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { apiFetch } from "../../../services/api";
@@ -19,7 +19,7 @@ export function useEquipmentLegacyRecovery({
   equipment,
   activeReservation,
 }: UseEquipmentLegacyRecoveryParams) {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
   const queryClient = useQueryClient();
 
   const legacyPickingResetMutation = useMutation({

@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useQuery } from "@tanstack/react-query";
 
 import type { ProductTableItem } from "../../../components/organisms/ProductTable";
@@ -9,7 +9,7 @@ type ProductsResponse = {
 };
 
 export function useProducts() {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
 
   const query = useQuery({
     queryKey: ["products"],

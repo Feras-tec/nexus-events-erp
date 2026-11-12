@@ -6,6 +6,7 @@ import { Button } from "../components/atoms/Button";
 import { EventForm } from "../components/organisms/EventForm";
 import { EventTable } from "../components/organisms/EventTable";
 import { ListLayout } from "../components/templates/ListLayout";
+import { can } from "../features/auth/permissions";
 import { useEvents } from "../features/events/hooks/useEvents";
 import { useEventFormCustomers } from "../features/events/hooks/useEventFormCustomers";
 import { useCreateEvent } from "../features/events/hooks/useCreateEvent";
@@ -15,10 +16,13 @@ import {
   type EventPeriodFilter,
 } from "../features/events/components/EventFilters";
 import { EventStats } from "../features/events/components/EventStats";
+import { useAppUser } from "../features/users/context/AppUserContext";
 
 export function EventsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const currentUser = useAppUser();
+  const canCreate = can(currentUser?.role, "events", "create");
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] =
@@ -30,7 +34,7 @@ export function EventsPage() {
   const {
     customers,
     customersLoading,
-  } = useEventFormCustomers();
+  } = useEventFormCustomers({ enabled: canCreate });
 
   const {
     events,
@@ -116,15 +120,17 @@ export function EventsPage() {
       searchPlaceholder={t("events.searchPlaceholder")}
       onSearchChange={setSearch}
       actions={
-        <Button
-          onClick={() =>
-            setShowEventForm((current) => !current)
-          }
-        >
-          {showEventForm
-            ? t("common.cancel")
-            : t("events.newEvent")}
-        </Button>
+        canCreate ? (
+          <Button
+            onClick={() =>
+              setShowEventForm((current) => !current)
+            }
+          >
+            {showEventForm
+              ? t("common.cancel")
+              : t("events.newEvent")}
+          </Button>
+        ) : undefined
       }
     >
       {!isLoading && !isError && (
@@ -147,7 +153,7 @@ export function EventsPage() {
         />
       </div>
 
-      {showEventForm && (
+      {canCreate && showEventForm && (
         <div className="space-y-4">
           <EventForm
             customers={customers}

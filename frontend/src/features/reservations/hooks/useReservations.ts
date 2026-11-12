@@ -1,14 +1,21 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useQuery } from "@tanstack/react-query";
 
 import type { ReservationItem } from "../../../components/organisms/ReservationTable";
 import { apiFetch } from "../../../services/api";
 
-export function useReservations() {
-  const { getToken } = useAuth();
+type UseReservationsOptions = {
+  enabled?: boolean;
+};
+
+export function useReservations({
+  enabled = true,
+}: UseReservationsOptions = {}) {
+  const { getToken } = useAppAuth();
 
   return useQuery({
     queryKey: ["reservations"],
+    enabled,
     queryFn: async () => {
       const token = await getToken();
 

@@ -19,5 +19,6 @@ module.exports = {
   },
 
   testMatch: ["**/tests/**/*.test.ts"],
+  setupFiles: ["<rootDir>/tests/setup-env.cjs"],
   clearMocks: true,
 };

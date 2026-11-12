@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useMutation } from "@tanstack/react-query";
 
 import { apiFetch } from "../../../services/api";
@@ -11,7 +11,7 @@ type SendQuoteEmailResult = {
 };
 
 export function useSendQuoteEmail() {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
 
   const mutation = useMutation({
     mutationFn: async (quoteId: string) => {

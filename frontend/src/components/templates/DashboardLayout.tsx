@@ -1,6 +1,11 @@
+import { APP_AUTH_MODE } from "../../features/auth/mode";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { UserButton } from "@clerk/react";
-import { useRouterState } from "@tanstack/react-router";
+import { lazy, Suspense } from "react";
+const UserButton = lazy(() => import("@clerk/react").then(m=>({default:m.UserButton})));
+import { useAppAuth } from "../../features/auth/AppAuthProvider";
+
+const AUTH_V2_MODE = APP_AUTH_MODE === "auth-v2";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
@@ -22,10 +27,12 @@ import {
 } from "lucide-react";
 
 import { ThemeSwitcher } from "../../features/theme/ThemeSwitcher";
+import { isUserAdministrationPath } from "../../features/auth-v2/routing/sections";
 import {
   MobileNavigation,
   ResponsiveNavigation,
 } from "../organisms/ResponsiveNavigation";
+import { UserAdministrationTabs } from "../organisms/UserAdministrationTabs";
 
 type DashboardLayoutProps = {
   children: ReactNode;
@@ -63,6 +70,7 @@ export function DashboardLayout({
   children,
 }: DashboardLayoutProps) {
   const { i18n, t } = useTranslation();
+  const appAuth = useAppAuth();
   const reduceMotion = useReducedMotion();
 
   const pathname = useRouterState({
@@ -72,6 +80,7 @@ export function DashboardLayout({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
   const languageRef = useRef<HTMLDivElement>(null);
+  const accountRef = useRef<HTMLDetailsElement>(null);
 
   const currentLanguage =
     languages.find((language) =>
@@ -79,13 +88,15 @@ export function DashboardLayout({
     ) ?? languages[0];
 
   const currentPage =
-    [...pageItems]
-      .sort((a, b) => b.path.length - a.path.length)
-      .find(
-        (item) =>
-          pathname === item.path ||
-          pathname.startsWith(`${item.path}/`),
-      );
+    AUTH_V2_MODE && isUserAdministrationPath(pathname)
+      ? pageItems.find((item) => item.key === "users")
+      : [...pageItems]
+          .sort((a, b) => b.path.length - a.path.length)
+          .find(
+            (item) =>
+              pathname === item.path ||
+              pathname.startsWith(`${item.path}/`),
+          );
 
   const PageIcon = currentPage?.icon ?? LayoutDashboard;
 
@@ -101,6 +112,7 @@ export function DashboardLayout({
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
+      if (accountRef.current && !accountRef.current.contains(event.target as Node)) accountRef.current.removeAttribute("open");
       if (
         languageRef.current &&
         !languageRef.current.contains(event.target as Node)
@@ -112,6 +124,7 @@ export function DashboardLayout({
     function handleEscape(event: KeyboardEvent) {
       if (event.key === "Escape") {
         setLanguageOpen(false);
+        accountRef.current?.removeAttribute("open");
       }
     }
 
@@ -252,10 +265,28 @@ export function DashboardLayout({
             </div>
 
             <div className="flex items-center ps-1">
-              <UserButton />
+              {AUTH_V2_MODE ? (
+                <details ref={accountRef} className="dropdown dropdown-end">
+                  <summary className="btn btn-ghost btn-sm min-h-11 rounded-xl" aria-label={t("authV2.nav.security")}>
+                    <UserRound size={18} aria-hidden="true" />
+                    <span className="hidden sm:inline">{t("authV2.nav.security")}</span>
+                  </summary>
+                  <ul className="menu dropdown-content z-50 mt-2 w-56 max-w-[calc(100vw-2rem)] rounded-xl border border-base-300 bg-base-100 p-2 text-base-content shadow-xl">
+                    <li><Link to="/account/security" onClick={event => event.currentTarget.closest("details")?.removeAttribute("open")}>{t("authV2.nav.security")}</Link></li>
+                    <li><Link to="/account/sessions" onClick={event => event.currentTarget.closest("details")?.removeAttribute("open")}>{t("authV2.nav.sessions")}</Link></li>
+                    <li><button type="button" onClick={() => { void appAuth.logout(); }}>{t("authV2.common.signOut")}</button></li>
+                  </ul>
+                </details>
+              ) : (
+                <Suspense fallback={null}><UserButton /></Suspense>
+              )}
             </div>
           </div>
         </header>
+
+        {AUTH_V2_MODE && isUserAdministrationPath(pathname) && (
+          <UserAdministrationTabs />
+        )}
 
         <main className="min-w-0 flex-1 p-4 sm:p-6">
           {children}

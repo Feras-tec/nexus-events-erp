@@ -17,6 +17,8 @@ import { useSendInvoiceEmail } from "../features/invoices/hooks/useSendInvoiceEm
 import type {
   InvoiceFormData,
 } from "../features/invoices/types/invoice.types";
+import { can } from "../features/auth/permissions";
+import { useAppUser } from "../features/users/context/AppUserContext";
 
 function formatCurrency(value: number, locale: string) {
   return new Intl.NumberFormat(locale, {
@@ -28,6 +30,17 @@ function formatCurrency(value: number, locale: string) {
 export function InvoiceDetailPage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const currentUser = useAppUser();
+  const canUpdate = can(
+    currentUser?.role,
+    "invoices",
+    "update",
+  );
+  const canSend = can(
+    currentUser?.role,
+    "invoices",
+    "send",
+  );
   const language = i18n.resolvedLanguage ?? i18n.language;
   const locale = language.startsWith("ar")
     ? "ar"
@@ -59,7 +72,7 @@ export function InvoiceDetailPage() {
     products,
     isLoading: areOptionsLoading,
     isError: areOptionsError,
-  } = useInvoiceFormOptions();
+  } = useInvoiceFormOptions({ enabled: canUpdate });
 
   const {
     updateInvoice,
@@ -181,35 +194,39 @@ export function InvoiceDetailPage() {
             {t(`status.${invoice.status}`)}
           </span>
 
-          <button
-            type="button"
-            className="btn btn-outline w-36"
-            onClick={() => setIsEditing((current) => !current)}
-          >
-            {isEditing ? t("common.cancel") : t("common.edit")}
-          </button>
+          {canUpdate && (
+            <button
+              type="button"
+              className="btn btn-outline w-36"
+              onClick={() => setIsEditing((current) => !current)}
+            >
+              {isEditing ? t("common.cancel") : t("common.edit")}
+            </button>
+          )}
 
           <InvoicePrintAction />
 
-          <button
-            type="button"
-            className="btn btn-outline h-auto min-h-10 min-w-36 px-4 py-2 whitespace-nowrap"
-            disabled={isSending}
-            onClick={async () => {
-              await sendInvoiceEmail({
-                invoiceId: invoice.id,
-              });
-            }}
-          >
-            {isSending ? (
-              <>
-                <span className="loading loading-spinner loading-sm" />
-                {t("invoices.detail.sending")}
-              </>
-            ) : (
-              t("invoices.detail.sendEmail")
-            )}
-          </button>
+          {canSend && (
+            <button
+              type="button"
+              className="btn btn-outline h-auto min-h-10 min-w-36 px-4 py-2 whitespace-nowrap"
+              disabled={isSending}
+              onClick={async () => {
+                await sendInvoiceEmail({
+                  invoiceId: invoice.id,
+                });
+              }}
+            >
+              {isSending ? (
+                <>
+                  <span className="loading loading-spinner loading-sm" />
+                  {t("invoices.detail.sending")}
+                </>
+              ) : (
+                t("invoices.detail.sendEmail")
+              )}
+            </button>
+          )}
         </div>
       </div>
 
@@ -219,7 +236,7 @@ export function InvoiceDetailPage() {
         </div>
       )}
 
-      {isEditing && (
+      {canUpdate && isEditing && (
         <div className="card border border-base-300 bg-base-100">
           <div className="card-body">
             <h2 className="card-title">

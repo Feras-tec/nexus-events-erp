@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useQuery } from "@tanstack/react-query";
 
 import type { EventItem } from "../../../components/organisms/EventTable";
@@ -25,11 +25,18 @@ export type EquipmentItem = {
   };
 };
 
-export function useReservationFormOptions() {
-  const { getToken } = useAuth();
+type UseReservationFormOptionsOptions = {
+  enabled?: boolean;
+};
+
+export function useReservationFormOptions({
+  enabled = true,
+}: UseReservationFormOptionsOptions = {}) {
+  const { getToken } = useAppAuth();
 
   const eventsQuery = useQuery({
     queryKey: ["events"],
+    enabled,
     queryFn: async () => {
       const token = await getToken();
 
@@ -49,6 +56,7 @@ export function useReservationFormOptions() {
 
   const equipmentQuery = useQuery({
     queryKey: ["equipment"],
+    enabled,
     queryFn: async () => {
       const token = await getToken();
 

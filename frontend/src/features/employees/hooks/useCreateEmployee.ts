@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { EmployeeFormValues } from "../../../components/organisms/EmployeeForm";
@@ -11,7 +11,7 @@ type UseCreateEmployeeParams = {
 export function useCreateEmployee({
   onSuccess,
 }: UseCreateEmployeeParams = {}) {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
   const queryClient = useQueryClient();
 
   const createEmployeeMutation = useMutation({

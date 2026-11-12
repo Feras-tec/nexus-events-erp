@@ -1,4 +1,6 @@
 import { useEffect } from "react";
+import { filterNavigation } from "../../features/auth/permissions";
+import { isUserAdministrationPath } from "../../features/auth-v2/routing/sections";
 import { useAppUser } from "../../features/users/context/AppUserContext";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
@@ -49,6 +51,11 @@ function NavigationContent({ onNavigate }: NavigationContentProps) {
     select: (state) => state.location.pathname,
   });
   const reduceMotion = useReducedMotion();
+  const visibleItems = filterNavigation(
+    navigationItems,
+    currentUser?.role,
+  );
+  const inUserAdministration = isUserAdministrationPath(pathname);
 
   return (
     <div className="flex h-full flex-col">
@@ -72,12 +79,13 @@ function NavigationContent({ onNavigate }: NavigationContentProps) {
         className="flex-1 overflow-y-auto px-3 py-5"
       >
         <ul className="flex flex-col gap-1.5">
-          {navigationItems.filter((item) => item.key !== "users" || currentUser?.role === "OWNER").map((item, index) => {
+          {visibleItems.map((item, index) => {
             const Icon = item.icon;
             const active =
               pathname === item.to ||
               (item.to !== "/dashboard" &&
-                pathname.startsWith(`${item.to}/`));
+                (pathname.startsWith(`${item.to}/`) ||
+                  (item.to === "/users" && inUserAdministration)));
 
             return (
               <li key={item.key}>

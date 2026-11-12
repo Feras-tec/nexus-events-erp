@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { useTranslation } from "react-i18next";
 
 import { ListLayout } from "../components/templates/ListLayout";
+import { can } from "../features/auth/permissions";
 import { QuoteForm } from "../features/quotes/components/QuoteForm";
 import { QuoteTable } from "../features/quotes/components/QuoteTable";
 import { QuoteStats } from "../features/quotes/components/QuoteStats";
@@ -15,10 +16,13 @@ import { useCreateQuote } from "../features/quotes/hooks/useCreateQuote";
 import { useQuoteFormOptions } from "../features/quotes/hooks/useQuoteFormOptions";
 import { useQuotes } from "../features/quotes/hooks/useQuotes";
 import type { QuoteFormData } from "../features/quotes/types/quote.types";
+import { useAppUser } from "../features/users/context/AppUserContext";
 
 export function QuotesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const currentUser = useAppUser();
+  const canCreate = can(currentUser?.role, "quotes", "create");
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] =
@@ -39,7 +43,7 @@ export function QuotesPage() {
     products,
     isLoading: optionsLoading,
     isError: optionsError,
-  } = useQuoteFormOptions();
+  } = useQuoteFormOptions({ enabled: canCreate });
 
   const {
     createQuote,
@@ -163,21 +167,23 @@ export function QuotesPage() {
         searchPlaceholder={t("quotes.searchPlaceholder")}
         onSearchChange={setSearch}
         actions={
-          <button
-            type="button"
-            className={
-              showForm
-                ? "btn btn-ghost"
-                : "btn btn-primary"
-            }
-            onClick={() => setShowForm((current) => !current)}
-          >
-            {showForm ? t("common.cancel") : `+ ${t("quotes.newQuote")}`}
-          </button>
+          canCreate ? (
+            <button
+              type="button"
+              className={
+                showForm
+                  ? "btn btn-ghost"
+                  : "btn btn-primary"
+              }
+              onClick={() => setShowForm((current) => !current)}
+            >
+              {showForm ? t("common.cancel") : `+ ${t("quotes.newQuote")}`}
+            </button>
+          ) : undefined
         }
       >
         <div className="space-y-6">
-          {showForm && (
+          {canCreate && showForm && (
             <div className="space-y-4">
               {optionsLoading && (
                 <div className="flex justify-center py-8">

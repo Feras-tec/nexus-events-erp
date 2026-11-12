@@ -1,8 +1,9 @@
 {
+  "_comment": "Production routing for the Vercel-hosted frontend. API traffic is proxied to the Render backend so Auth-V2 stays same-origin for cookies; both Auth-V2 HTML entries and the ERP SPA are served from their own documents.",
   "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+    { "source": "/api/:path*", "destination": "https://nexus-events-erp.onrender.com/api/:path*" },
+    { "source": "/auth-v2", "destination": "/auth-v2.html" },
+    { "source": "/auth-v2/:path*", "destination": "/auth-v2.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

@@ -7,6 +7,7 @@ import { Button } from "../components/atoms/Button";
 import { ProductForm } from "../components/organisms/ProductForm";
 import { ProductTable } from "../components/organisms/ProductTable";
 import { ListLayout } from "../components/templates/ListLayout";
+import { can } from "../features/auth/permissions";
 import { useProducts } from "../features/products/hooks/useProducts";
 import { useCreateProduct } from "../features/products/hooks/useCreateProduct";
 import { ProductStats } from "../features/products/components/ProductStats";
@@ -16,10 +17,13 @@ import {
   type ProductTrackingFilter,
   type ProductUsageFilter,
 } from "../features/products/components/ProductFilters";
+import { useAppUser } from "../features/users/context/AppUserContext";
 
 export function ProductsPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const currentUser = useAppUser();
+  const canCreate = can(currentUser?.role, "products", "create");
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<ProductStatusFilter>("ALL");
@@ -85,14 +89,16 @@ export function ProductsPage() {
         searchPlaceholder={t("products.search")}
         onSearchChange={setSearch}
         actions={
-          <Button
-            type="button"
-            onClick={() =>
-              setShowCreateForm((current) => !current)
-            }
-          >
-            {showCreateForm ? t("products.cancel") : t("products.new")}
-          </Button>
+          canCreate ? (
+            <Button
+              type="button"
+              onClick={() =>
+                setShowCreateForm((current) => !current)
+              }
+            >
+              {showCreateForm ? t("products.cancel") : t("products.new")}
+            </Button>
+          ) : undefined
         }
       >
         {!isLoading && !isError && (
@@ -118,7 +124,7 @@ export function ProductsPage() {
       </div>
 
       <AnimatePresence>
-          {showCreateForm && (
+          {canCreate && showCreateForm && (
             <motion.div
               initial={{ opacity: 0, y: -12 }}
               animate={{ opacity: 1, y: 0 }}

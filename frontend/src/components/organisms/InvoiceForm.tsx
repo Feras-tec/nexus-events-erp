@@ -23,6 +23,7 @@ type InvoiceFormProps = {
   events: EventOption[];
   quotes: QuoteOption[];
   products: ProductOption[];
+  mode?: "create" | "edit";
   loading?: boolean;
   initialData?: InvoiceFormData;
   submitLabel?: string;
@@ -50,6 +51,7 @@ export function InvoiceForm({
   events,
   quotes,
   products,
+  mode = "edit",
   loading = false,
   initialData,
   submitLabel,
@@ -131,17 +133,19 @@ export function InvoiceForm({
             }
           />
 
-          <Select
-            label={t("invoices.table.status")}
-            value={formData.status}
-            options={invoiceStatuses.map((status) => ({
-              value: status,
-              label: t(`status.${status}`),
-            }))}
-            onChange={(event) =>
-              updateField("status", event.target.value as InvoiceStatus)
-            }
-          />
+          {mode === "edit" && (
+            <Select
+              label={t("invoices.table.status")}
+              value={formData.status}
+              options={invoiceStatuses.map((status) => ({
+                value: status,
+                label: t(`status.${status}`),
+              }))}
+              onChange={(event) =>
+                updateField("status", event.target.value as InvoiceStatus)
+              }
+            />
+          )}
 
           <Select
             label={t("invoices.table.customer")}

@@ -28,7 +28,8 @@ const invoiceItemSchema = z.object({
 export const createInvoiceSchema = z
   .object({
     invoiceNo: z.string().trim().min(1).max(50),
-    status: invoiceStatusSchema.default("DRAFT"),
+    // Neue Rechnungen starten immer als Entwurf. Statusänderungen erfolgen
+    // ausschließlich über den validierten Update-Endpunkt.
 
     issueDate: z.coerce.date().optional(),
     dueDate: z.coerce.date().optional(),

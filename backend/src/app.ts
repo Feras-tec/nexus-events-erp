@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
-import { rateLimit } from "express-rate-limit";
+import { configureAccountLimits, configureRequestLimits } from "./middleware/request-limits.js";
 import prisma from "./lib/prisma.js";
 import companyRoutes from "./routes/company.routes.js";
 import branchRoutes from "./routes/branch.routes.js";
@@ -16,11 +16,16 @@ import reservationRoutes from "./routes/reservation.routes.js";
 import equipmentMovementRoutes from "./routes/equipment-movement.routes.js";
 import quoteRoutes from "./routes/quote.routes.js";
 import invoiceRoutes from "./routes/invoice.routes.js";
-import { clerkMiddleware } from "@clerk/express";
-import authRoutes from "./routes/auth.routes.js";
 import appUserRoutes from "./routes/app-user.routes.js";
+import { getAuthMode } from "./auth/mode.js";
+import { getAuthV2Runtime } from "./middleware/require-role.js";
+import { createAuthV2Router } from "./modules/auth-v2/router.js";
 
 const app = express();
+const authMode = getAuthMode();
+// Primärmodus vor dem Start validieren; fehlende Konfiguration ist ein Startfehler.
+const authRuntime = authMode === "auth-v2" ? getAuthV2Runtime() : null;
+if (authRuntime && !process.env.DATABASE_URL) throw new Error("DATABASE_URL is required for Auth-V2 ERP operation");
 
 // Sicherheits-Header aktivieren
 app.use(helmet());
@@ -45,19 +50,23 @@ app.use(
   }),
 );
 
-// Clerk-Authentifizierung aktivieren
-app.use(clerkMiddleware());
+// Limits vor Clerk anwenden, damit auch ungültige Authentifizierungsversuche gezählt werden.
+configureRequestLimits(app);
 
-// API vor zu vielen Anfragen schützen
-app.use(
-  rateLimit({
-    windowMs: 15 * 60 * 1000,
-    limit: 150,
-  }),
-);
-
-// API-Routen für Authentifizierung
-app.use("/api/auth", authRoutes);
+// Unvertraute IPs bleiben unabhängig vom ausgewählten Anbieter begrenzt.
+app.get("/api/auth/mode", (_req,res) => {
+  res.setHeader("Cache-Control","no-store"); res.json({mode:authMode});
+});
+if (authMode === "clerk") {
+  const { clerkMiddleware } = await import("@clerk/express");
+  app.use(clerkMiddleware());
+}
+app.use("/api", (_req,res,next) => {res.setHeader("Cache-Control","private, no-store"); next();});
+configureAccountLimits(app);
+if (authMode === "clerk") {
+  const { default:authRoutes } = await import("./routes/auth.routes.js");
+  app.use("/api/auth",authRoutes);
+}
 app.use("/api/users", appUserRoutes);
 
 // API-Routen für Niederlassungen
@@ -94,6 +103,12 @@ app.use("/api/equipment-movements", equipmentMovementRoutes);
 app.use("/api/quotes", quoteRoutes);
 
 app.use("/api/invoices", invoiceRoutes);
+
+if (authRuntime) {
+  app.use("/api/auth-v2", createAuthV2Router({auth:authRuntime.auth,config:authRuntime.config}));
+}
+// API-Fehler niemals als HTML-SPA-Erfolg ausgeben.
+app.use("/api", (_req,res) => {res.status(404).json({error:"API route not found"});});
 
 // Health-Check für API und Datenbank
 app.get("/health", async (_req, res) => {

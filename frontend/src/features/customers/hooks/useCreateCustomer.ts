@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { CustomerFormData } from "../../../components/organisms/CustomerForm";
@@ -11,7 +11,7 @@ type UseCreateCustomerParams = {
 export function useCreateCustomer({
   onSuccess,
 }: UseCreateCustomerParams = {}) {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
   const queryClient = useQueryClient();
 
   const createCustomerMutation = useMutation({

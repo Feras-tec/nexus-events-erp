@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { apiFetch } from "../../../services/api";
@@ -10,7 +10,7 @@ type UseEquipmentReservationMovementParams = {
 export function useEquipmentReservationMovement({
   equipmentId,
 }: UseEquipmentReservationMovementParams) {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
   const queryClient = useQueryClient();
 
   const createMovementMutation = useMutation({

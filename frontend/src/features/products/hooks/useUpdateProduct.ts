@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { ProductFormValues } from "../../../components/organisms/ProductForm";
@@ -13,7 +13,7 @@ export function useUpdateProduct({
   productId,
   onSuccess,
 }: UseUpdateProductParams) {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
   const queryClient = useQueryClient();
 
   const updateProductMutation = useMutation({

@@ -11,11 +11,13 @@ import { QuoteDetailMobileItems } from "../features/quotes/components/QuoteDetai
 import { QuotePrintAction } from "../features/quotes/components/QuotePrintAction";
 import { QuotePrintDocument } from "../features/quotes/components/QuotePrintDocument";
 import { QuoteRestoreAction } from "../features/quotes/components/QuoteRestoreAction";
+import { can } from "../features/auth/permissions";
 import { useQuoteDetail } from "../features/quotes/hooks/useQuoteDetail";
 import { useQuoteFormOptions } from "../features/quotes/hooks/useQuoteFormOptions";
 import { useUpdateQuote } from "../features/quotes/hooks/useUpdateQuote";
 import { quoteToFormData } from "../features/quotes/utils/quote-form";
 import { formatQuoteCurrency } from "../features/quotes/utils/quote-calculations";
+import { useAppUser } from "../features/users/context/AppUserContext";
 
 function formatDate(
   value: string | null | undefined,
@@ -41,6 +43,14 @@ function formatDate(
 export function QuoteDetailPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const currentUser = useAppUser();
+  const canUpdate = can(currentUser?.role, "quotes", "update");
+  const canSend = can(currentUser?.role, "quotes", "send");
+  const canDeactivate = can(
+    currentUser?.role,
+    "quotes",
+    "deactivate",
+  );
   const [isEditing, setIsEditing] = useState(false);
   const { quoteId } = useParams({
     strict: false,
@@ -64,7 +74,7 @@ export function QuoteDetailPage() {
     products,
     isLoading: optionsLoading,
     isError: optionsError,
-  } = useQuoteFormOptions();
+  } = useQuoteFormOptions({ enabled: canUpdate });
 
   if (isLoading) {
     return (
@@ -149,22 +159,24 @@ export function QuoteDetailPage() {
 
           <QuotePrintAction />
 
-          <QuoteEmailAction
-            quoteId={quote.id}
-            customerEmail={quote.customer.email}
-            lastSentAt={quote.lastSentAt}
-            lastSentTo={quote.lastSentTo}
-            disabled={quote.status === "CANCELLED"}
-          />
+          {canSend && (
+            <QuoteEmailAction
+              quoteId={quote.id}
+              customerEmail={quote.customer.email}
+              lastSentAt={quote.lastSentAt}
+              lastSentTo={quote.lastSentTo}
+              disabled={quote.status === "CANCELLED"}
+            />
+          )}
 
-          {quote.status === "CANCELLED" && (
+          {canUpdate && quote.status === "CANCELLED" && (
             <QuoteRestoreAction
               quoteId={quote.id}
               quoteNo={quote.quoteNo}
             />
           )}
 
-          {quote.status !== "CANCELLED" && (
+          {canUpdate && quote.status !== "CANCELLED" && (
             <>
               <button
                 type="button"
@@ -178,7 +190,7 @@ export function QuoteDetailPage() {
                   : t("quotes.detail.edit")}
               </button>
 
-              {!isEditing && (
+              {canDeactivate && !isEditing && (
                 <QuoteCancelAction
                   quoteId={quote.id}
                   quoteNo={quote.quoteNo}
@@ -189,7 +201,7 @@ export function QuoteDetailPage() {
         </div>
       </div>
 
-      {isEditing && (
+      {canUpdate && isEditing && (
         <div className="space-y-4">
           {optionsLoading && (
             <div className="flex justify-center py-8">

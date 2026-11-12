@@ -18,8 +18,13 @@ import {
 import { DashboardOverview } from "../components/organisms/DashboardOverview";
 import { UpcomingEvents } from "../features/dashboard/components/UpcomingEvents";
 import { InvoicesAttention } from "../features/dashboard/components/InvoicesAttention";
+import {
+  can,
+  filterNavigation,
+} from "../features/auth/permissions";
 import { useEvents } from "../features/events/hooks/useEvents";
 import { useInvoices } from "../features/invoices/hooks/useInvoices";
+import { useAppUser } from "../features/users/context/AppUserContext";
 
 type DashboardSection = {
   key: string;
@@ -78,14 +83,23 @@ const dashboardSections: DashboardSection[] = [
 export function DashboardPage() {
   const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
+  const currentUser = useAppUser();
+  const role = currentUser?.role;
 
-  const { events, isLoading, isError } = useEvents();
+  const canReadEvents = can(role, "events");
+  const canReadInvoices = can(role, "invoices");
+
+  const visibleSections = filterNavigation(dashboardSections, role);
+
+  const { events, isLoading, isError } = useEvents({
+    enabled: canReadEvents,
+  });
 
   const {
     invoices,
     isLoading: invoicesLoading,
     isError: invoicesError,
-  } = useInvoices();
+  } = useInvoices({ enabled: canReadInvoices });
 
   return (
     <motion.section
@@ -130,21 +144,25 @@ export function DashboardPage() {
       <DashboardOverview />
 
       <div className="grid items-start gap-4 xl:grid-cols-2">
-        <UpcomingEvents
-          events={events}
-          isLoading={isLoading}
-          isError={isError}
-        />
+        {canReadEvents && (
+          <UpcomingEvents
+            events={events}
+            isLoading={isLoading}
+            isError={isError}
+          />
+        )}
 
-        <InvoicesAttention
-          invoices={invoices}
-          isLoading={invoicesLoading}
-          isError={invoicesError}
-        />
+        {canReadInvoices && (
+          <InvoicesAttention
+            invoices={invoices}
+            isLoading={invoicesLoading}
+            isError={invoicesError}
+          />
+        )}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {dashboardSections.map((section, index) => {
+        {visibleSections.map((section, index) => {
           const Icon = section.icon;
 
           return (

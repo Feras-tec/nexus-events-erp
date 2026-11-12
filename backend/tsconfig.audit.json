@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "rootDir": ".", "noEmit": true },
+  "include": ["src/**/*.ts", "audit-tests/**/*.ts", "scripts/audit-transfer-local.ts", "scripts/audit-transfer-production.ts", "prisma7.audit-local.config.ts"]
+}

@@ -59,6 +59,8 @@ router.get("/me", async (req, res) => {
         clerkUserId: userId,
         email,
         role: "EMPLOYEE",
+        // Neue Clerk-Konten erhalten erst nach Freigabe durch den OWNER Zugriff.
+        isActive: false,
       },
     });
 

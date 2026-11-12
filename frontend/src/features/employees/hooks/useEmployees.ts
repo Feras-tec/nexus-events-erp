@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useQuery } from "@tanstack/react-query";
 
 import { apiFetch } from "../../../services/api";
@@ -27,7 +27,7 @@ type EmployeesResponse = {
 };
 
 export function useEmployees() {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
 
   const query = useQuery({
     queryKey: ["employees"],

@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { EquipmentFormValues } from "../../../components/organisms/EquipmentForm";
@@ -13,7 +13,7 @@ export function useUpdateEquipment({
   equipmentId,
   onSuccess,
 }: UseUpdateEquipmentParams) {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
   const queryClient = useQueryClient();
 
   const updateEquipmentMutation = useMutation({
@@ -23,14 +23,14 @@ export function useUpdateEquipment({
       const payload = {
         manufacturerSerial: data.manufacturerSerial.trim() || undefined,
         barcode: data.barcode.trim() || undefined,
-        status: data.status,
+        // Status- und Lagerortwechsel laufen ausschließlich über
+        // EquipmentMovement, damit Bewegung und Audit-Log entstehen.
         location: data.location.trim() || undefined,
         purchaseDate: data.purchaseDate || undefined,
         purchasePrice: data.purchasePrice
           ? Number(data.purchasePrice)
           : undefined,
         notes: data.notes.trim() || undefined,
-        warehouseId: data.warehouseId,
       };
 
       const response = await apiFetch(

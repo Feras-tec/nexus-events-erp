@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { EventFormData } from "../../../components/organisms/EventForm";
@@ -11,7 +11,7 @@ type UseCreateEventParams = {
 export function useCreateEvent({
   onSuccess,
 }: UseCreateEventParams = {}) {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
   const queryClient = useQueryClient();
 
   const createEventMutation = useMutation({

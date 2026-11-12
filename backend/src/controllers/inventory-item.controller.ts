@@ -178,47 +178,9 @@ export const updateInventoryItem = async (req: Request, res: Response) => {
       });
     }
 
-    // Nicht registrierte Artikel dürfen nicht manuell freigegeben werden
-    if (
-      existingItem.status === "PENDING_REGISTRATION" &&
-      result.data.status &&
-      result.data.status !== "PENDING_REGISTRATION"
-    ) {
-      return res.status(409).json({
-        error: "Pending inventory items must be received by barcode scan",
-      });
-    }
-
-    // Der Registrierungsstatus darf nicht manuell gesetzt werden
-    if (
-      result.data.status === "PENDING_REGISTRATION" &&
-      existingItem.status !== "PENDING_REGISTRATION"
-    ) {
-      return res.status(409).json({
-        error: "Pending registration cannot be assigned manually",
-      });
-    }
-
-    // Neues Lager prüfen, falls der Artikel verschoben wird
-    if (result.data.warehouseId) {
-      const warehouse = await prisma.warehouse.findUnique({
-        where: {
-          id: result.data.warehouseId,
-        },
-      });
-
-      if (!warehouse) {
-        return res.status(404).json({
-          error: "Warehouse not found",
-        });
-      }
-
-      if (!warehouse.isActive) {
-        return res.status(400).json({
-          error: "Warehouse is inactive",
-        });
-      }
-    }
+    // Status- und Lagerortwechsel sind im generischen Update bewusst nicht
+    // möglich. Sie müssen über die EquipmentMovement-Endpunkte erfolgen, damit
+    // eine Bewegung und ein Audit-Log entstehen.
 
     // Aktualisierung nur bei unverändertem Status durchführen
     const inventoryItem = await prisma.inventoryItem.update({

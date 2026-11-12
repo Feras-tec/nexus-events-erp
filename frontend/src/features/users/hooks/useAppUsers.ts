@@ -1,11 +1,11 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "../../../services/api";
 import { useAppUser } from "../context/AppUserContext";
 
 export type ManagedUser = {
   id: string;
-  clerkUserId: string;
+  clerkUserId: string | null;
   email: string | null;
   role: string;
   isActive: boolean;
@@ -17,7 +17,7 @@ type UsersResponse = {
 };
 
 export function useAppUsers() {
-  const { getToken } = useAuth();
+  const { getToken, mode } = useAppAuth();
   const currentUser = useAppUser();
 
   return useQuery({
@@ -25,7 +25,8 @@ export function useAppUsers() {
     enabled: currentUser?.role === "OWNER",
     queryFn: async () => {
       const token = await getToken();
-      if (!token) throw new Error("Missing authentication token");
+      // Cookie-Sitzungen benötigen kein Clerk-Bearer-Token.
+      if (!token && mode !== "auth-v2") throw new Error("Missing authentication token");
 
       const response = await apiFetch("/api/users", token);
       const result = (await response.json()) as UsersResponse;

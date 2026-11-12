@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import {
   useMutation,
   useQueryClient,
@@ -16,7 +16,7 @@ type QuoteStatusActionVariables = {
 };
 
 export function useQuoteStatusAction() {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({

@@ -1,11 +1,11 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
 
 import i18n from "../../../i18n/config";
-import { apiFetch } from "../../../services/api";
+import { ApiError, apiFetch } from "../../../services/api";
 import type {
   Invoice,
   InvoiceFormData,
@@ -17,7 +17,7 @@ type UpdateInvoiceVariables = {
 };
 
 export function useUpdateInvoice() {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
@@ -68,17 +68,38 @@ export function useUpdateInvoice() {
         })),
       };
 
-      const response = await apiFetch(
-        `/api/invoices/${invoiceId}`,
-        token,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
+      let response: Response;
+
+      try {
+        response = await apiFetch(
+          `/api/invoices/${invoiceId}`,
+          token,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
           },
-          body: JSON.stringify(payload),
-        },
-      );
+        );
+      } catch (error) {
+        const body = error instanceof ApiError ? error.body : null;
+
+        if (
+          error instanceof ApiError &&
+          error.status === 409 &&
+          typeof body === "object" &&
+          body !== null &&
+          "error" in body &&
+          body.error === "Quote already has an active invoice"
+        ) {
+          throw new Error(
+            i18n.t("invoices.errors.duplicateQuote"),
+          );
+        }
+
+        throw error;
+      }
 
       if (!response.ok) {
         const result = await response.json().catch(() => null);

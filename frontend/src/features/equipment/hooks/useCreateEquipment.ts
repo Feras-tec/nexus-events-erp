@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { EquipmentFormValues } from "../../../components/organisms/EquipmentForm";
@@ -11,7 +11,7 @@ type UseCreateEquipmentParams = {
 export function useCreateEquipment({
   onSuccess,
 }: UseCreateEquipmentParams = {}) {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
   const queryClient = useQueryClient();
 
   const createEquipmentMutation = useMutation({

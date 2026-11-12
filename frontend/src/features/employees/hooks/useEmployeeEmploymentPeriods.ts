@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { EmploymentPeriodFormData } from "../../../components/organisms/EmploymentPeriodForm";
@@ -17,7 +17,7 @@ export function useEmployeeEmploymentPeriods({
   onUpdateSuccess,
   onDeleteSuccess,
 }: UseEmployeeEmploymentPeriodsParams) {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
   const queryClient = useQueryClient();
 
   const invalidateEmployee = async () => {

@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 
 import { InvoiceForm } from "../components/organisms/InvoiceForm";
 import { ListLayout } from "../components/templates/ListLayout";
+import { can } from "../features/auth/permissions";
 import { InvoiceTable } from "../features/invoices/components/InvoiceTable";
 import { InvoiceStats } from "../features/invoices/components/InvoiceStats";
 import {
@@ -15,10 +16,17 @@ import { useCreateInvoice } from "../features/invoices/hooks/useCreateInvoice";
 import { useInvoiceFormOptions } from "../features/invoices/hooks/useInvoiceFormOptions";
 import { useInvoices } from "../features/invoices/hooks/useInvoices";
 import type { InvoiceFormData } from "../features/invoices/types/invoice.types";
+import { useAppUser } from "../features/users/context/AppUserContext";
 
 export function InvoicesPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const currentUser = useAppUser();
+  const canCreate = can(
+    currentUser?.role,
+    "invoices",
+    "create",
+  );
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] =
@@ -40,7 +48,7 @@ export function InvoicesPage() {
     products,
     isLoading: optionsLoading,
     isError: optionsError,
-  } = useInvoiceFormOptions();
+  } = useInvoiceFormOptions({ enabled: canCreate });
 
   const {
     createInvoice,
@@ -164,21 +172,23 @@ export function InvoicesPage() {
         searchPlaceholder={t("invoices.searchPlaceholder")}
         onSearchChange={setSearch}
         actions={
-          <button
-            type="button"
-            className={
-              showForm
-                ? "btn btn-ghost"
-                : "btn btn-primary"
-            }
-            onClick={() => setShowForm((current) => !current)}
-          >
-            {showForm ? t("common.cancel") : `+ ${t("invoices.newInvoice")}`}
-          </button>
+          canCreate ? (
+            <button
+              type="button"
+              className={
+                showForm
+                  ? "btn btn-ghost"
+                  : "btn btn-primary"
+              }
+              onClick={() => setShowForm((current) => !current)}
+            >
+              {showForm ? t("common.cancel") : `+ ${t("invoices.newInvoice")}`}
+            </button>
+          ) : undefined
         }
       >
         <div className="space-y-6">
-          {showForm && (
+          {canCreate && showForm && (
             <div className="space-y-4">
               {optionsLoading && (
                 <div className="flex justify-center py-8">
@@ -200,6 +210,7 @@ export function InvoicesPage() {
 
               {!optionsLoading && !optionsError && (
                 <InvoiceForm
+                  mode="create"
                   customers={customers}
                   events={events}
                   quotes={quotes}

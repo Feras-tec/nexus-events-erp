@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { EventFormData } from "../../../components/organisms/EventForm";
@@ -13,7 +13,7 @@ export function useUpdateEvent({
   eventId,
   onSuccess,
 }: UseUpdateEventParams) {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
   const queryClient = useQueryClient();
 
   const updateEventMutation = useMutation({

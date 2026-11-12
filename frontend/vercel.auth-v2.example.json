@@ -1,0 +1,9 @@
+{
+  "_comment": "PREPARED ONLY. Replace the staging backend placeholder after approval. Never copy a production target. Order: all API traffic, Auth-V2 HTML entries, ERP fallback.",
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://REPLACE-WITH-ISOLATED-STAGING-BACKEND.invalid/api/:path*" },
+    { "source": "/auth-v2", "destination": "/auth-v2.html" },
+    { "source": "/auth-v2/:path*", "destination": "/auth-v2.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

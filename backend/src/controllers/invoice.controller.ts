@@ -7,6 +7,21 @@ import {
 import { sendEmail } from "../services/email.service.js";
 import { generateInvoicePdf } from "../services/invoice-pdf.service.js";
 
+// Kontrollierte Fehler aus einer Transaktion an den HTTP-Layer weitergeben.
+class InvoiceRequestError extends Error {
+  constructor(
+    readonly statusCode: number,
+    readonly payload: Record<string, unknown>,
+  ) {
+    super(
+      typeof payload.error === "string"
+        ? payload.error
+        : "Invoice request failed",
+    );
+    this.name = "InvoiceRequestError";
+  }
+}
+
 function isValidInvoiceStatusTransition(
   from: string,
   to: string,
@@ -151,51 +166,102 @@ export async function createInvoice(req: Request, res: Response) {
     const subtotal = subtotalCents / 100;
     const total = totalCents / 100;
 
-    // Rechnung mit Positionen speichern
-    const invoice = await prisma.invoice.create({
-      data: {
-        invoiceNo: data.invoiceNo,
-        status: data.status,
-        issueDate: data.issueDate,
-        dueDate: data.dueDate,
-        notes: data.notes,
+    // Rechnung mit Positionen speichern. Bei verknüpftem Angebot wird die
+    // Angebotszeile gesperrt, damit parallele Anfragen serialisiert werden.
+    const invoice = await prisma.$transaction(async (tx) => {
+      if (data.quoteId) {
+        await tx.$queryRaw`SELECT "id" FROM "Quote" WHERE "id" = ${data.quoteId} FOR UPDATE`;
 
-        subtotal: Number(subtotal.toFixed(2)),
-        discount: data.discount,
-        tax: data.tax,
-        total: Number(total.toFixed(2)),
+        const lockedQuote = await tx.quote.findUnique({
+          where: { id: data.quoteId },
+        });
 
-        customerId: data.customerId,
-        eventId: data.eventId,
-        quoteId: data.quoteId,
+        if (!lockedQuote) {
+          throw new InvoiceRequestError(404, {
+            error: "Quote not found",
+          });
+        }
 
-        items: {
-          create: calculatedItems.map((item) => ({
-            type: item.type,
-            description: item.description,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            discount: item.discount,
-            total: item.total,
-            productId: item.productId,
-          })),
-        },
-      },
+        if (lockedQuote.customerId !== data.customerId) {
+          throw new InvoiceRequestError(400, {
+            error: "Quote does not belong to this customer",
+          });
+        }
 
-      include: {
-        customer: true,
-        event: true,
-        quote: true,
-        items: {
-          include: {
-            product: true,
+        if (lockedQuote.status !== "ACCEPTED") {
+          throw new InvoiceRequestError(409, {
+            error: "Only accepted quotes can be invoiced",
+          });
+        }
+
+        const duplicateInvoice = await tx.invoice.findFirst({
+          where: {
+            quoteId: data.quoteId,
+            status: { not: "CANCELLED" },
+          },
+          select: {
+            invoiceNo: true,
+          },
+        });
+
+        if (duplicateInvoice) {
+          throw new InvoiceRequestError(409, {
+            error: "Quote already has an active invoice",
+            invoiceNo: duplicateInvoice.invoiceNo,
+          });
+        }
+      }
+
+      return tx.invoice.create({
+        data: {
+          invoiceNo: data.invoiceNo,
+          // Neue Rechnungen starten immer als Entwurf.
+          status: "DRAFT",
+          issueDate: data.issueDate,
+          dueDate: data.dueDate,
+          notes: data.notes,
+
+          subtotal: Number(subtotal.toFixed(2)),
+          discount: data.discount,
+          tax: data.tax,
+          total: Number(total.toFixed(2)),
+
+          customerId: data.customerId,
+          eventId: data.eventId,
+          quoteId: data.quoteId,
+
+          items: {
+            create: calculatedItems.map((item) => ({
+              type: item.type,
+              description: item.description,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              discount: item.discount,
+              total: item.total,
+              productId: item.productId,
+            })),
           },
         },
-      },
+
+        include: {
+          customer: true,
+          event: true,
+          quote: true,
+          items: {
+            include: {
+              product: true,
+            },
+          },
+        },
+      });
     });
 
     return res.status(201).json(invoice);
   } catch (error) {
+    if (error instanceof InvoiceRequestError) {
+      return res.status(error.statusCode).json(error.payload);
+    }
+
     console.error("Create invoice error:", error);
 
     return res.status(500).json({
@@ -203,9 +269,79 @@ export async function createInvoice(req: Request, res: Response) {
     });
   }
 }
+// Minimale Auswahldaten für das Rechnungsformular. Eigener Endpunkt, damit
+// Rollen mit Rechnungszugriff keine allgemeinen Kunden-/Produktlisten erhalten.
+export async function getInvoiceFormOptions(
+  _req: Request,
+  res: Response,
+) {
+  try {
+    const [customers, events, products, quotes] = await Promise.all([
+      prisma.customer.findMany({
+        where: { isActive: true },
+        select: {
+          id: true,
+          customerNo: true,
+          companyName: true,
+          firstName: true,
+          lastName: true,
+        },
+        orderBy: { customerNo: "asc" },
+      }),
+      prisma.event.findMany({
+        select: {
+          id: true,
+          eventNo: true,
+          name: true,
+        },
+        orderBy: { eventNo: "asc" },
+      }),
+      prisma.product.findMany({
+        where: { isActive: true },
+        select: {
+          id: true,
+          productNo: true,
+          name: true,
+        },
+        orderBy: { productNo: "asc" },
+      }),
+      prisma.quote.findMany({
+        where: { status: "ACCEPTED" },
+        select: {
+          id: true,
+          quoteNo: true,
+        },
+        orderBy: { quoteNo: "asc" },
+      }),
+    ]);
+
+    return res.json({
+      customers,
+      events,
+      products,
+      quotes,
+    });
+  } catch (error) {
+    console.error("Get invoice form options error:", error);
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
+  }
+}
+
 // Alle Rechnungen abrufen
 export async function getInvoices(req: Request, res: Response) {
   try {
+    const skip = req.query.skip !== undefined ? Number(req.query.skip) : undefined;
+    const take = req.query.take !== undefined ? Number(req.query.take) : undefined;
+    if (skip !== undefined && (!Number.isInteger(skip) || skip < 0)) {
+      return res.status(400).json({ error: "Invalid skip value" });
+    }
+    if (take !== undefined && (!Number.isInteger(take) || take < 1)) {
+      return res.status(400).json({ error: "Invalid take value" });
+    }
+
     const invoices = await prisma.invoice.findMany({
       include: {
         customer: true,
@@ -217,9 +353,9 @@ export async function getInvoices(req: Request, res: Response) {
           },
         },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      ...(skip !== undefined ? { skip } : {}),
+      ...(take !== undefined ? { take } : {}),
     });
 
     return res.json(invoices);
@@ -308,6 +444,13 @@ export async function updateInvoice(req: Request, res: Response) {
       });
     }
 
+    // Bei Teiländerungen müssen übernommene Datumswerte ebenfalls in die Prüfung eingehen.
+    const effectiveIssueDate = data.issueDate ?? existingInvoice.issueDate;
+    const effectiveDueDate = data.dueDate ?? existingInvoice.dueDate;
+    if (effectiveIssueDate && effectiveDueDate && effectiveDueDate < effectiveIssueDate) {
+      return res.status(400).json({ error: "Due date must not be before issue date" });
+    }
+
     if (
       data.status !== undefined &&
       !isValidInvoiceStatusTransition(
@@ -337,9 +480,10 @@ export async function updateInvoice(req: Request, res: Response) {
     }
 
     // Event prüfen, falls geändert
-    if (data.eventId) {
+    const effectiveEventId = data.eventId ?? existingInvoice.eventId;
+    if (effectiveEventId && (data.eventId !== undefined || data.customerId !== undefined)) {
       const event = await prisma.event.findUnique({
-        where: { id: data.eventId },
+        where: { id: effectiveEventId },
       });
 
       if (!event) {
@@ -352,6 +496,14 @@ export async function updateInvoice(req: Request, res: Response) {
         return res.status(400).json({
           error: "Event does not belong to this customer",
         });
+      }
+    }
+
+    // Unveränderte Angebotsverknüpfungen dürfen durch Kundenwechsel nicht inkonsistent werden.
+    if (data.customerId !== undefined && existingInvoice.quoteId && (!data.quoteId || data.quoteId === existingInvoice.quoteId)) {
+      const linkedQuote = await prisma.quote.findUnique({ where: { id: existingInvoice.quoteId } });
+      if (!linkedQuote || linkedQuote.customerId !== customerId) {
+        return res.status(400).json({ error: "Quote does not belong to this customer" });
       }
     }
 
@@ -486,6 +638,55 @@ export async function updateInvoice(req: Request, res: Response) {
     }
 
     const invoice = await prisma.$transaction(async (tx) => {
+      // Beim Wechsel des Angebots gilt dieselbe Eindeutigkeitsregel wie beim
+      // Anlegen: pro Angebot höchstens eine nicht stornierte Rechnung.
+      if (
+        data.quoteId &&
+        data.quoteId !== existingInvoice.quoteId
+      ) {
+        await tx.$queryRaw`SELECT "id" FROM "Quote" WHERE "id" = ${data.quoteId} FOR UPDATE`;
+
+        const lockedQuote = await tx.quote.findUnique({
+          where: { id: data.quoteId },
+        });
+
+        if (!lockedQuote) {
+          throw new InvoiceRequestError(404, {
+            error: "Quote not found",
+          });
+        }
+
+        if (lockedQuote.customerId !== customerId) {
+          throw new InvoiceRequestError(400, {
+            error: "Quote does not belong to this customer",
+          });
+        }
+
+        if (lockedQuote.status !== "ACCEPTED") {
+          throw new InvoiceRequestError(409, {
+            error: "Only accepted quotes can be invoiced",
+          });
+        }
+
+        const duplicateInvoice = await tx.invoice.findFirst({
+          where: {
+            quoteId: data.quoteId,
+            id: { not: id },
+            status: { not: "CANCELLED" },
+          },
+          select: {
+            invoiceNo: true,
+          },
+        });
+
+        if (duplicateInvoice) {
+          throw new InvoiceRequestError(409, {
+            error: "Quote already has an active invoice",
+            invoiceNo: duplicateInvoice.invoiceNo,
+          });
+        }
+      }
+
       if (calculatedItems) {
         await tx.invoiceItem.deleteMany({
           where: {
@@ -551,7 +752,7 @@ export async function updateInvoice(req: Request, res: Response) {
             tax: data.tax,
           }),
 
-          ...(totalsUpdate && totalsUpdate),
+          ...totalsUpdate,
 
           ...(calculatedItems && {
             items: {
@@ -583,6 +784,10 @@ export async function updateInvoice(req: Request, res: Response) {
 
     return res.json(invoice);
   } catch (error) {
+    if (error instanceof InvoiceRequestError) {
+      return res.status(error.statusCode).json(error.payload);
+    }
+
     console.error("Update invoice error:", error);
 
     return res.status(500).json({

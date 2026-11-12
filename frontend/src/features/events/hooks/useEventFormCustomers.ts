@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useQuery } from "@tanstack/react-query";
 
 import { apiFetch } from "../../../services/api";
@@ -16,11 +16,18 @@ type CustomersResponse = {
   data: EventFormCustomer[];
 };
 
-export function useEventFormCustomers() {
-  const { getToken } = useAuth();
+type UseEventFormCustomersOptions = {
+  enabled?: boolean;
+};
+
+export function useEventFormCustomers({
+  enabled = true,
+}: UseEventFormCustomersOptions = {}) {
+  const { getToken } = useAppAuth();
 
   const query = useQuery({
     queryKey: ["customers"],
+    enabled,
     queryFn: async () => {
       const token = await getToken();
 

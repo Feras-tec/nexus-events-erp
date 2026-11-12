@@ -10,15 +10,23 @@ import {
   type ReservationFormData,
 } from "../components/organisms/ReservationForm";
 import { DetailLayout } from "../components/templates/DetailLayout";
+import { can } from "../features/auth/permissions";
 import { ReservationOverview } from "../features/reservations/components/ReservationOverview";
 import { useReservationDetail } from "../features/reservations/hooks/useReservationDetail";
 import { useUpdateReservation } from "../features/reservations/hooks/useUpdateReservation";
 import { useCancelReservation } from "../features/reservations/hooks/useCancelReservation";
 import { useReactivateReservation } from "../features/reservations/hooks/useReactivateReservation";
+import { useAppUser } from "../features/users/context/AppUserContext";
 
 export function ReservationDetailPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const currentUser = useAppUser();
+  const canUpdate = can(
+    currentUser?.role,
+    "reservations",
+    "update",
+  );
 
   const [isEditing, setIsEditing] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
@@ -116,7 +124,7 @@ export function ReservationDetailPage() {
                 {t("reservations.detail.back")}
               </Button>
 
-              {reservation.status !== "CANCELLED" && (
+              {canUpdate && reservation.status !== "CANCELLED" && (
                 <>
                   <Button
                     type="button"
@@ -138,7 +146,7 @@ export function ReservationDetailPage() {
                 </>
               )}
 
-              {reservation.status === "CANCELLED" && (
+              {canUpdate && reservation.status === "CANCELLED" && (
                 <Button
                   type="button"
                   onClick={() => {

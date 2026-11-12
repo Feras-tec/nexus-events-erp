@@ -1,11 +1,11 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useQuery } from "@tanstack/react-query";
 
 import { apiFetch } from "../../../services/api";
 import type { EquipmentMovementsResponse } from "../types/equipment.types";
 
 export function useEquipmentMovements(equipmentId: string) {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
 
   return useQuery({
     queryKey: ["equipment-movements", equipmentId],

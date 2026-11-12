@@ -77,7 +77,7 @@ export function EquipmentSelectionFields({
           onChange={(event) =>
             onUpdate("warehouseId", event.target.value)
           }
-          disabled={loading}
+          disabled={mode === "edit" || loading}
           required
         >
           <option value="">{t("equipment.form.selectWarehouse")}</option>
@@ -88,6 +88,12 @@ export function EquipmentSelectionFields({
             </option>
           ))}
         </select>
+
+        {mode === "edit" && (
+          <p className="text-xs text-base-content/60">
+            {t("equipment.form.warehouseEditHint")}
+          </p>
+        )}
       </fieldset>
     </>
   );

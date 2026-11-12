@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { useAppAuth } from "../../auth/AppAuthProvider";
 import { useQuery } from "@tanstack/react-query";
 
 import type {
@@ -16,7 +16,7 @@ type DepartmentsResponse = {
 };
 
 export function useEmployeeFormOptions() {
-  const { getToken } = useAuth();
+  const { getToken } = useAppAuth();
 
   const branchesQuery = useQuery({
     queryKey: ["branches"],

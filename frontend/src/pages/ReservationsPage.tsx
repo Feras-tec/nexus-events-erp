@@ -12,14 +12,22 @@ import {
   type ReservationStatusFilter,
 } from "../features/reservations/components/ReservationFilters";
 import { ListLayout } from "../components/templates/ListLayout";
+import { can } from "../features/auth/permissions";
 import { useReservations } from "../features/reservations/hooks/useReservations";
 import { useReservationFormOptions } from "../features/reservations/hooks/useReservationFormOptions";
 import { useCreateReservation } from "../features/reservations/hooks/useCreateReservation";
+import { useAppUser } from "../features/users/context/AppUserContext";
 
 
 export function ReservationsPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const currentUser = useAppUser();
+  const canCreate = can(
+    currentUser?.role,
+    "reservations",
+    "create",
+  );
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] =
@@ -40,7 +48,7 @@ export function ReservationsPage() {
     eventsLoading,
     equipment,
     equipmentLoading,
-  } = useReservationFormOptions();
+  } = useReservationFormOptions({ enabled: canCreate });
 
   const { createReservationMutation } = useCreateReservation({
     onSuccess: () => {
@@ -130,17 +138,19 @@ export function ReservationsPage() {
       searchPlaceholder={t("reservations.search")}
       onSearchChange={setSearch}
       actions={
-        <Button
-          onClick={() => {
-            setCreateError("");
-            setShowForm((current) => !current);
-          }}
-        >
-          {showForm ? t("reservations.cancel") : t("reservations.new")}
-        </Button>
+        canCreate ? (
+          <Button
+            onClick={() => {
+              setCreateError("");
+              setShowForm((current) => !current);
+            }}
+          >
+            {showForm ? t("reservations.cancel") : t("reservations.new")}
+          </Button>
+        ) : undefined
       }
     >
-      {showForm && (
+      {canCreate && showForm && (
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
